@@ -7,11 +7,18 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBasicAuth,
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { UsersService } from 'src/users/users.service';
+import { Public } from './auth.decorator';
 import { AuthService } from './auth.service';
 import { LoginDto, LoginResDto, SignUpDto } from './dto';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import { ReqUser } from './interfaces';
 import { LocalAuthGuard } from './local-auth.guard';
 
 @ApiTags('auth')
@@ -22,6 +29,7 @@ export class AuthController {
     private usersService: UsersService,
   ) {}
 
+  @Public()
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @ApiOperation({
@@ -37,6 +45,7 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
+  @Public()
   @Post('signup')
   @ApiOperation({
     summary: '회원가입',
@@ -55,13 +64,13 @@ export class AuthController {
     return this.authService.signUp(body);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @ApiBasicAuth()
   @Get('me')
   @ApiOperation({
     summary: '내 정보 조회',
   })
   async getMe(@Request() req) {
-    console.log(req);
+    console.log(req.user as ReqUser);
     return null;
   }
 }
