@@ -20,7 +20,7 @@ export class User {
   @Prop({ default: false })
   subNewsletter: boolean;
 
-  @Prop()
+  @Prop({ uppercase: true })
   countryCode: string;
 
   @Prop({ default: false })
