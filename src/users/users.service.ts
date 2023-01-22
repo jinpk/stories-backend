@@ -12,6 +12,14 @@ export class UsersService {
     return user;
   }
 
+  async findById(id: string): Promise<UserDocument | false> {
+    const user = await this.userModel.findById(id);
+    if (!user) {
+      return false;
+    }
+    return user;
+  }
+
   async create(user: User) {
     const doc = await new this.userModel(user).save();
     return doc._id.toString();

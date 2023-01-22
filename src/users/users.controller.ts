@@ -1,19 +1,29 @@
-import { Controller, Get, Query } from '@nestjs/common';
-import { ApiBasicAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { GetUsersDto } from './dto/get-users.dto';
+import { Controller, Get, Param } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
+import { UserDto } from './dto/user.dto';
+import { UsersService } from './users.service';
 
-@ApiTags('users')
 @Controller('users')
-@ApiBasicAuth()
+@ApiTags('users')
+@ApiBearerAuth()
 export class UsersController {
-  @Get('')
+  constructor(private readonly usersService: UsersService) {}
+
+  @Get(':id')
   @ApiOperation({
-    summary: '회원 조회',
+    summary: '회원 상세 조회',
   })
-  async getUsers(@Query() query: GetUsersDto) {
-    return {
-      total: 0,
-      results: [],
-    };
+  @ApiOkResponse({
+    type: UserDto,
+  })
+  async getUser(@Param('id') id: string) {
+    console.log('wdawdawdawd');
+    const user = new UserDto();
+    return user;
   }
 }
