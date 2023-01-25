@@ -11,7 +11,7 @@ export class LoginDto {
   password: string;
 }
 
-export class LoginResDto {
+export class TokenDto {
   @ApiProperty({ description: 'Bearer token' })
   accessToken: string;
 }

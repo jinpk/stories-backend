@@ -29,6 +29,11 @@ export class UserDto {
     description: 'TTMIK 멤버쉽 여부',
   })
   ttmik: boolean;
+
+  @ApiProperty({
+    description: '가입 날짜',
+  })
+  createdAt: Date;
 }
 
 export class GetUserDto {

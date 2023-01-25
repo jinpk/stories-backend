@@ -18,7 +18,7 @@ import {
 import { UsersService } from 'src/users/users.service';
 import { Public } from './decorator/auth.decorator';
 import { AuthService } from './auth.service';
-import { AccountDto, LoginDto, LoginResDto, SignUpDto } from './dto';
+import { AccountDto, LoginDto, TokenDto, SignUpDto } from './dto';
 import { LocalAuthGuard } from './guard/local-auth.guard';
 
 @Controller('auth')
@@ -39,7 +39,7 @@ export class AuthController {
     type: LoginDto,
   })
   @ApiOkResponse({
-    type: LoginResDto,
+    type: TokenDto,
   })
   async login(@Request() req) {
     return this.authService.login(req.user);
@@ -54,7 +54,7 @@ export class AuthController {
     type: SignUpDto,
   })
   @ApiOkResponse({
-    type: LoginResDto,
+    type: TokenDto,
   })
   async signUp(@Body() body: SignUpDto) {
     if (await this.usersService.findOneByEmail(body.email)) {
