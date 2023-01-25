@@ -7,6 +7,13 @@ import { AppConfigModule, AppConfigService } from './config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guard/jwt-auth.guard';
 import { JwtStrategy } from './auth/strategy/jwt.strategy';
+import { LeveltestService } from './leveltest/leveltest.service';
+import { EducontentsService } from './educontents/educontents.service';
+import { EducontentsModule } from './educontents/educontents.module';
+import { LeveltestModule } from './leveltest/leveltest.module';
+import { VocabsController } from './vocabs/vocabs.controller';
+import { VocabsService } from './vocabs/vocabs.service';
+import { VocabsModule } from './vocabs/vocabs.module';
 
 @Module({
   imports: [
@@ -20,8 +27,11 @@ import { JwtStrategy } from './auth/strategy/jwt.strategy';
     }),
     UsersModule,
     AuthModule,
+    EducontentsModule,
+    LeveltestModule,
+    VocabsModule,
   ],
-  controllers: [AppController],
-  providers: [AppConfigService],
+  controllers: [AppController, VocabsController],
+  providers: [AppConfigService, LeveltestService, EducontentsService, VocabsService],
 })
 export class AppModule {}
