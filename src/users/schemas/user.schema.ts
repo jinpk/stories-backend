@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import bcrypt from 'bcrypt';
+import { compareSync, genSalt, hash } from 'bcrypt';
 
-export type UserDocument = HydratedDocument<User>;
+export type UserDocument = HydratedDocument<User & UserMethods>;
 
 @Schema({ timestamps: true })
 export class User {
@@ -40,29 +40,28 @@ export const UserSchema = SchemaFactory.createForClass(User);
 
 UserSchema.pre('save', function (next) {
   if (!this.isModified('password')) return next();
-  bcrypt
-    .genSalt()
+  genSalt()
     .then((salt) => {
-      bcrypt
-        .hash(this.password, salt)
-        .then((hash) => {
-          this.password = hash;
+      hash(this.password, salt)
+        .then((hashed) => {
+          this.password = hashed;
           next();
         })
         .catch((err) => {
+          console.error('hash user password (2): ', err);
           next(new Error('암호화 오류'));
         });
     })
     .catch((err) => {
+      console.error('hash user password (1): ', err);
       next(new Error('암호화 오류'));
     });
 });
 
-UserSchema.methods.comparePassword = function (password, cb) {
-  bcrypt
-    .compare(password, this.password)
-    .then((success) => cb(null, success))
-    .catch((e) => {
-      cb(e);
-    });
+interface UserMethods {
+  comparePassword?: (password: string) => Promise<boolean>;
+}
+
+UserSchema.methods.comparePassword = async function (password) {
+  return compareSync(password, this.password);
 };
