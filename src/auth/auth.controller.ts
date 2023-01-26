@@ -18,8 +18,15 @@ import {
 import { UsersService } from 'src/users/users.service';
 import { Public } from './decorator/auth.decorator';
 import { AuthService } from './auth.service';
-import { AccountDto, LoginDto, TokenDto, SignUpDto } from './dto';
-import { LocalAuthGuard } from './guard/local-auth.guard';
+import {
+  AccountDto,
+  LoginDto,
+  TokenDto,
+  SignUpDto,
+  AdminLoginDto,
+} from './dto';
+import { LocalAuthGuard, LocalAuthAdminGuard } from './guard/local-auth.guard';
+import { AdminService } from 'src/admin/admin.service';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -27,13 +34,30 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private usersService: UsersService,
+    private adminService: AdminService,
   ) {}
+
+  @Post('admin/login')
+  @Public()
+  @UseGuards(LocalAuthAdminGuard)
+  @ApiOperation({
+    summary: '관리자 로그인',
+  })
+  @ApiBody({
+    type: AdminLoginDto,
+  })
+  @ApiOkResponse({
+    type: TokenDto,
+  })
+  async adminLogin(@Request() req) {
+    return this.authService.login(req.user, true);
+  }
 
   @Post('login')
   @Public()
   @UseGuards(LocalAuthGuard)
   @ApiOperation({
-    summary: '이메일 로그인',
+    summary: '사용자 로그인',
   })
   @ApiBody({
     type: LoginDto,
@@ -76,15 +100,21 @@ export class AuthController {
     const account: AccountDto = {
       id: req.user.id,
       email: '',
-      isAdmin: req.user.isAdmin,
+      isAdmin: req.user.isAdmin || false,
     };
 
-    const user = await this.usersService.findById(account.id);
-    if (!user) {
-      throw new NotFoundException('조회할 수 없는 계정입니다.');
+    if (account.isAdmin) {
+      const admin = await this.adminService.findById(account.id);
+      if (!admin) {
+        throw new NotFoundException('조회할 수 없는 관리자 계정입니다.');
+      }
+    } else {
+      const user = await this.usersService.findById(account.id);
+      if (!user) {
+        throw new NotFoundException('조회할 수 없는 계정입니다.');
+      }
+      account.email = user.email;
     }
-
-    account.email = user.email;
 
     return account;
   }

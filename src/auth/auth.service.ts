@@ -19,8 +19,8 @@ export class AuthService {
     return null;
   }
 
-  async login(sub: string) {
-    const payload = { sub };
+  async login(sub: string, isAdmin?: boolean) {
+    const payload = { sub, isAdmin };
     return {
       accessToken: this.jwtService.sign(payload),
     };
