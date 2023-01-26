@@ -48,7 +48,7 @@ export class AuthController {
   @Post('signup')
   @Public()
   @ApiOperation({
-    summary: '회원가입',
+    summary: '회원가입 (계정생성)',
   })
   @ApiBody({
     type: SignUpDto,

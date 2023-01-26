@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsUppercase } from 'class-validator';
 
 export class UserDto {
-  @ApiProperty({})
+  @ApiProperty({ description: 'userId' })
   id: string;
 
   @ApiProperty({})

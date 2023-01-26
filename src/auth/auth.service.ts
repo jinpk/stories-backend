@@ -30,8 +30,8 @@ export class AuthService {
     const user: User = {
       email: params.email,
       password: params.password,
-      name: 'name ' + new Date().getTime(),
-      nickname: 'name ' + new Date().getTime(),
+      name: params.nickname,
+      nickname: params.nickname,
       subNewsletter: false,
       countryCode: 'kr',
       ttmik: false,

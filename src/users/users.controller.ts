@@ -1,4 +1,12 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Req,
+  UnauthorizedException,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOkResponse,
@@ -22,8 +30,28 @@ export class UsersController {
     type: UserDto,
   })
   async getUser(@Param('id') id: string) {
-    console.log('wdawdawdawd');
-    const user = new UserDto();
-    return user;
+    const user = await this.usersService.findById(id);
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    return this.usersService._userDocToDto(user);
+  }
+
+  @Delete(':id')
+  @ApiOperation({
+    summary: '회원 탈퇴(삭제)',
+  })
+  @ApiOkResponse({
+    description: 'deleted.',
+  })
+  async deleteUser(@Param('id') id: string, @Req() req) {
+    if (req.user.id !== id && !req.user.isAdmin) {
+      throw new UnauthorizedException();
+    }
+    if (!(await this.usersService.findById(id))) {
+      throw new NotFoundException();
+    }
+    await this.usersService.deleteUser(id);
   }
 }
