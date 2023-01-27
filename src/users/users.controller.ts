@@ -4,6 +4,8 @@ import {
   Get,
   NotFoundException,
   Param,
+  Put,
+  Query,
   Req,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -11,16 +13,31 @@ import {
   ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
 import { UserDto } from './dto/user.dto';
+import { GetUsersDto } from './dto/get-user.dto';
 import { UsersService } from './users.service';
+import { UpdateUserDto } from './dto/update.user.dto';
 
 @Controller('users')
 @ApiTags('users')
 @ApiBearerAuth()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Put(':id')
+  @ApiOperation({
+    summary: '회원 수정',
+  })
+  @ApiOkResponse({
+    type: UpdateUserDto,
+  })
+  async updateUser(@Param('id') id: string) {
+    return null;
+  }
 
   @Get(':id')
   @ApiOperation({
@@ -53,5 +70,17 @@ export class UsersController {
       throw new NotFoundException();
     }
     await this.usersService.deleteUser(id);
+  }
+
+  @Get('')
+  @ApiOperation({
+    summary: '회원 전체 조회',
+  })
+  @ApiQuery({
+    type: GetUsersDto,
+  })
+  @ApiOkResponsePaginated(UserDto)
+  async getUserList(@Query() query) {
+    return [];
   }
 }
