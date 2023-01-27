@@ -11,6 +11,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guard/jwt-auth.guard';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CouponsModule } from './coupons/coupons.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { CouponsModule } from './coupons/coupons.module';
     VocabsModule,
     AdminModule,
     CouponsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [

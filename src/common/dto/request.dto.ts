@@ -31,6 +31,20 @@ export class SearchReqDto {
   readonly keyword: string;
 }
 
+export class DateReqDto {
+  @ApiProperty({
+    description: '조회 시작일 (YYYY-MM-DD)',
+    required: false,
+  })
+  readonly start: string;
+
+  @ApiProperty({
+    description: '조회 종료일 (YYYY-MM-DD)',
+    required: false,
+  })
+  readonly end: string;
+}
+
 export class PagingExcelReqDto extends PagingReqDto {
   @ApiProperty({
     description: '엑셀 다운로드',
@@ -40,19 +54,12 @@ export class PagingExcelReqDto extends PagingReqDto {
   readonly excel: string;
 }
 
-export class ListReqDto extends IntersectionType(
+export class PagingExcelDateReqDto extends IntersectionType(
   PagingExcelReqDto,
-  SearchReqDto,
-) {
-  @ApiProperty({
-    description: '조회 시작일',
-    required: false,
-  })
-  readonly start: string;
+  DateReqDto,
+) {}
 
-  @ApiProperty({
-    description: '조회 종료일',
-    required: false,
-  })
-  readonly end: string;
-}
+export class ListReqDto extends IntersectionType(
+  PagingExcelDateReqDto,
+  SearchReqDto,
+) {}
