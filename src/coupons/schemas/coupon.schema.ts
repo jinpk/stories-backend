@@ -14,6 +14,9 @@ export class Coupon {
   @Prop({ enum: ['percent', 'amount', 'period'] })
   type: string;
 
+  @Prop({ default: 0 })
+  value: number;
+
   @Prop()
   start: Date;
 

@@ -1,16 +1,17 @@
-import { ApiProperty, OmitType } from '@nestjs/swagger';
-import { Coupon } from '../schemas/coupon.schema';
+import { ApiProperty, OmitType, PickType } from '@nestjs/swagger';
 import { CouponDto } from './coupon.dto';
 
-export class UserCouponDto {
-  @ApiProperty()
-  id: string;
-
-  @ApiProperty({ description: '회원 명' })
+export class UserCouponDto extends PickType(CouponDto, [
+  'id',
+  'name',
+  'description',
+  'type',
+  'start',
+  'value',
+  'end',
+] as const) {
+  @ApiProperty({ description: '회원 닉네임' })
   nickname: string;
-
-  @ApiProperty({ type: Coupon })
-  coupon: CouponDto;
 
   @ApiProperty({ description: '발송 날짜' })
   createdAt: Date;
