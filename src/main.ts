@@ -17,6 +17,7 @@ async function bootstrap() {
     .setVersion('0.1')
     .addTag('auth', '서비스 인증')
     .addTag('users', '회원 관리')
+    .addTag('coupons', '쿠폰 관리')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);

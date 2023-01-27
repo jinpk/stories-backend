@@ -59,9 +59,6 @@ export class UsersController {
   @ApiOperation({
     summary: '회원 탈퇴(삭제)',
   })
-  @ApiOkResponse({
-    description: 'deleted.',
-  })
   async deleteUser(@Param('id') id: string, @Req() req) {
     if (req.user.id !== id && !req.user.isAdmin) {
       throw new UnauthorizedException();
@@ -74,13 +71,10 @@ export class UsersController {
 
   @Get('')
   @ApiOperation({
-    summary: '회원 전체 조회',
-  })
-  @ApiQuery({
-    type: GetUsersDto,
+    summary: '회원 조회',
   })
   @ApiOkResponsePaginated(UserDto)
-  async getUserList(@Query() query) {
+  async getUserList(@Query() query: GetUsersDto) {
     return [];
   }
 }
