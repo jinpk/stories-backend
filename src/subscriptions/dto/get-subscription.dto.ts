@@ -29,4 +29,10 @@ export class GetSubscriptionsDto extends ListReqDto {
   })
   @IsEnum(SubscriptionTypes)
   type: SubscriptionTypes;
+
+  @ApiProperty({
+    description: `userID (검색 사용자 특정)`,
+    required: false,
+  })
+  userId: string;
 }
