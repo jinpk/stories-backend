@@ -1,15 +1,9 @@
-import { ApiProperty, IntersectionType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsUppercase } from 'class-validator';
-
-enum UserSubscription {
-  '',
-  Year,
-  Month,
-  None,
-}
+import { SubscriptionTypes } from 'src/subscriptions/enums';
 
 enum UserState {
-  '',
+  All,
   Trial,
   TrialEnd,
   Subscription,
@@ -22,7 +16,7 @@ enum UserState {
 export class UserEnumDto {
   @ApiProperty({
     description: `회원 구분 >
-    \n'': 전체,
+    \nAll: 전체,
     \nTrial: 트라이얼,
     \nTrialEnd: 트라이얼 해지,
     \nSubscription: 구독중,
@@ -38,17 +32,17 @@ export class UserEnumDto {
   userState: UserState;
 
   @ApiProperty({
-    description: `구독권 종류 >
-    \n'': 전체,
-    \nYear: 연간 구독,
-    \nMMonth: 월간 구독,
-    \nNone: 미구독,
+    description: `회원 구독중인 구독권 종류 >
+    \nAll: 전체
+    \nYear: 연간 구독
+    \nMMonth: 월간 구독
+    \nNone: 미구독
     `,
-    enum: UserSubscription,
+    enum: SubscriptionTypes,
     required: false,
   })
-  @IsEnum(UserSubscription)
-  userSubscription: UserSubscription;
+  @IsEnum(SubscriptionTypes)
+  userSubscriptionType: SubscriptionTypes;
 }
 
 export class UserDto extends UserEnumDto {

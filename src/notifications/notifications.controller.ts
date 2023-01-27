@@ -1,5 +1,10 @@
 import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
 import { GetNotificationsDto } from './dto/get-notification.dto';
 import {
@@ -11,6 +16,7 @@ import { NotificationConfigTypes } from './enums';
 
 @Controller('notifications')
 @ApiTags('notifications')
+@ApiBearerAuth()
 export class NotificationsController {
   @Post('config/init')
   @ApiOperation({ summary: '(-) 자동 알림 규칙 초기화 (데이터 없을시 실행)' })

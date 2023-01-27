@@ -8,7 +8,12 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
 import { CouponDto } from './dto/coupon.dto';
 import { CreateCouponDto } from './dto/create-coupon.dto';
@@ -18,6 +23,7 @@ import { CreateUserCouponDto, UserCouponDto } from './dto/user-coupon.dto';
 
 @Controller('coupons')
 @ApiTags('coupons')
+@ApiBearerAuth()
 export class CouponsController {
   @Post('sent')
   @ApiOperation({ summary: '쿠폰 발송' })
