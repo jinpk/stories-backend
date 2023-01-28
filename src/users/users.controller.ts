@@ -13,7 +13,6 @@ import {
   ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
-  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';

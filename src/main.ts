@@ -20,6 +20,8 @@ async function bootstrap() {
     .addTag('coupons', '쿠폰 관리')
     .addTag('notifications', '알림 관리')
     .addTag('subscriptions', '구독 관리')
+    .addTag('admin', '관리자 전용 API')
+    .addTag('files', '공통 파일 API')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);

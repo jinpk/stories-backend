@@ -1,16 +1,40 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { ExistUserDto } from '../auth/dto/exist-user.dto';
 import { UserDto } from './dto/user.dto';
+import { ExistQueryFields } from '../auth/enums';
 import { User, UserDocument } from './schemas/user.schema';
 
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
+  async getExistingUser(query: ExistUserDto): Promise<boolean> {
+    switch (ExistQueryFields[query.field]) {
+      case ExistQueryFields.email:
+        const user = await this.findOneByEmail(query.value);
+        if (user) {
+          return true;
+        }
+      case ExistQueryFields.nickname:
+        return await this.existingNickname(query.value);
+      default:
+        throw new Error('잘못된 parameter');
+    }
+  }
+
   async findOneByEmail(email: string): Promise<UserDocument> {
     const user = await this.userModel.findOne({ email, deleted: false });
     return user;
+  }
+
+  async existingNickname(nickname: string): Promise<boolean> {
+    const user = await this.userModel.findOne({ nickname, deleted: false });
+    if (user) {
+      return true;
+    }
+    return false;
   }
 
   async findById(id: string): Promise<UserDocument | false> {
