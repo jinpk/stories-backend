@@ -13,6 +13,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { CouponsModule } from './coupons/coupons.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
     CouponsModule,
     NotificationsModule,
     SubscriptionsModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [
