@@ -14,12 +14,16 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { unlink } from 'fs';
+import { AwsService } from 'src/aws/aws.service';
 import { UploadFilesDto, UploadFilesResDto } from './dto/upload.dto';
 
 @Controller('files')
 @ApiTags('files')
 @ApiBearerAuth()
 export class FilesController {
+  constructor(private readonly awsService: AwsService) {}
+
   @Post()
   @ApiOperation({ summary: '공통 파일 업로드' })
   @ApiConsumes('multipart/form-data')
@@ -32,11 +36,19 @@ export class FilesController {
   @ApiCreatedResponse({
     type: UploadFilesResDto,
   })
-  uploadFiles(@UploadedFiles() { files }: UploadFilesDto) {
+  async uploadFiles(@UploadedFiles() { files }: UploadFilesDto) {
     if (!files || !files.length) {
       throw new BadRequestException('files을 업로드 해주세요.');
     }
-    console.log(files);
-    return files.map((x) => x.path);
+    const paths = files.map((x) => x.path);
+
+    await this.awsService.filesToBucket({
+      bucket: 'files.stories',
+      paths,
+    });
+
+    paths.forEach((path) => unlink(path, console.error));
+
+    return paths;
   }
 }

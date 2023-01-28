@@ -13,6 +13,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         PORT: Joi.number().required(),
         MONGO_URI: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
+        AWS_ACCESS_KEY: Joi.string().required(),
+        AWS_SECRET_KEY: Joi.string().required(),
       }),
     }),
   ],

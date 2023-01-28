@@ -2,11 +2,12 @@ import { Module } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { existsSync, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
+import { AwsModule } from 'src/aws/aws.module';
 import { FilesController } from './files.controller';
-import { FilesService } from './files.service';
 
 @Module({
   imports: [
+    AwsModule,
     MulterModule.registerAsync({
       useFactory: () => {
         const destFolderExist = existsSync('./uploads');
@@ -35,6 +36,5 @@ import { FilesService } from './files.service';
     }),
   ],
   controllers: [FilesController],
-  providers: [FilesService],
 })
 export class FilesModule {}

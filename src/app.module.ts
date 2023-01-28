@@ -14,6 +14,7 @@ import { CouponsModule } from './coupons/coupons.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { FilesModule } from './files/files.module';
+import { AwsModule } from './aws/aws.module';
 
 @Module({
   imports: [
