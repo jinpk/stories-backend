@@ -1,5 +1,5 @@
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
-import { IsNumberString } from 'class-validator';
+import { IsDateString, IsNumberString } from 'class-validator';
 
 export class PagingReqDto {
   @ApiProperty({
@@ -36,12 +36,14 @@ export class DateReqDto {
     description: '조회 시작일 (YYYY-MM-DD)',
     required: false,
   })
+  @IsDateString()
   readonly start: string;
 
   @ApiProperty({
     description: '조회 종료일 (YYYY-MM-DD)',
     required: false,
   })
+  @IsDateString()
   readonly end: string;
 }
 

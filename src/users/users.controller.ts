@@ -34,7 +34,7 @@ export class UsersController {
 
   @Patch(':id/password')
   @ApiOperation({
-    summary: '비밀번호 경경',
+    summary: '비밀번호 변경',
   })
   @ApiBody({ type: PasswordUpdateDto })
   async patchPassword(@Param('id') id: string) {}
@@ -103,6 +103,6 @@ export class UsersController {
   })
   @ApiOkResponsePaginated(UserDto)
   async getUserList(@Query() query: GetUsersDto) {
-    return [];
+    return await this.usersService.getPagingUsers(query);
   }
 }

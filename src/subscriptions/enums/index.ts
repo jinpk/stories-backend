@@ -1,6 +1,4 @@
 export enum SubscriptionTypes {
-  All,
-  Year,
-  Month,
-  None,
+  Year = 'year',
+  Month = 'month',
 }

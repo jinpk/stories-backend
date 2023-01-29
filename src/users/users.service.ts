@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { AnyKeys, Model } from 'mongoose';
+import { AnyKeys, FilterQuery, Model } from 'mongoose';
 import { ExistUserDto } from '../auth/dto/exist-user.dto';
 import { UserDto } from './dto/user.dto';
 import { ExistQueryFields, OAuthProviers } from '../auth/enums';
@@ -8,6 +8,8 @@ import { User, UserDocument } from './schemas/user.schema';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserCreatedEvent } from './events/create-user.event';
 import { UpdateUserDto } from './dto/update.user.dto';
+import { GetUsersDto } from './dto/get-user.dto';
+import { PagingResDto } from 'src/common/dto/response.dto';
 
 @Injectable()
 export class UsersService {
@@ -15,6 +17,25 @@ export class UsersService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private eventEmitter: EventEmitter2,
   ) {}
+
+  async getPagingUsers(query: GetUsersDto): Promise<PagingResDto<UserDto>> {
+    const filter: FilterQuery<UserDocument> = {
+      //name: { $regex: query.name || '', $options: 'i' },
+    };
+
+    const docs = await this.userModel
+      .find(filter)
+      .limit(parseInt(query.limit))
+      .skip((parseInt(query.page) - 1) * parseInt(query.limit))
+      .sort({ createdAt: -1 });
+
+    const total = await this.userModel.countDocuments(filter);
+    const data: UserDto[] = docs.map((doc) => this._userDocToDto(doc));
+    return {
+      total,
+      data,
+    };
+  }
 
   async findByOAuthId(
     provider: OAuthProviers,
@@ -114,10 +135,10 @@ export class UsersService {
     user.nickname = doc.nickname;
     user.email = doc.email;
     user.ttmik = doc.ttmik;
+    user.deleted = doc.deleted;
     user.subNewsletter = doc.subNewsletter;
     user.countryCode = doc.countryCode;
     user.createdAt = doc.createdAt;
-
     return user;
   }
 }

@@ -14,7 +14,6 @@ export class GetSubscriptionsDto extends ListReqDto {
     description: '국가코드',
     required: false,
   })
-  @IsUppercase()
   countryCode: string;
 
   @ApiProperty({
