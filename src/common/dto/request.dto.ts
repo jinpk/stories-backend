@@ -1,20 +1,20 @@
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
-import { IsNumber } from 'class-validator';
+import { IsNumberString } from 'class-validator';
 
 export class PagingReqDto {
   @ApiProperty({
     description: 'page',
     default: 1,
   })
-  @IsNumber()
-  page: number;
+  @IsNumberString()
+  page: string;
 
   @ApiProperty({
     description: 'limit',
     default: 10,
   })
-  @IsNumber()
-  limit: number;
+  @IsNumberString()
+  limit: string;
 }
 
 export class SearchReqDto {
