@@ -6,6 +6,7 @@ import { NotificationContexts } from '../enums';
 
 export type NotificationDocument = HydratedDocument<Notification>;
 
+// 관리자 등록 알람
 @Schema({ timestamps: true })
 export class Notification {
   @Prop({ enum: NotificationContexts, default: NotificationContexts.ALL })

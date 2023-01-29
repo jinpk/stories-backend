@@ -17,7 +17,7 @@ import {
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
 import { CouponDto } from './dto/coupon.dto';
 import { CreateCouponDto } from './dto/create-coupon.dto';
-import { GetCouponsDto } from './dto/get-coupon.dto';
+import { GetCouponsDto, GetCouponsSentDto } from './dto/get-coupon.dto';
 import { UpdateCouponDto } from './dto/update-coupon.dto';
 import { CreateUserCouponDto, UserCouponDto } from './dto/user-coupon.dto';
 
@@ -30,9 +30,12 @@ export class CouponsController {
   couponSent(@Body() body: CreateUserCouponDto) {}
 
   @Get('sent')
-  @ApiOperation({ summary: '쿠폰 발송 내역' })
+  @ApiOperation({
+    summary: '쿠폰 발송 내역',
+    description: 'userId 입력시 회원 쿠폰 내역 조회',
+  })
   @ApiOkResponsePaginated(UserCouponDto)
-  listCouponSent(@Query() qeury: GetCouponsDto) {}
+  listCouponSent(@Query() qeury: GetCouponsSentDto) {}
 
   @Get(':id')
   @ApiOperation({ summary: '쿠폰 상세조회' })

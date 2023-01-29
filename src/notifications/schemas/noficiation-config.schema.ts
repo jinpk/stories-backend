@@ -1,4 +1,4 @@
-import { Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty } from 'class-validator';
 import { HydratedDocument } from 'mongoose';
@@ -6,6 +6,8 @@ import { NotificationConfigTypes, NotificationContexts } from '../enums';
 
 export type NotificationConfigDocument = HydratedDocument<NotificationConfig>;
 
+// 시스템 알림 설정
+@Schema()
 export class NotificationConfig {
   @Prop({
     enum: NotificationConfigTypes,

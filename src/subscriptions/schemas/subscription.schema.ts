@@ -1,13 +1,17 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty } from 'class-validator';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Types, SchemaTypes } from 'mongoose';
 import { AppOS } from 'src/common/enums';
 
 export type SubscriptionDocument = HydratedDocument<Subscription>;
 
 @Schema({ timestamps: true })
 export class Subscription {
+  @Prop({ type: SchemaTypes.ObjectId })
+  @ApiProperty({ description: '사용자 ID', type: String })
+  userId: Types.ObjectId;
+
   @Prop()
   @ApiProperty({ description: '결제(주문) ID' })
   @IsNotEmpty()
@@ -33,8 +37,8 @@ export class Subscription {
   token: string;
 
   @Prop()
-  @ApiProperty({ description: '쿠폰 ID(첫 결제에서만)', required: false })
-  couponId: string;
+  @ApiProperty({ description: '유저 쿠폰 ID(첫 결제에서만)', required: false })
+  userCouponId: string;
 
   @Prop({ default: null })
   @ApiProperty({ description: '주문 날짜' })

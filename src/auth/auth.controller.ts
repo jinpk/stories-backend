@@ -34,7 +34,7 @@ import {
 import { LocalAuthGuard, LocalAuthAdminGuard } from './guard/local-auth.guard';
 import { AdminService } from 'src/admin/admin.service';
 import { ExistUserDto } from './dto/exist-user.dto';
-import { isEmail, ValidationError } from 'class-validator';
+import { isEmail } from 'class-validator';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -60,6 +60,15 @@ export class AuthController {
   async adminLogin(@Request() req) {
     return this.authService.login(req.user, true);
   }
+
+  @Post('logout')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '사용자 로그아웃',
+    description: `로그아웃시 Client에서 accessToken 삭제
+    \n서버에서는 FcmToken 초기화`,
+  })
+  async logout(@Request() req) {}
 
   @Post('login')
   @Public()

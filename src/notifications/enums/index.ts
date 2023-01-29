@@ -12,3 +12,10 @@ export enum NotificationContexts {
   INAPP,
   PUSH,
 }
+
+export enum NotificationSettingTypes {
+  Promotion,
+  Service,
+  Study,
+  Reminder,
+}

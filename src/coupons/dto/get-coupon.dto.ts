@@ -7,3 +7,10 @@ export class GetCouponsDto extends PagingExcelReqDto {
   })
   readonly name: string;
 }
+
+export class GetCouponsSentDto extends GetCouponsDto {
+  @ApiProperty({
+    required: false,
+  })
+  readonly userId: string;
+}

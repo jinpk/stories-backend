@@ -10,6 +10,9 @@ export class UserCouponDto extends PickType(CouponDto, [
   'value',
   'end',
 ] as const) {
+  @ApiProperty({ description: '쿠폰 발급 ID' })
+  userCouponId: string;
+
   @ApiProperty({ description: '회원 닉네임' })
   nickname: string;
 

@@ -5,7 +5,8 @@ export class VerifySubscriptionDto extends PickType(Subscription, [
   'transactionId',
   'productId',
   'os',
+  'userId',
   'receiptData',
   'token',
-  'couponId',
+  'userCouponId',
 ] as const) {}
