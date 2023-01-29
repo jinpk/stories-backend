@@ -15,8 +15,13 @@ async function bootstrap() {
     .setTitle('Stories API')
     .setDescription('The stories API description')
     .setVersion('0.1')
-    .addTag('auth')
-    .addTag('users')
+    .addTag('auth', '서비스 인증')
+    .addTag('users', '회원 관리')
+    .addTag('coupons', '쿠폰 관리')
+    .addTag('notifications', '알림 관리')
+    .addTag('subscriptions', '구독 관리')
+    .addTag('admin', '관리자 전용 API')
+    .addTag('files', '공통 파일 API')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);

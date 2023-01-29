@@ -14,4 +14,10 @@ export class AppConfigService {
   get jwtSecret(): string {
     return this.configService.get<string>('app.jwtSecret');
   }
+  get awsAccessKey(): string {
+    return this.configService.get<string>('app.awsAccessKey');
+  }
+  get awsSecret(): string {
+    return this.configService.get<string>('app.awsSecret');
+  }
 }

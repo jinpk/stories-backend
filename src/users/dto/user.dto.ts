@@ -1,8 +1,52 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUppercase } from 'class-validator';
+import { IsEnum, IsUppercase } from 'class-validator';
+import { SubscriptionTypes } from 'src/subscriptions/enums';
 
-export class UserDto {
-  @ApiProperty({})
+enum UserState {
+  All,
+  Trial,
+  TrialEnd,
+  Subscription,
+  SubscriptionEnd,
+  End,
+  Normal,
+  Deleted,
+}
+
+export class UserEnumDto {
+  @ApiProperty({
+    description: `회원 구분 >
+    \nAll: 전체,
+    \nTrial: 트라이얼,
+    \nTrialEnd: 트라이얼 해지,
+    \nSubscription: 구독중,
+    \nSubscriptionEnd: 구독해지,
+    \nEnd: 해지,
+    \nNormal: 미구독,
+    \nDeleted: 탈퇴,
+    `,
+    enum: UserState,
+    required: false,
+  })
+  @IsEnum(UserState)
+  userState: UserState;
+
+  @ApiProperty({
+    description: `회원 구독중인 구독권 종류 >
+    \nAll: 전체
+    \nYear: 연간 구독
+    \nMMonth: 월간 구독
+    \nNone: 미구독
+    `,
+    enum: SubscriptionTypes,
+    required: false,
+  })
+  @IsEnum(SubscriptionTypes)
+  userSubscriptionType: SubscriptionTypes;
+}
+
+export class UserDto extends UserEnumDto {
+  @ApiProperty({ description: 'userId' })
   id: string;
 
   @ApiProperty({})
@@ -29,20 +73,9 @@ export class UserDto {
     description: 'TTMIK 멤버쉽 여부',
   })
   ttmik: boolean;
-}
 
-export class GetUserDto {
   @ApiProperty({
-    required: false,
+    description: '가입 날짜',
   })
-  readonly id: string;
-}
-
-export class GetUsersDto {
-  @ApiProperty({
-    description: '뉴스레터 구독',
-    enum: ['', '1', '0'],
-    required: false,
-  })
-  readonly newsletter: string;
+  createdAt: Date;
 }
