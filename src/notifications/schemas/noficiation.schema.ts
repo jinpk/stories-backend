@@ -9,7 +9,7 @@ export type NotificationDocument = HydratedDocument<Notification>;
 // 관리자 등록 알람
 @Schema({ timestamps: true })
 export class Notification {
-  @Prop({ enum: NotificationContexts, default: NotificationContexts.ALL })
+  @Prop({ enum: NotificationContexts, default: NotificationContexts.All })
   @ApiProperty({ description: '알림종류', enum: NotificationContexts })
   context: NotificationContexts;
 

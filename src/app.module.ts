@@ -14,11 +14,12 @@ import { CouponsModule } from './coupons/coupons.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { FilesModule } from './files/files.module';
-import { AwsModule } from './aws/aws.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
     AppConfigModule,
+    EventEmitterModule.forRoot(),
     MongooseModule.forRootAsync({
       useFactory: async (configService: AppConfigService) => ({
         uri: configService.mongoURI,

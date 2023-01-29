@@ -21,6 +21,7 @@ export class AdminController {
   @Post('users')
   @ApiOperation({
     summary: '사용자 생성',
+    description: "국가코드는 default 'KR'로 생성됨.",
   })
   @ApiCreatedResponse({
     description: 'createdUserId',

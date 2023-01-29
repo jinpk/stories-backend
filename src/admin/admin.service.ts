@@ -38,7 +38,7 @@ export class AdminService {
       name: params.nickname,
       nickname: params.nickname,
       subNewsletter: false,
-      countryCode: 'kr',
+      countryCode: 'KR',
       ttmik: false,
       deleted: false,
     };

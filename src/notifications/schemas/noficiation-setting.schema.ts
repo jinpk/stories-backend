@@ -9,7 +9,7 @@ export type NotificationSettingDocument = HydratedDocument<NotificationSetting>;
 // 사용자 알림 설정
 @Schema({})
 export class NotificationSetting {
-  @Prop({ unique: true, type: () => SchemaTypes.ObjectId })
+  @Prop({ type: SchemaTypes.ObjectId })
   @ApiProperty({ description: '사용자 Id', type: String })
   userId: Types.ObjectId;
 
@@ -32,7 +32,7 @@ export class NotificationSetting {
   })
   remindTime: string;
 
-  @Prop({ default: '1230' })
+  @Prop({ default: '' })
   @ApiProperty({
     description: '리마인드 Days 1-Mon...7-Sunday, ex) 1,2,3 or 3',
     required: false,

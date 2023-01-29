@@ -5,10 +5,15 @@ import { ExistUserDto } from '../auth/dto/exist-user.dto';
 import { UserDto } from './dto/user.dto';
 import { ExistQueryFields } from '../auth/enums';
 import { User, UserDocument } from './schemas/user.schema';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { UserCreatedEvent } from './events/create-user.event';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    private eventEmitter: EventEmitter2,
+  ) {}
 
   async getExistingUser(query: ExistUserDto): Promise<boolean> {
     switch (ExistQueryFields[query.field]) {
@@ -47,6 +52,12 @@ export class UsersService {
 
   async create(user: User) {
     const doc = await new this.userModel(user).save();
+
+    this.eventEmitter.emit(
+      UserCreatedEvent.event,
+      new UserCreatedEvent(doc._id.toString()),
+    );
+
     return doc._id.toString();
   }
 

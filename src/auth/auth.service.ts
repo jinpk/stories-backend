@@ -69,7 +69,7 @@ export class AuthService {
       name: params.nickname,
       nickname: params.nickname,
       subNewsletter: false,
-      countryCode: 'kr',
+      countryCode: params.countryCode || 'KR',
       ttmik: false,
       deleted: false,
     };

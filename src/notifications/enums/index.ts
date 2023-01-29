@@ -1,21 +1,21 @@
 export enum NotificationConfigTypes {
-  Paymented,
-  PrePayment,
-  Quiz,
-  LevelUp,
-  Reminder,
-  AppConn,
+  Paymented = 'paymented',
+  PrePayment = 'prepayment',
+  Quiz = 'quiz',
+  LevelUp = 'levelup',
+  Reminder = 'reminder',
+  AppConn = 'appconn',
 }
 
 export enum NotificationContexts {
-  ALL,
-  INAPP,
-  PUSH,
+  All = 'all',
+  InApp = 'inapp',
+  Push = 'push',
 }
 
 export enum NotificationSettingTypes {
-  Promotion,
-  Service,
-  Study,
-  Reminder,
+  Promotion = 'promotion',
+  Service = 'service',
+  Study = 'study',
+  Reminder = 'reminder',
 }
