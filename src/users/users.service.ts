@@ -63,6 +63,12 @@ export class UsersService {
     await this.userModel.findByIdAndUpdate(userId, { $set: set });
   }
 
+  async updatePasswordByEmail(email: string, password: string) {
+    const user = await this.userModel.findOne({ email, deleted: false });
+    user.password = password;
+    await user.save();
+  }
+
   async findOneByEmail(email: string): Promise<UserDocument> {
     const user = await this.userModel.findOne({ email, deleted: false });
     return user;

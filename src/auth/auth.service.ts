@@ -97,13 +97,31 @@ export class AuthService {
     return true;
   }
 
+  async requestPasswordResetEmail(email: string) {
+    //토큰 이메일 전송 필요
+    return await this.jwtService.signAsync(
+      { action: 'password', email },
+      { expiresIn: '30m' },
+    );
+  }
+
+  async verifyPasswordResetToken(token: string) {
+    const payload = await this.jwtService.verifyAsync(token);
+    if (payload?.action === 'password') {
+      return payload.email;
+    }
+    return null;
+  }
+
   async requestEmailVerify(email: string) {
     const code = Math.floor(100000 + Math.random() * 900000);
     const doc = await new this.verifiModel({
       email,
       code,
     }).save();
-    return doc._id.toString();
+
+    //이메일 전송 - 이메일 전송이 필수, 이벤트기반 X
+    return { verifiId: doc._id.toString(), code };
   }
 
   async validateUser(email: string, password: string) {

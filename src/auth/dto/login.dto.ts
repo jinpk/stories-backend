@@ -1,11 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsEmail,
-  IsEnum,
-  IsJWT,
-  IsNotEmpty,
-  IsOptional,
-} from 'class-validator';
+import { IsEmail, IsEnum, IsJWT, IsNotEmpty } from 'class-validator';
 import { OAuthProviers } from '../enums';
 
 export class LoginDto {
