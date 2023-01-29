@@ -8,7 +8,7 @@ export class UserCoupon {
   @Prop()
   userId: Types.ObjectId;
 
-  @Prop()
+  @Prop({})
   counponId: Types.ObjectId;
 }
 

@@ -9,32 +9,32 @@ import { FilesController } from './files.controller';
   imports: [
     AwsModule,
     MulterModule.registerAsync({
-      useFactory: () => {
-        const destFolderExist = existsSync('./uploads');
-        if (!destFolderExist) {
-          mkdirSync('./uploads');
-        }
-
-        return {
-          storage: diskStorage({
-            destination: function (req, file, cb) {
-              cb(null, './uploads');
-            },
-            filename: function (req, file, cb) {
-              const uniqueSuffix =
-                Date.now() + '-' + Math.round(Math.random() * 1e9);
-              cb(
-                null,
-                `${req.user['id']}-${uniqueSuffix}.${file.originalname
-                  .split('.')
-                  .pop()}`,
-              );
-            },
-          }),
-        };
-      },
+      useFactory: multerModuleFactory,
     }),
   ],
   controllers: [FilesController],
 })
 export class FilesModule {}
+
+function multerModuleFactory() {
+  const destFolderExist = existsSync('./uploads');
+  if (!destFolderExist) {
+    mkdirSync('./uploads');
+  }
+  return {
+    storage: diskStorage({
+      destination: function (req, file, cb) {
+        cb(null, './uploads');
+      },
+      filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        cb(
+          null,
+          `${req.user['id']}-${uniqueSuffix}.${file.originalname
+            .split('.')
+            .pop()}`,
+        );
+      },
+    }),
+  };
+}

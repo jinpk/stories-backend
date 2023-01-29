@@ -38,7 +38,7 @@ export class FilesController {
   })
   async uploadFiles(@UploadedFiles() { files }: UploadFilesDto) {
     if (!files || !files.length) {
-      throw new BadRequestException('files을 업로드 해주세요.');
+      throw new BadRequestException('files is a empty array.');
     }
     const paths = files.map((x) => x.path);
 
