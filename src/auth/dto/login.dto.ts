@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsJWT, isJWT, IsNotEmpty } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsJWT,
+  IsNotEmpty,
+  IsOptional,
+} from 'class-validator';
 import { OAuthProviers } from '../enums';
 
 export class LoginDto {
@@ -18,9 +24,18 @@ export class OAuthDto {
   @IsNotEmpty()
   provider: string;
 
-  @ApiProperty({ description: '각 SNS 클라인트에서 Login후 발급 받은 code' })
+  @ApiProperty({
+    description: `각 SNS 클라인트에서 Login후 발급 받은 code
+  \n페이스북은 accessToken까지 발급 받아 code에 accessToken을 넣으면 됌.`,
+  })
   @IsNotEmpty()
   code: string;
+
+  @ApiProperty({
+    description: '국가코드',
+  })
+  @IsNotEmpty()
+  countryCode?: string;
 }
 
 export class TokenDto {

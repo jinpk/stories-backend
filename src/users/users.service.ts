@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { AnyKeys, Model } from 'mongoose';
 import { ExistUserDto } from '../auth/dto/exist-user.dto';
 import { UserDto } from './dto/user.dto';
-import { ExistQueryFields } from '../auth/enums';
+import { ExistQueryFields, OAuthProviers } from '../auth/enums';
 import { User, UserDocument } from './schemas/user.schema';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserCreatedEvent } from './events/create-user.event';
+import { UpdateUserDto } from './dto/update.user.dto';
 
 @Injectable()
 export class UsersService {
@@ -15,18 +16,51 @@ export class UsersService {
     private eventEmitter: EventEmitter2,
   ) {}
 
+  async findByOAuthId(
+    provider: OAuthProviers,
+    id: string,
+  ): Promise<UserDocument> {
+    const user = await this.userModel.findOne({
+      deleted: false,
+      [provider === OAuthProviers.Google
+        ? 'googleLogin'
+        : provider === OAuthProviers.Facebook
+        ? 'facebookLogin'
+        : 'appleLogin']: id,
+    });
+    return user;
+  }
+
   async getExistingUser(query: ExistUserDto): Promise<boolean> {
-    switch (ExistQueryFields[query.field]) {
-      case ExistQueryFields.email:
+    switch (query.field) {
+      case ExistQueryFields.Email:
         const user = await this.findOneByEmail(query.value);
         if (user) {
           return true;
         }
-      case ExistQueryFields.nickname:
+        return false;
+      case ExistQueryFields.Nickname:
         return await this.existingNickname(query.value);
       default:
         throw new Error('잘못된 parameter');
     }
+  }
+
+  async updateById(userId: string, body: UpdateUserDto) {
+    const set: AnyKeys<UserDocument> = {};
+    if (body.fcmToken !== undefined) {
+      set.fcmToken = body.fcmToken;
+    }
+
+    if (body.nickname !== undefined) {
+      set.nickname = body.nickname;
+    }
+
+    if (body.subNewsletter !== undefined) {
+      set.subNewsletter = body.subNewsletter;
+    }
+
+    await this.userModel.findByIdAndUpdate(userId, { $set: set });
   }
 
   async findOneByEmail(email: string): Promise<UserDocument> {

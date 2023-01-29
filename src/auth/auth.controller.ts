@@ -68,7 +68,9 @@ export class AuthController {
     description: `로그아웃시 Client에서 accessToken 삭제
     \n서버에서는 FcmToken 초기화`,
   })
-  async logout(@Request() req) {}
+  async logout(@Request() req) {
+    await this.usersService.updateById(req.user.id, { fcmToken: '' });
+  }
 
   @Post('login')
   @Public()
@@ -90,13 +92,13 @@ export class AuthController {
   @Public()
   @ApiOperation({
     summary: 'OAuth 로그인 / 자동가입',
+    description: 'schema.code description 참고',
   })
   @ApiOkResponse({
     type: TokenDto,
   })
   async oAuth(@Body() body: OAuthDto) {
-    throw new Error('개발중인 컨트롤러');
-    return this.authService.login('wd');
+    return await this.authService.oAuthLogin(body);
   }
 
   @Get('users/exist')

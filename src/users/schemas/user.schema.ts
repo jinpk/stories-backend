@@ -18,6 +18,13 @@ export class User {
   @Prop()
   password: string;
 
+  @Prop({ default: '' })
+  googleLogin?: string;
+  @Prop({ default: '' })
+  facebookLogin?: string;
+  @Prop({ default: '' })
+  appleLogin?: string;
+
   @Prop({ default: false })
   subNewsletter: boolean;
 
@@ -27,12 +34,16 @@ export class User {
   @Prop({ default: false })
   ttmik: boolean;
 
+  @Prop({})
+  fcmToken?: string;
+
   @Prop({ default: false })
   deleted: boolean;
-
   @Prop({ default: null })
   deletedAt?: Date;
+  @Prop({ default: null })
   createdAt?: Date;
+  @Prop({ default: null })
   updatedAt?: Date;
 }
 
