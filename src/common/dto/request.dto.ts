@@ -1,25 +1,25 @@
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
-import { IsNumber } from 'class-validator';
+import { IsDateString, IsNumberString } from 'class-validator';
 
 export class PagingReqDto {
   @ApiProperty({
     description: 'page',
     default: 1,
   })
-  @IsNumber()
-  page: number;
+  @IsNumberString()
+  page: string;
 
   @ApiProperty({
     description: 'limit',
     default: 10,
   })
-  @IsNumber()
-  limit: number;
+  @IsNumberString()
+  limit: string;
 }
 
 export class SearchReqDto {
   @ApiProperty({
-    description: '검색 대상',
+    description: '검색 대상\n각 API Dto의 field를 사용',
     required: false,
   })
   readonly target: string;
@@ -36,12 +36,14 @@ export class DateReqDto {
     description: '조회 시작일 (YYYY-MM-DD)',
     required: false,
   })
+  @IsDateString()
   readonly start: string;
 
   @ApiProperty({
     description: '조회 종료일 (YYYY-MM-DD)',
     required: false,
   })
+  @IsDateString()
   readonly end: string;
 }
 

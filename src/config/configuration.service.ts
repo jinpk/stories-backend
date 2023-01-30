@@ -20,4 +20,11 @@ export class AppConfigService {
   get awsSecret(): string {
     return this.configService.get<string>('app.awsSecret');
   }
+
+  get googleClientId(): string {
+    return this.configService.get<string>('app.googleClientId');
+  }
+  get googleClientSecret(): string {
+    return this.configService.get<string>('app.googleClientSecret');
+  }
 }

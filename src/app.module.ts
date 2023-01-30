@@ -14,11 +14,16 @@ import { CouponsModule } from './coupons/coupons.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { FilesModule } from './files/files.module';
-import { AwsModule } from './aws/aws.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { EventModule } from './event/event.module';
+import { SchedulerModule } from './scheduler/scheduler.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     AppConfigModule,
+    EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot(),
     MongooseModule.forRootAsync({
       useFactory: async (configService: AppConfigService) => ({
         uri: configService.mongoURI,
@@ -35,6 +40,8 @@ import { AwsModule } from './aws/aws.module';
     NotificationsModule,
     SubscriptionsModule,
     FilesModule,
+    EventModule,
+    SchedulerModule,
   ],
   controllers: [AppController],
   providers: [

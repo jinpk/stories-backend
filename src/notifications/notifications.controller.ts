@@ -18,47 +18,61 @@ import {
 } from './dto/notification-setting.dto';
 import { CreateNotificationDto, NotificationDto } from './dto/notification.dto';
 import { NotificationConfigTypes } from './enums';
+import { NotificationsService } from './notifications.service';
 
 @Controller('notifications')
 @ApiTags('notifications')
 @ApiBearerAuth()
 export class NotificationsController {
+  constructor(private readonly notificationsService: NotificationsService) {}
+
   @Put('settings/:id')
   @ApiOperation({ summary: '사용자 알림 설정 수정' })
   @ApiParam({ name: 'id', description: 'settingId' })
-  updateUserNotificationSetting(
+  async updateUserNotificationSetting(
     @Param('id') id: string,
     @Body() body: UpdateNotificationSettingDto,
-  ) {}
+  ) {
+    return await this.notificationsService.updateNotificationSetting(id, body);
+  }
 
   @Get('settings')
   @ApiOperation({ summary: '사용자 알림 설정 조회' })
   @ApiOkResponse({ type: [NotificationSettingDto] })
-  getUserNotificationSettings(@Query('userId') userId: string) {}
+  async getUserNotificationSettings(@Query('userId') userId: string) {
+    return await this.notificationsService.getUserNotificationSettings(userId);
+  }
 
-  @Post('config/init')
-  @ApiOperation({ summary: '(-) 자동 알림 규칙 초기화 (데이터 없을시 실행)' })
-  configInit() {}
-
-  @Put('config/:id')
-  @ApiOperation({ summary: '자동 알림 규칙 수정' })
+  @Put('configs/:id')
+  @ApiOperation({
+    summary: '자동 알림 규칙 수정',
+    description: 'body 값 전부 넣어줘야 함. (default GET)',
+  })
   @ApiParam({ name: 'id', description: 'configId' })
-  updateConfig(
+  async updateConfig(
     @Param('id') id: NotificationConfigTypes,
     @Body() body: UpdateNotificationConfigDto,
-  ) {}
+  ) {
+    await this.notificationsService.updateNotificationConfigs(id, body);
+  }
 
-  @Get('config')
+  @Get('configs')
   @ApiOperation({ summary: '자동 알림 규칙 조회' })
   @ApiOkResponse({ type: [NotificationConfigDto] })
-  getConfig() {}
+  async getConfigs() {
+    return await this.notificationsService.getNotificationConfigs();
+  }
 
   @Post('')
   @ApiOperation({ summary: '알림 등록' })
-  createNotification(@Body() body: CreateNotificationDto) {}
+  async createNotification(@Body() body: CreateNotificationDto) {
+    return await this.notificationsService.createNotification(body);
+  }
 
   @Get('')
   @ApiOperation({ summary: '알림 조회' })
   @ApiOkResponsePaginated(NotificationDto)
-  listNotification(@Query() query: GetNotificationsDto) {}
+  async listNotification(@Query() query: GetNotificationsDto) {
+    return await this.notificationsService.getPagingNotifications(query);
+  }
 }

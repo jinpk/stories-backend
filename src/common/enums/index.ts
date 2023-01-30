@@ -1,4 +1,4 @@
 export enum AppOS {
-  Android,
-  Ios,
+  Android = 'android',
+  Ios = 'ios',
 }

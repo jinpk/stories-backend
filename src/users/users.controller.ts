@@ -34,10 +34,29 @@ export class UsersController {
 
   @Patch(':id/password')
   @ApiOperation({
-    summary: '비밀번호 경경',
+    summary: '비밀번호 변경',
   })
   @ApiBody({ type: PasswordUpdateDto })
-  async patchPassword(@Param('id') id: string) {}
+  async patchPassword(
+    @Req() req,
+    @Param('id') id: string,
+    @Body() body: PasswordUpdateDto,
+  ) {
+    if (req.user.id !== id) {
+      throw new UnauthorizedException();
+    }
+
+    const user = await this.usersService.findById(id);
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    if (!(await this.usersService.checkCurrentPassword(user, body.password))) {
+      throw new UnauthorizedException('현재 비밀번호가 일치하지 않습니다.');
+    }
+
+    await this.usersService.updatePasswordById(id, body.updatePassword);
+  }
 
   @Post(':id/passwordcheck')
   @ApiOperation({
@@ -47,8 +66,21 @@ export class UsersController {
   @ApiOkResponse({
     type: Boolean,
   })
-  async checkCurrentPassword(@Param('id') id: string) {
-    return true;
+  async checkCurrentPassword(
+    @Req() req,
+    @Param('id') id: string,
+    @Body() body: PasswordCheckDto,
+  ) {
+    if (req.user.id !== id) {
+      throw new UnauthorizedException();
+    }
+
+    const user = await this.usersService.findById(id);
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    return await this.usersService.checkCurrentPassword(user, body.password);
   }
 
   @Post(':id/withdrawal')
@@ -57,28 +89,44 @@ export class UsersController {
     description: '관리자 요청은 password 필수 아님.',
   })
   async deleteUser(
+    @Req() req,
     @Param('id') id: string,
     @Body() body: DeleteUserDto,
-    @Req() req,
   ) {
     if (req.user.id !== id && !req.user.isAdmin) {
       throw new UnauthorizedException();
     }
-    if (!(await this.usersService.findById(id))) {
+
+    const user = await this.usersService.findById(id);
+    if (!user) {
       throw new NotFoundException();
     }
+
+    if (
+      !req.user.isAdmin &&
+      !(await this.usersService.checkCurrentPassword(user, body.password))
+    ) {
+      throw new UnauthorizedException('현재 비밀번호가 일치하지 않습니다.');
+    }
+
     await this.usersService.deleteUser(id);
   }
 
   @Put(':id')
   @ApiOperation({
     summary: '회원 수정',
+    description: `body에 property가 있는 항목만 업데이트됨`,
   })
   @ApiOkResponse({
     type: UpdateUserDto,
   })
-  async updateUser(@Param('id') id: string) {
-    return null;
+  async updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
+    const user = await this.usersService.findById(id);
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    return await this.usersService.updateById(id, body);
   }
 
   @Get(':id')
@@ -103,6 +151,6 @@ export class UsersController {
   })
   @ApiOkResponsePaginated(UserDto)
   async getUserList(@Query() query: GetUsersDto) {
-    return [];
+    return await this.usersService.getPagingUsers(query);
   }
 }

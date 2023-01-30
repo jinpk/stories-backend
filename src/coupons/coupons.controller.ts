@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -15,6 +16,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
+import { CouponsService } from './coupons.service';
 import { CouponDto } from './dto/coupon.dto';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { GetCouponsDto, GetCouponsSentDto } from './dto/get-coupon.dto';
@@ -25,9 +27,16 @@ import { CreateUserCouponDto, UserCouponDto } from './dto/user-coupon.dto';
 @ApiTags('coupons')
 @ApiBearerAuth()
 export class CouponsController {
+  constructor(private readonly couponsService: CouponsService) {}
   @Post('sent')
   @ApiOperation({ summary: '쿠폰 발송' })
-  couponSent(@Body() body: CreateUserCouponDto) {}
+  async couponSent(@Body() body: CreateUserCouponDto) {
+    if (!(await this.couponsService.existCouponById(body.couponId))) {
+      throw new NotFoundException('NotFound Coupon');
+    }
+
+    await this.couponsService.sentCouponToUsers(body);
+  }
 
   @Get('sent')
   @ApiOperation({
@@ -35,27 +44,52 @@ export class CouponsController {
     description: 'userId 입력시 회원 쿠폰 내역 조회',
   })
   @ApiOkResponsePaginated(UserCouponDto)
-  listCouponSent(@Query() qeury: GetCouponsSentDto) {}
+  async listCouponSent(@Query() query: GetCouponsSentDto) {
+    return await this.couponsService.getPagingCouponSentList(query);
+  }
 
   @Get(':id')
-  @ApiOperation({ summary: '쿠폰 상세조회' })
+  @ApiOperation({ summary: '쿠폰 상세 조회' })
   @ApiOkResponse({ type: CouponDto })
-  getCoupon(@Param('id') id: string) {}
+  async getCoupon(@Param('id') id: string) {
+    if (!(await this.couponsService.existCouponById(id))) {
+      throw new NotFoundException('NotFound Coupon');
+    }
+    return await this.couponsService.getCouponById(id);
+  }
 
   @Delete(':id')
   @ApiOperation({ summary: '쿠폰 삭제' })
-  deleteCoupon(@Param('id') id: string) {}
+  async deleteCoupon(@Param('id') id: string) {
+    if (!(await this.couponsService.existCouponById(id))) {
+      throw new NotFoundException('NotFound Coupon');
+    }
+    return await this.couponsService.deleteCoupon(id);
+  }
 
   @Put(':id')
-  @ApiOperation({ summary: '쿠폰 수정' })
-  updateCoupon(@Param('id') id: string, @Body() body: UpdateCouponDto) {}
+  @ApiOperation({
+    summary: '쿠폰 수정',
+    description:
+      ':id(GET)에서 받아온 값 default, 사용자가 수정한 값 반영하여 전체 payload 요청',
+  })
+  async updateCoupon(@Param('id') id: string, @Body() body: UpdateCouponDto) {
+    if (!(await this.couponsService.existCouponById(id))) {
+      throw new NotFoundException('NotFound Coupon');
+    }
+    return await this.couponsService.updateCoupon(id, body);
+  }
 
   @Post('')
   @ApiOperation({ summary: '쿠폰 등록' })
-  createCoupon(@Body() body: CreateCouponDto) {}
+  async createCoupon(@Body() body: CreateCouponDto) {
+    return await this.couponsService.createCounpon(body);
+  }
 
   @Get('')
   @ApiOperation({ summary: '쿠폰 조회' })
   @ApiOkResponsePaginated(CouponDto)
-  listCoupon(@Query() qeury: GetCouponsDto) {}
+  async listCoupon(@Query() query: GetCouponsDto) {
+    return await this.couponsService.getPagingCoupons(query);
+  }
 }

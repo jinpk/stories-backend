@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, SchemaTypes, Types } from 'mongoose';
 import { compareSync, genSalt, hash } from 'bcrypt';
 
 export type UserDocument = HydratedDocument<User & UserMethods>;
@@ -18,6 +18,13 @@ export class User {
   @Prop()
   password: string;
 
+  @Prop({ default: '' })
+  googleLogin?: string;
+  @Prop({ default: '' })
+  facebookLogin?: string;
+  @Prop({ default: '' })
+  appleLogin?: string;
+
   @Prop({ default: false })
   subNewsletter: boolean;
 
@@ -27,12 +34,19 @@ export class User {
   @Prop({ default: false })
   ttmik: boolean;
 
+  @Prop({})
+  fcmToken?: string;
+
+  @Prop({ type: SchemaTypes.ObjectId, default: null })
+  subscriptionId?: Types.ObjectId;
+
   @Prop({ default: false })
   deleted: boolean;
-
   @Prop({ default: null })
   deletedAt?: Date;
+  @Prop({ default: null })
   createdAt?: Date;
+  @Prop({ default: null })
   updatedAt?: Date;
 }
 

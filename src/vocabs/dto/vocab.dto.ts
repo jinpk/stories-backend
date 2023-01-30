@@ -37,11 +37,7 @@ export class VocabDto{
   meaning_en: string;
 
   @ApiProperty({})
-  core_type: boolean;
-
-  @ApiProperty({})
-  authFilePath: string;
-}
+  value: string;
 
 
 export class CoreTypeUpdateDto{

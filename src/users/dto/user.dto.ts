@@ -1,48 +1,35 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsUppercase } from 'class-validator';
+import { IsEnum, IsOptional, IsUppercase } from 'class-validator';
 import { SubscriptionTypes } from 'src/subscriptions/enums';
-
-enum UserState {
-  All,
-  Trial,
-  TrialEnd,
-  Subscription,
-  SubscriptionEnd,
-  End,
-  Normal,
-  Deleted,
-}
+import { UserStates } from '../enums';
 
 export class UserEnumDto {
   @ApiProperty({
     description: `회원 구분 >
-    \nAll: 전체,
-    \nTrial: 트라이얼,
-    \nTrialEnd: 트라이얼 해지,
-    \nSubscription: 구독중,
-    \nSubscriptionEnd: 구독해지,
-    \nEnd: 해지,
-    \nNormal: 미구독,
-    \nDeleted: 탈퇴,
-    `,
-    enum: UserState,
+    \ntrial: 트라이얼,
+    \ntrialEnd: 트라이얼 해지,
+    \nsubscription: 구독중,
+    \nsubscriptionEnd: 구독해지,
+    \nend: 해지,
+    \nnormal: 미구독,
+    \ndeleted: 탈퇴`,
+    enum: UserStates,
     required: false,
   })
-  @IsEnum(UserState)
-  userState: UserState;
+  @IsOptional()
+  @IsEnum(UserStates)
+  userState: UserStates;
 
   @ApiProperty({
     description: `회원 구독중인 구독권 종류 >
-    \nAll: 전체
-    \nYear: 연간 구독
-    \nMMonth: 월간 구독
-    \nNone: 미구독
-    `,
+    \nyear: 연간 구독
+    \nmonth: 월간 구독`,
     enum: SubscriptionTypes,
     required: false,
   })
+  @IsOptional()
   @IsEnum(SubscriptionTypes)
-  userSubscriptionType: SubscriptionTypes;
+  subscriptionType: SubscriptionTypes;
 }
 
 export class UserDto extends UserEnumDto {
@@ -66,13 +53,17 @@ export class UserDto extends UserEnumDto {
   @ApiProperty({
     description: '국가코드',
   })
-  @IsUppercase()
   countryCode: string;
 
   @ApiProperty({
     description: 'TTMIK 멤버쉽 여부',
   })
   ttmik: boolean;
+
+  @ApiProperty({
+    description: '회원 탈퇴 여부',
+  })
+  deleted: boolean;
 
   @ApiProperty({
     description: '가입 날짜',

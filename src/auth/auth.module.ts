@@ -10,9 +10,12 @@ import { AuthService } from './auth.service';
 import { Verifi, VerifiSchema } from './schemas/verifi.schema';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { LocalAdminStrategy, LocalStrategy } from './strategy/local.strategy';
+import { OAuthService } from './oauth.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
+    HttpModule,
     UsersModule,
     AdminModule,
     PassportModule,
@@ -26,7 +29,13 @@ import { LocalAdminStrategy, LocalStrategy } from './strategy/local.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy, LocalAdminStrategy],
-  exports: [AuthService],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    JwtStrategy,
+    LocalAdminStrategy,
+    OAuthService,
+  ],
+  exports: [AuthService, OAuthService],
 })
 export class AuthModule {}

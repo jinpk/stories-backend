@@ -10,6 +10,7 @@ import {
   UseGuards,
   BadRequestException,
   Param,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -30,10 +31,10 @@ import {
   AdminLoginDto,
   PasswordResetDto,
   OAuthDto,
+  ExistUserDto,
 } from './dto';
 import { LocalAuthGuard, LocalAuthAdminGuard } from './guard/local-auth.guard';
 import { AdminService } from 'src/admin/admin.service';
-import { ExistUserDto } from './dto/exist-user.dto';
 import { isEmail } from 'class-validator';
 
 @Controller('auth')
@@ -68,7 +69,9 @@ export class AuthController {
     description: `로그아웃시 Client에서 accessToken 삭제
     \n서버에서는 FcmToken 초기화`,
   })
-  async logout(@Request() req) {}
+  async logout(@Request() req) {
+    await this.usersService.updateById(req.user.id, { fcmToken: '' });
+  }
 
   @Post('login')
   @Public()
@@ -90,13 +93,13 @@ export class AuthController {
   @Public()
   @ApiOperation({
     summary: 'OAuth 로그인 / 자동가입',
+    description: 'schema.code description 참고',
   })
   @ApiOkResponse({
     type: TokenDto,
   })
   async oAuth(@Body() body: OAuthDto) {
-    throw new Error('개발중인 컨트롤러');
-    return this.authService.login('wd');
+    return await this.authService.oAuthLogin(body);
   }
 
   @Get('users/exist')
@@ -186,7 +189,7 @@ export class AuthController {
       throw new ConflictException('Already exist nickname.');
     }
 
-    return this.authService.signUp(verifi, body);
+    return await this.authService.signUp(verifi, body);
   }
 
   @Post('passwordreset/exec')
@@ -200,12 +203,24 @@ export class AuthController {
   @ApiOkResponse({
     description: '비밀번호 재설정 완료',
   })
-  async passwordResetExecute(@Body() body: PasswordResetDto) {}
+  async passwordResetExecute(@Body() body: PasswordResetDto) {
+    const email = await this.authService.verifyPasswordResetToken(body.token);
+    if (!email) {
+      throw new UnauthorizedException('유효하지 않거나 만료된 토큰입니다.');
+    }
+
+    if (!(await this.usersService.findOneByEmail(email))) {
+      throw new NotFoundException('not found email.');
+    }
+
+    await this.usersService.updatePasswordByEmail(email, body.password);
+  }
 
   @Post('passwordreset')
   @Public()
   @ApiOperation({
     summary: '비밀번호 재설정 요청',
+    description: '이메일로 링크에 토큰담아서 전송됨.',
   })
   @ApiBody({
     schema: {
@@ -219,6 +234,8 @@ export class AuthController {
     if (!(await this.usersService.findOneByEmail(email))) {
       throw new NotFoundException('not found email.');
     }
+
+    return await this.authService.requestPasswordResetEmail(email);
   }
 
   @Get('me')

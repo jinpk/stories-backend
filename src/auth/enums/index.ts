@@ -1,10 +1,10 @@
 export enum ExistQueryFields {
-  email,
-  nickname,
+  Email = 'email',
+  Nickname = 'nickname',
 }
 
 export enum OAuthProviers {
-  Google,
-  Apple,
-  Facebook,
+  Google = 'google',
+  Apple = 'apple',
+  Facebook = 'facebook',
 }

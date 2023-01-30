@@ -23,7 +23,7 @@ export class NotificationConfig {
   on: boolean;
 
   @Prop({
-    default: NotificationContexts.ALL,
+    default: NotificationContexts.All,
     enum: NotificationContexts,
   })
   @ApiProperty({ description: '알림 실행 대상', enum: NotificationContexts })
