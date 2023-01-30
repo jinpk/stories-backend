@@ -31,13 +31,20 @@ import { StaticsVocabDto } from './dto/vocab-statics.dto';
 @ApiBearerAuth()
 export class VocabsController {
     constructor(private readonly vocabsService: VocabsService) {}
-    @Patch(':id/password')
+    @Patch(':id/coretype')
     @ApiOperation({
-      summary: '(ADMIN) 핵심단어 적용, USE | UNUSE',
+      summary: '(ADMIN) 핵심 단어 적용, USE | UNUSE',
     })
     @ApiBody({ type: CoreTypeUpdateDto })
-    async patchPassword(@Param('vocab_id') vocab_id: string) {}
+    async patchCoreType(@Param('vocab_id') vocab_id: string) {}
     
+    @Patch(':id/vocab')
+    @ApiOperation({
+      summary: '(ADMIN) 등록 단어 수정',
+    })
+    @ApiBody({ type: VocabDto })
+    async patchVocab(@Param('vocab_id') vocab_id: string) {}
+
     @Delete(':id')
     @ApiOperation({ summary: '(ADMIN) 단어 삭제' })
     deleteVocab(@Param('vocab_id') vocab_id: string) {}

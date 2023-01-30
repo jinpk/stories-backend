@@ -34,10 +34,13 @@ export class VocabDto{
   sentence: string;
 
   @ApiProperty({})
+  value: string;
+
+  @ApiProperty({})
   meaning_en: string;
 
   @ApiProperty({})
-  value: string;
+  core_type: CoreType;
 }
 
 export class CoreTypeUpdateDto{
