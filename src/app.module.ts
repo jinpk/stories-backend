@@ -15,6 +15,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { FilesModule } from './files/files.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { EventModule } from './event/event.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     NotificationsModule,
     SubscriptionsModule,
     FilesModule,
+    EventModule,
   ],
   controllers: [AppController],
   providers: [

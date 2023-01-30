@@ -1,8 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { OnEvent } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
-import { UserCreatedEvent } from 'src/users/events/create-user.event';
 import { NotificationSettingTypes } from './enums';
 import {
   NotificationConfig,
@@ -28,15 +26,6 @@ export class NotificationsService {
     @InjectModel(NotificationSetting.name)
     private notificationSettingModel: mongoose.Model<NotificationSettingDocument>,
   ) {}
-
-  @OnEvent(UserCreatedEvent.event)
-  handleUserCreatedEvent(payload: UserCreatedEvent) {
-    this.logger.debug(
-      `event detected: ${UserCreatedEvent.event}, ${payload.userId}`,
-    );
-
-    this.initUserNotificationSettings(payload.userId);
-  }
 
   async initUserNotificationSettings(userId: string) {
     const oid = new mongoose.Types.ObjectId(userId);
