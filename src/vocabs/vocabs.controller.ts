@@ -1,32 +1,66 @@
-import { Controller, Get, Post, Param, Body, UseInterceptors } from '@nestjs/common';
-import { VocabDto } from './dto/vocab.dto';
-
 import {
-    ApiBearerAuth,
-    ApiOkResponse,
-    ApiOperation,
-    ApiTags,
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Delete,
+  Patch,
+  Post,
+  Put,
+  Query,
+  Req,
+  UnauthorizedException,
+ } from '@nestjs/common';
+ import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
 } from '@nestjs/swagger'
+import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
+import { VocabDto, CoreTypeUpdateDto } from './dto/vocab.dto';
+import { GetVocabsDto, GetStaticsVocabDto } from './dto/get-vocab.dto';
+import { VocabTestDto } from './dto/vocab-test.dto';
 import { VocabsService } from './vocabs.service';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { StaticsVocabDto } from './dto/vocab-statics.dto';
 
 @Controller('vocabs')
 @ApiTags('vocabs')
 @ApiBearerAuth()
 export class VocabsController {
     constructor(private readonly vocabsService: VocabsService) {}
+    @Patch(':id/password')
+    @ApiOperation({
+      summary: '(ADMIN) 핵심단어 적용, USE | UNUSE',
+    })
+    @ApiBody({ type: CoreTypeUpdateDto })
+    async patchPassword(@Param('vocab_id') vocab_id: string) {}
+    
+    @Delete(':id')
+    @ApiOperation({ summary: '(ADMIN) 단어 삭제' })
+    deleteVocab(@Param('vocab_id') vocab_id: string) {}
 
-    // @Get('cats/all')
-    // async findAll(): string {
-    //   return 'This action returns all cats';
-    // }
-  
-    // @Get(':id')
-    // findOne(@Param('id') id: number): string {
-    //     console.log(id)
-    //   return 'This action returns one cats';
-    // }
-  
+    @Post(':vocab_id/test/vocab')
+    @ApiOperation({
+      summary: 'Vocab 테스트 제출',
+    })
+    @ApiBody({ type: VocabTestDto })
+    @ApiOkResponse({
+      type: Boolean,
+    })
+    async checkVocabTest(@Param('vocab_id') vocab_id: string) {
+      return true;
+    }
+
+    @Get('statics')
+    @ApiOperation({
+      summary: '(ADMIN) Vocab 퀴즈 이용 통계',
+    })
+    @ApiOkResponsePaginated(StaticsVocabDto)
+    async getStaticsVocab(@Query() qeury: GetStaticsVocabDto) {}
+    
     @Get(':id')
     @ApiOperation({
       summary: 'Vocab 상세 조회',
@@ -39,17 +73,10 @@ export class VocabsController {
       return vocab;
     }
 
-    @Get('listvocab')
-    async getListVocab() {
-      return 'This action returns some list vocab';
-    }
-
-    @Post('fileupload')
+    @Get('')
     @ApiOperation({
-      summary: 'Vocab Excel File 업로드',
+      summary: '(ADMIN) Vocab 조회',
     })
-    @UseInterceptors(FileInterceptor('excel_file', 1, ))
-    fileUpload(@Body('excel_data') excel_data: FormData) {
-      return 'This action POST vocabs by reading excel data';
-    }
+    @ApiOkResponsePaginated(VocabDto)
+    async getListVocab(@Query() query: GetVocabsDto) {}
 }
