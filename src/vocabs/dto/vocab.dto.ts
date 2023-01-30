@@ -38,7 +38,7 @@ export class VocabDto{
 
   @ApiProperty({})
   value: string;
-
+}
 
 export class CoreTypeUpdateDto{
   @ApiProperty({})
