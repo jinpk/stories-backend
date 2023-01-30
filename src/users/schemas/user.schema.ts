@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, SchemaTypes, Types } from 'mongoose';
 import { compareSync, genSalt, hash } from 'bcrypt';
 
 export type UserDocument = HydratedDocument<User & UserMethods>;
@@ -36,6 +36,9 @@ export class User {
 
   @Prop({})
   fcmToken?: string;
+
+  @Prop({ type: SchemaTypes.ObjectId, default: null })
+  subscriptionId?: Types.ObjectId;
 
   @Prop({ default: false })
   deleted: boolean;

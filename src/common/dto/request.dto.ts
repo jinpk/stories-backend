@@ -19,7 +19,7 @@ export class PagingReqDto {
 
 export class SearchReqDto {
   @ApiProperty({
-    description: '검색 대상',
+    description: '검색 대상\n각 API Dto의 field를 사용',
     required: false,
   })
   readonly target: string;

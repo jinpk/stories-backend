@@ -19,9 +19,34 @@ export class UsersService {
   ) {}
 
   async getPagingUsers(query: GetUsersDto): Promise<PagingResDto<UserDto>> {
-    const filter: FilterQuery<UserDocument> = {
-      //name: { $regex: query.name || '', $options: 'i' },
-    };
+    const filter: FilterQuery<UserDocument> = {};
+
+    if (query.target) {
+      filter[query.target] = { $regex: query.keyword || '', $options: 'i' };
+    }
+
+    if (query.start) {
+      filter.createdAt = { $gte: new Date(query.start) };
+    }
+
+    if (query.end) {
+      filter.createdAt = { $lte: new Date(query.end) };
+    }
+
+    if (query.ttmik) {
+      filter.ttmik = { $eq: query.ttmik === '1' };
+    }
+
+    if (query.newsletter) {
+      filter.newsletter = { $eq: query.newsletter === '1' };
+    }
+
+    if (query.countryCode) {
+      filter.countryCode = { $eq: query.countryCode.toUpperCase() };
+    }
+
+    /*query.subscriptionType
+      query.userState*/
 
     const docs = await this.userModel
       .find(filter)
