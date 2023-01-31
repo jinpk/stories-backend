@@ -18,6 +18,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { EventModule } from './event/event.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { FaqboardService } from './faqboard/faqboard.service';
+import { FaqboardModule } from './faqboard/faqboard.module';
 
 @Module({
   imports: [
@@ -42,6 +44,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     FilesModule,
     EventModule,
     SchedulerModule,
+    FaqboardModule,
   ],
   controllers: [AppController],
   providers: [
@@ -50,6 +53,7 @@ import { ScheduleModule } from '@nestjs/schedule';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
+    FaqboardService,
   ],
 })
 export class AppModule {}

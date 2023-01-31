@@ -6,11 +6,11 @@ import { LevelTest, LevelTestDocument } from './schemas/leveltest.schema';
 @Injectable()
 export class LeveltestService {
     constructor(
-        @InjectModel(LevelTest.name) private vocabModel: Model<LevelTestDocument>,
+        @InjectModel(LevelTest.name) private leveltestModel: Model<LevelTestDocument>,
       ) {}
     
       async GetVocab(leveltest_id: string): Promise<LevelTestDocument | false> {
-        const vocab = await this.vocabModel.findById(leveltest_id);
+        const vocab = await this.leveltestModel.findById(leveltest_id);
         if (!vocab) {
           return false;
         }

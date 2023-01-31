@@ -25,26 +25,11 @@ class CompleteRate {
 }
 
 class LevelCompleteRate {
-    @ApiProperty({})
-    lv1: CompleteRate;
-    @ApiProperty({})
-    lv2: CompleteRate;
-    @ApiProperty({})
-    lv3: CompleteRate;
-    @ApiProperty({})
-    lv4: CompleteRate;
-    @ApiProperty({})
-    lv5: CompleteRate;
-    @ApiProperty({})
-    lv6: CompleteRate;
-    @ApiProperty({})
-    lv7: CompleteRate;
-    @ApiProperty({})
-    lv8: CompleteRate;
-    @ApiProperty({})
-    lv9: CompleteRate;
-    @ApiProperty({})
-    lv10: CompleteRate;
+  @ApiProperty({})
+  level: string;
+
+  @ApiProperty({})
+  completeRate: CompleteRate;
 }
 
 export class UserLevelTestDto{
@@ -65,7 +50,7 @@ export class UserLevelTestDto{
   @ApiProperty({
     description: '레벨별 완료율',
   })
-  level_complete_rate: LevelCompleteRate;
+  level_complete_rate: LevelCompleteRate[];
 }
 
 export class LevelTestDto{

@@ -43,7 +43,7 @@ export class LeveltestController {
     @ApiOperation({
         summary: '레벨 테스트 삭제'
     })
-    async deleteCoupon(@Param('leveltest_id') leveltest_id: string) {}
+    async deleteLevelTest(@Param('leveltest_id') leveltest_id: string) {}
 
     @Get('statics')
     @ApiOperation({
