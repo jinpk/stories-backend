@@ -10,10 +10,10 @@ export class LeveltestService {
       ) {}
     
       async GetVocab(leveltest_id: string): Promise<LevelTestDocument | false> {
-        const vocab = await this.leveltestModel.findById(leveltest_id);
-        if (!vocab) {
+        const leveltest = await this.leveltestModel.findById(leveltest_id);
+        if (!leveltest) {
           return false;
         }
-        return vocab;
+        return leveltest;
       }
 }

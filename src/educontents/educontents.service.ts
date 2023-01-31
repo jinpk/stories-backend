@@ -10,10 +10,10 @@ export class EducontentsService {
       ) {}
     
       async GetEducontents(educontents_id: string): Promise<EduContentsDocument | false> {
-        const vocab = await this.educontentsModel.findById(educontents_id);
-        if (!vocab) {
+        const educontents = await this.educontentsModel.findById(educontents_id);
+        if (!educontents) {
           return false;
         }
-        return vocab;
+        return educontents;
       }
 }

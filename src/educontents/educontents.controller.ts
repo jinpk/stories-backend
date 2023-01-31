@@ -23,7 +23,7 @@ import { EducontentsService } from './educontents.service';
 @ApiTags('educontents')
 @ApiBearerAuth()
 export class EducontentsController {
-    constructor(private readonly vocabsService: EducontentsService) {}
+    constructor(private readonly educontentsService: EducontentsService) {}
     @Post('upload')
     @ApiOperation({
       summary: '(ADMIN) 컨텐츠 목록 업로드',

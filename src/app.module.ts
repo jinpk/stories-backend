@@ -53,7 +53,6 @@ import { FaqboardModule } from './faqboard/faqboard.module';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
-    FaqboardService,
   ],
 })
 export class AppModule {}
