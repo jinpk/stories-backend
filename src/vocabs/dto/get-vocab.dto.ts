@@ -5,7 +5,6 @@ import { PagingExcelReqDto } from 'src/common/dto/request.dto';
 
 type VocabType = 'ADDED' | 'STUDIED'
 
-
 export class GetVocabDto {
   @ApiProperty({
     required: false,

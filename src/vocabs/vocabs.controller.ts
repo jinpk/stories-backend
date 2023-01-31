@@ -1,16 +1,11 @@
 import {
-  Body,
   Controller,
   Get,
-  NotFoundException,
   Param,
   Delete,
   Patch,
   Post,
-  Put,
   Query,
-  Req,
-  UnauthorizedException,
  } from '@nestjs/common';
  import {
   ApiBearerAuth,
@@ -31,21 +26,21 @@ import { StaticsVocabDto } from './dto/vocab-statics.dto';
 @ApiBearerAuth()
 export class VocabsController {
     constructor(private readonly vocabsService: VocabsService) {}
-    @Patch(':id/coretype')
+    @Patch(':vocab_id/coretype')
     @ApiOperation({
-      summary: '(ADMIN) 핵심 단어 적용, USE | UNUSE',
+      summary: '(ADMIN) 핵심 단어 적용, USE or UNUSE',
     })
     @ApiBody({ type: CoreTypeUpdateDto })
     async patchCoreType(@Param('vocab_id') vocab_id: string) {}
     
-    @Patch(':id/vocab')
+    @Patch(':vocab_id/vocab')
     @ApiOperation({
       summary: '(ADMIN) 등록 단어 수정',
     })
     @ApiBody({ type: VocabDto })
     async patchVocab(@Param('vocab_id') vocab_id: string) {}
 
-    @Delete(':id')
+    @Delete(':vocab_id')
     @ApiOperation({ summary: '(ADMIN) 단어 삭제' })
     deleteVocab(@Param('vocab_id') vocab_id: string) {}
 
@@ -68,7 +63,7 @@ export class VocabsController {
     @ApiOkResponsePaginated(StaticsVocabDto)
     async getStaticsVocab(@Query() qeury: GetStaticsVocabDto) {}
     
-    @Get(':id')
+    @Get(':vocab_id')
     @ApiOperation({
       summary: 'Vocab 상세 조회',
     })
