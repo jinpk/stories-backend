@@ -10,7 +10,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     ConfigModule.forRoot({
       load: [configuration],
       validationSchema: Joi.object({
-        PORT: Joi.number().required(),
         MONGO_URI: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
         AWS_ACCESS_KEY: Joi.string().required(),
