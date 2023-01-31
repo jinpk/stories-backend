@@ -8,9 +8,6 @@ export class AppConfigService {
   get mongoURI(): string {
     return this.configService.get<string>('app.mongoURI');
   }
-  get port(): number {
-    return Number(this.configService.get<number>('app.port'));
-  }
   get jwtSecret(): string {
     return this.configService.get<string>('app.jwtSecret');
   }
