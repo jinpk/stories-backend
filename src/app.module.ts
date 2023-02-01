@@ -60,7 +60,6 @@ import { BannerModule } from './banner/banner.module';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
-    BannerService,
   ],
 })
 export class AppModule {}
