@@ -26,14 +26,14 @@ import { StaticsVocabDto } from './dto/vocab-statics.dto';
 @ApiBearerAuth()
 export class VocabsController {
     constructor(private readonly vocabsService: VocabsService) {}
-    @Patch(':vocab_id/coretype')
+    @Patch('coretype/:vocab_id')
     @ApiOperation({
       summary: '(ADMIN) 핵심 단어 적용, USE or UNUSE',
     })
     @ApiBody({ type: CoreTypeUpdateDto })
     async patchCoreType(@Param('vocab_id') vocab_id: string) {}
     
-    @Patch(':vocab_id/vocab')
+    @Patch('vocab/:vocab_id')
     @ApiOperation({
       summary: '(ADMIN) 등록 단어 수정',
     })
@@ -44,7 +44,7 @@ export class VocabsController {
     @ApiOperation({ summary: '(ADMIN) 단어 삭제' })
     deleteVocab(@Param('vocab_id') vocab_id: string) {}
 
-    @Post(':vocab_id/test/vocab')
+    @Post('test/:vocab_id')
     @ApiOperation({
       summary: 'Vocab 테스트 제출',
     })

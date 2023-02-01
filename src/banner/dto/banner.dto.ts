@@ -16,4 +16,6 @@ export class BannerDto{
     @ApiProperty({})
     imageFilePath: string;
   
+    @ApiProperty({})
+    link: string;
   }

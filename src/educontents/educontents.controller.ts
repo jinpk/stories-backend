@@ -31,7 +31,7 @@ export class EducontentsController {
     async createContentsList() {
     }
 
-    @Post(':educontents_id/quiz')
+    @Post('quiz/:educontents_id')
     @ApiOperation({
       summary: '(ADMIN) 컨텐츠 퀴즈 등록',
     })
@@ -41,14 +41,14 @@ export class EducontentsController {
     async createContentsQuiz(@Param('educontents_id') educontents_id: string) {
     }
 
-    @Patch(':quiz_id/quiz')
+    @Patch('quiz/:quiz_id')
     @ApiOperation({
       summary: '(ADMIN) 컨텐츠 단어 퀴즈 수정',
     })
     async patchContentsQuiz(@Param('quiz_id') quiz_id: string) {
     }
 
-    @Delete(':quiz_id/quiz')
+    @Delete('quiz/:quiz_id')
     @ApiOperation({
       summary: '(ADMIN) 컨텐츠 단어 퀴즈 삭제',
     })
@@ -83,7 +83,7 @@ export class EducontentsController {
     async listEduContents(@Query() query: GetListEduContentsDto) {
     }
     
-    @Get(':educontents_id/quiz')
+    @Get('quiz/:educontents_id')
     @ApiOperation({
       summary: '학습 컨텐츠 별 퀴즈 조회',
     })

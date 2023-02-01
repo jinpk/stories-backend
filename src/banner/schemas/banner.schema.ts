@@ -19,6 +19,9 @@ export class Banner {
 
   @Prop()
   imageFilePath: string;
+
+  @Prop()
+  link: string;
 }
 
 export const BannerSchema = SchemaFactory.createForClass(Banner);
