@@ -22,6 +22,9 @@ import { FaqboardService } from './faqboard/faqboard.service';
 import { FaqboardModule } from './faqboard/faqboard.module';
 import { PopupService } from './popup/popup.service';
 import { PopupModule } from './popup/popup.module';
+import { BannerService } from './banner/banner.service';
+import { BannerController } from './banner/banner.controller';
+import { BannerModule } from './banner/banner.module';
 
 @Module({
   imports: [
@@ -48,14 +51,16 @@ import { PopupModule } from './popup/popup.module';
     SchedulerModule,
     FaqboardModule,
     PopupModule,
+    BannerModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, BannerController],
   providers: [
     AppConfigService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
+    BannerService,
   ],
 })
 export class AppModule {}
