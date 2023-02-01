@@ -70,7 +70,7 @@ export class FaqboardController {
     @ApiOkResponse({
       type: FaqBoardDto,
     })
-    async getVocab(@Param('leveltest_id') leveltest_id: string) {
+    async getFaq(@Param('faq_id') faq_id: string) {
       const faq = new FaqBoardDto();
       return faq;
     }

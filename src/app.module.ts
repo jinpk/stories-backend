@@ -20,6 +20,8 @@ import { SchedulerModule } from './scheduler/scheduler.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { FaqboardService } from './faqboard/faqboard.service';
 import { FaqboardModule } from './faqboard/faqboard.module';
+import { PopupService } from './popup/popup.service';
+import { PopupModule } from './popup/popup.module';
 
 @Module({
   imports: [
@@ -45,6 +47,7 @@ import { FaqboardModule } from './faqboard/faqboard.module';
     EventModule,
     SchedulerModule,
     FaqboardModule,
+    PopupModule,
   ],
   controllers: [AppController],
   providers: [
