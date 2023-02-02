@@ -75,22 +75,6 @@ export class EducontentsController {
     async getExcelDownloadPath() {
     }
 
-    @Get('')
-    @ApiOperation({
-      summary: '학습 컨텐츠 조회',
-    })
-    @ApiOkResponsePaginated(EduContentsDto)
-    async listEduContents(@Query() query: GetListEduContentsDto) {
-    }
-    
-    @Get('quiz/:educontents_id')
-    @ApiOperation({
-      summary: '학습 컨텐츠 별 퀴즈 조회',
-    })
-    @ApiOkResponsePaginated(ContentsQuizDto)
-    async listContentsQuiz(@Query() query: GetListQuizDto) {
-    }
-
     @Get('eduinfo/:user_id')
     @ApiOperation({
       summary: '(ADMIN) 회원상세 학습정보',
@@ -99,6 +83,29 @@ export class EducontentsController {
         type: UserEduInfoDto,
     })
     async getUserLevelTest(@Param('user_id') user_id: string) {}
+
+    @Get('')
+    @ApiOperation({
+      summary: '학습 컨텐츠 조회',
+    })
+    @ApiOkResponsePaginated(EduContentsDto)
+    async listEduContents(@Query() query: GetListEduContentsDto) {
+    }
+    
+    @Get(':educontents_id')
+    @ApiOperation({
+      summary: '학습 컨텐츠 상세 조회',
+    })
+    async getEduContents() {
+    }
+
+    @Get('quiz/:educontents_id')
+    @ApiOperation({
+      summary: '학습 컨텐츠 별 퀴즈 조회',
+    })
+    @ApiOkResponsePaginated(ContentsQuizDto)
+    async listContentsQuiz(@Query() query: GetListQuizDto) {
+    }
 
     // 사용자 학습 컨텐츠 진행 상황
 

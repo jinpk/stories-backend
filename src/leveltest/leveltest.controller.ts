@@ -41,7 +41,7 @@ export class LeveltestController {
 
     @Delete(':leveltest_id')
     @ApiOperation({
-        summary: '레벨 테스트 삭제'
+        summary: '(ADMIN) 레벨 테스트 삭제'
     })
     async deleteLevelTest(@Param('leveltest_id') leveltest_id: string) {}
 
@@ -52,12 +52,12 @@ export class LeveltestController {
     @ApiOkResponsePaginated(StaticsLevelTestDto)
     async getStaticsLevelTest(@Query() qeury: GetStaticsLevelTestDto) {}
 
-    @Post('result/:user_id')
+    @Post('result')
     @ApiOperation({
       summary: '사용자 레벨 테스트 최종결과 등록',
     })
     @ApiBody({ type: LevelTestResultDto })
-    async saveLevelTestResult(@Param('user_id') user_id: string) {}
+    async saveLevelTestResult(@Param('userId') userId: string) {}
 
     @Get(':leveltest_id')
     @ApiOperation({

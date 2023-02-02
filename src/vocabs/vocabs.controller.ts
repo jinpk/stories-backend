@@ -52,7 +52,7 @@ export class VocabsController {
     @ApiOkResponse({
       type: Boolean,
     })
-    async checkVocabTest(@Param('vocab_id') vocab_id: string) {
+    async checkVocabTest(@Query('userId') userId: string, @Param('vocab_id') vocab_id: string) {
       return true;
     }
 

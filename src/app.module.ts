@@ -25,6 +25,12 @@ import { PopupModule } from './popup/popup.module';
 import { BannerService } from './banner/banner.service';
 import { BannerController } from './banner/banner.controller';
 import { BannerModule } from './banner/banner.module';
+import { ReminderService } from './reminder/reminder.service';
+import { ReminderController } from './reminder/reminder.controller';
+import { ReminderModule } from './reminder/reminder.module';
+import { LibraryService } from './library/library.service';
+import { LibraryController } from './library/library.controller';
+import { LibraryModule } from './library/library.module';
 
 @Module({
   imports: [
@@ -52,8 +58,10 @@ import { BannerModule } from './banner/banner.module';
     FaqboardModule,
     PopupModule,
     BannerModule,
+    ReminderModule,
+    LibraryModule,
   ],
-  controllers: [AppController, BannerController],
+  controllers: [AppController, BannerController, ReminderController, LibraryController],
   providers: [
     AppConfigService,
     {
