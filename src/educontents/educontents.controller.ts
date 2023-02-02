@@ -15,7 +15,7 @@ import {
     ApiTags,
 } from '@nestjs/swagger'
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
-import { EduContentsDto, ContentsQuizDto } from './dto/educontents.dto';
+import { EduContentsDto, ContentsQuizDto, UserEduInfoDto } from './dto/educontents.dto';
 import { GetListEduContentsDto, GetListQuizDto} from './dto/get-educontents.dto';
 import { EducontentsService } from './educontents.service';
 
@@ -90,4 +90,17 @@ export class EducontentsController {
     @ApiOkResponsePaginated(ContentsQuizDto)
     async listContentsQuiz(@Query() query: GetListQuizDto) {
     }
+
+    @Get('eduinfo/:user_id')
+    @ApiOperation({
+      summary: '(ADMIN) 회원상세 학습정보',
+    })
+    @ApiOkResponse({
+        type: UserEduInfoDto,
+    })
+    async getUserLevelTest(@Param('user_id') user_id: string) {}
+
+    // 사용자 학습 컨텐츠 진행 상황
+
+    // 컨텐츠 별 단어 목록 조회
 }

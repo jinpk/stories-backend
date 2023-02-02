@@ -15,7 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
-import { LevelTestDto, UserLevelTestDto } from './dto/leveltest.dto';
+import { LevelTestDto, LevelTestResultDto } from './dto/leveltest.dto';
 import { GetLevelTestsDto, GetStaticsLevelTestDto } from './dto/get-leveltest.dto';
 import { StaticsLevelTestDto } from './dto/leveltest-statics.dto';
 import { LeveltestService } from './leveltest.service';
@@ -52,14 +52,12 @@ export class LeveltestController {
     @ApiOkResponsePaginated(StaticsLevelTestDto)
     async getStaticsLevelTest(@Query() qeury: GetStaticsLevelTestDto) {}
 
-    @Get(':id/user')
+    @Post('result/:user_id')
     @ApiOperation({
-      summary: '회원별 레벨테스트 학습정보',
+      summary: '사용자 레벨 테스트 최종결과 등록',
     })
-    @ApiOkResponse({
-        type: UserLevelTestDto,
-    })
-    async getUserLevelTest(@Query() qeury: GetStaticsLevelTestDto) {}
+    @ApiBody({ type: LevelTestResultDto })
+    async saveLevelTestResult(@Param('user_id') user_id: string) {}
 
     @Get(':leveltest_id')
     @ApiOperation({
@@ -68,7 +66,7 @@ export class LeveltestController {
     @ApiOkResponse({
       type: LevelTestDto,
     })
-    async getVocab(@Param('leveltest_id') leveltest_id: string) {
+    async getLevelTest(@Param('leveltest_id') leveltest_id: string) {
       const leveltest = new LevelTestDto();
       return leveltest;
     }
