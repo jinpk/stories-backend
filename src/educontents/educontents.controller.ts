@@ -16,6 +16,7 @@ import {
 } from '@nestjs/swagger'
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
 import { EduContentsDto, ContentsQuizDto, UserEduInfoDto } from './dto/educontents.dto';
+import { EduProgress } from './dto/eduprogress.dto';
 import { GetListEduContentsDto, GetListQuizDto} from './dto/get-educontents.dto';
 import { EducontentsService } from './educontents.service';
 
@@ -75,14 +76,14 @@ export class EducontentsController {
     async getExcelDownloadPath() {
     }
 
-    @Get('eduinfo/:user_id')
+    @Get('eduinfo')
     @ApiOperation({
       summary: '(ADMIN) 회원상세 학습정보',
     })
     @ApiOkResponse({
         type: UserEduInfoDto,
     })
-    async getUserLevelTest(@Param('user_id') user_id: string) {}
+    async getUserLevelTest(@Param('userId') userId: string) {}
 
     @Get('')
     @ApiOperation({
@@ -108,6 +109,15 @@ export class EducontentsController {
     }
 
     // 사용자 학습 컨텐츠 진행 상황
+    @Get('progress')
+    @ApiOperation({
+      summary: 'HOME 사용자 학습 진행상황',
+    })
+    @ApiOkResponse({
+      type: EduProgress,
+  })
+    async getEduProgress(@Param('userId') userId: string) {
+    }
 
     // 컨텐츠 별 단어 목록 조회
 }
