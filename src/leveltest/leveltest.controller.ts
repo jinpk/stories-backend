@@ -32,18 +32,18 @@ export class LeveltestController {
     @ApiBody({ type: LevelTestDto })
     async createLevelTest() {}
 
-    @Patch(':leveltest_id')
+    @Patch(':leveltestId')
     @ApiOperation({
       summary: '(ADMIN) 레벨 테스트 수정',
     })
     @ApiBody({ type: LevelTestDto })
-    async patchLevelTest(@Param('leveltest_id') leveltest_id: string) {}
+    async patchLevelTest(@Param('leveltestId') leveltestId: string) {}
 
-    @Delete(':leveltest_id')
+    @Delete(':leveltestId')
     @ApiOperation({
         summary: '(ADMIN) 레벨 테스트 삭제'
     })
-    async deleteLevelTest(@Param('leveltest_id') leveltest_id: string) {}
+    async deleteLevelTest(@Param('leveltestId') leveltestId: string) {}
 
     @Get('statics')
     @ApiOperation({
@@ -54,19 +54,19 @@ export class LeveltestController {
 
     @Post('result')
     @ApiOperation({
-      summary: '사용자 레벨 테스트 최종결과 등록',
+      summary: '사용자 레벨 테스트 최종결과 제출',
     })
     @ApiBody({ type: LevelTestResultDto })
     async saveLevelTestResult(@Param('userId') userId: string) {}
 
-    @Get(':leveltest_id')
+    @Get(':leveltestId')
     @ApiOperation({
       summary: '레벨테스트 상세 조회',
     })
     @ApiOkResponse({
       type: LevelTestDto,
     })
-    async getLevelTest(@Param('leveltest_id') leveltest_id: string) {
+    async getLevelTest(@Param('leveltestId') leveltestId: string) {
       const leveltest = new LevelTestDto();
       return leveltest;
     }

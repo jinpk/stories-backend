@@ -47,7 +47,7 @@ class RecentArticle {
     title: string;
 }
 
-export class EduProgress {
+export class EduProgressDto {
     @ApiProperty({})
     highestLevel: string;
 

@@ -19,6 +19,8 @@ import { ReminderDto } from './dto/reminder.dto';
 import { ReminderService } from './reminder.service';
 
 @Controller('reminder')
+@ApiTags('reminder')
+@ApiBearerAuth()
 export class ReminderController {
     constructor(private readonly reminderService: ReminderService) {}
     @Post('')

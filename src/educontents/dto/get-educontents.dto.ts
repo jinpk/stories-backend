@@ -36,3 +36,11 @@ export class GetListEduContentsDto extends PagingExcelReqDto {
 
 export class GetListQuizDto extends PagingExcelReqDto {
 }
+
+export class GetContentsQuizResultDto{
+  @ApiProperty({})
+  level: string;
+
+  @ApiProperty({})
+  contentsId: string;
+}

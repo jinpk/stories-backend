@@ -15,9 +15,9 @@ import {
     ApiTags,
 } from '@nestjs/swagger'
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
-import { EduContentsDto, ContentsQuizDto, UserEduInfoDto } from './dto/educontents.dto';
-import { EduProgress } from './dto/eduprogress.dto';
-import { GetListEduContentsDto, GetListQuizDto} from './dto/get-educontents.dto';
+import { EduContentsDto, ContentsQuizDto, UserEduInfoDto, ContentsQuizResultDto } from './dto/educontents.dto';
+import { EduProgressDto } from './dto/eduprogress.dto';
+import { GetListEduContentsDto, GetListQuizDto, GetContentsQuizResultDto} from './dto/get-educontents.dto';
 import { EducontentsService } from './educontents.service';
 
 @Controller('educontents')
@@ -100,6 +100,16 @@ export class EducontentsController {
     async getEduContents() {
     }
 
+    @Post('result')
+    @ApiOperation({
+      summary: '사용자 학습컨텐츠 퀴즈 결과 제출',
+    })
+    @ApiBody({ type: GetContentsQuizResultDto })
+    @ApiOkResponse({
+      type:    ContentsQuizResultDto,
+    })
+    async saveLevelTestResult(@Param('userId') userId: string) {}
+
     @Get('quiz/:educontents_id')
     @ApiOperation({
       summary: '학습 컨텐츠 별 퀴즈 조회',
@@ -108,16 +118,13 @@ export class EducontentsController {
     async listContentsQuiz(@Query() query: GetListQuizDto) {
     }
 
-    // 사용자 학습 컨텐츠 진행 상황
     @Get('progress')
     @ApiOperation({
       summary: 'HOME 사용자 학습 진행상황',
     })
     @ApiOkResponse({
-      type: EduProgress,
+      type: EduProgressDto,
   })
     async getEduProgress(@Param('userId') userId: string) {
     }
-
-    // 컨텐츠 별 단어 목록 조회
 }

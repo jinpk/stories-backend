@@ -61,7 +61,7 @@ import { LibraryModule } from './library/library.module';
     ReminderModule,
     LibraryModule,
   ],
-  controllers: [AppController, BannerController, ReminderController, LibraryController],
+  controllers: [AppController],
   providers: [
     AppConfigService,
     {

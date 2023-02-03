@@ -72,6 +72,20 @@ export class ContentsQuizDto{
     choiceAnswer: ChoiceAnswer[];
 }
 
+export class ContentsQuizResultDto{
+    @ApiProperty({})
+    storyRead: string;
+  
+    @ApiProperty({})
+    correctAnswer: number;
+  
+    @ApiProperty({})
+    total: number;
+  
+    @ApiProperty({})
+    nextContentsId: string;
+}
+
 class Statics {
     @ApiProperty({
         description: '분단위로 저장',
