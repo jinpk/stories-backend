@@ -73,17 +73,17 @@ export class ContentsQuizDto{
 }
 
 export class ContentsQuizResultDto{
-    @ApiProperty({})
-    storyRead: string;
-  
-    @ApiProperty({})
-    correctAnswer: number;
-  
-    @ApiProperty({})
-    total: number;
-  
-    @ApiProperty({})
-    nextContentsId: string;
+  @ApiProperty({})
+  storyRead: string;
+
+  @ApiProperty({})
+  correctAnswer: number;
+
+  @ApiProperty({})
+  total: number;
+
+  @ApiProperty({})
+  nextContentsId: string;
 }
 
 class Statics {

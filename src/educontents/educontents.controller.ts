@@ -16,8 +16,10 @@ import {
 } from '@nestjs/swagger'
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
 import { EduContentsDto, ContentsQuizDto, UserEduInfoDto, ContentsQuizResultDto } from './dto/educontents.dto';
+import { AudioPlayerDto } from './dto/audioplayer.dto';
 import { EduProgressDto } from './dto/eduprogress.dto';
 import { GetListEduContentsDto, GetListQuizDto, GetContentsQuizResultDto} from './dto/get-educontents.dto';
+import { GetListAudioPlayerDto } from './dto/get-audioplayer.dto';
 import { EducontentsService } from './educontents.service';
 
 @Controller('educontents')
@@ -32,7 +34,7 @@ export class EducontentsController {
     async createContentsList() {
     }
 
-    @Post('quiz/:educontents_id')
+    @Post('quiz/:educontentsId')
     @ApiOperation({
       summary: '(ADMIN) 컨텐츠 퀴즈 등록',
     })
@@ -42,32 +44,32 @@ export class EducontentsController {
     async createContentsQuiz(@Param('educontents_id') educontents_id: string) {
     }
 
-    @Patch('quiz/:quiz_id')
+    @Patch('quiz/:quizId')
     @ApiOperation({
       summary: '(ADMIN) 컨텐츠 단어 퀴즈 수정',
     })
-    async patchContentsQuiz(@Param('quiz_id') quiz_id: string) {
+    async patchContentsQuiz(@Param('quizId') quizId: string) {
     }
 
-    @Delete('quiz/:quiz_id')
+    @Delete('quiz/:quizId')
     @ApiOperation({
       summary: '(ADMIN) 컨텐츠 단어 퀴즈 삭제',
     })
-    async deleteContentsQuiz(@Param('quiz_id') quiz_id: string) {
+    async deleteContentsQuiz(@Param('quizId') quizId: string) {
     }
 
-    @Patch(':educontents_id')
+    @Patch(':educontentsId')
     @ApiOperation({
       summary: '(ADMIN) 학습 컨텐츠 수정',
     })
     @ApiBody({ type: EduContentsDto })
-    async patchEduContents(@Param('educontents_id') educontents_id: string) {}
+    async patchEduContents(@Param('educontentsId') educontentsId: string) {}
 
-    @Delete(':educontents_id')
+    @Delete(':educontentsId')
     @ApiOperation({
         summary: '(ADMIN) 학습 컨텐츠 삭제'
     })
-    async deleteEduContents(@Param('educontents_id') educontents_id: string) {}
+    async deleteEduContents(@Param('educontentsId') educontentsId: string) {}
 
     @Get('downloadexecel')
     @ApiOperation({
@@ -93,11 +95,11 @@ export class EducontentsController {
     async listEduContents(@Query() query: GetListEduContentsDto) {
     }
     
-    @Get(':educontents_id')
+    @Get(':educontentsId')
     @ApiOperation({
       summary: '학습 컨텐츠 상세 조회',
     })
-    async getEduContents() {
+    async getEduContents(@Param('educontentsId') educontentsId: string) {
     }
 
     @Post('result')
@@ -110,7 +112,21 @@ export class EducontentsController {
     })
     async saveLevelTestResult(@Param('userId') userId: string) {}
 
-    @Get('quiz/:educontents_id')
+    @Post('bookmark')
+    @ApiOperation({
+      summary: '컨텐츠 북마크 등록',
+    })
+    async saveBookmark() {
+    }
+
+    @Delete('bookmark')
+    @ApiOperation({
+      summary: '컨텐츠 북마크 삭제',
+    })
+    async deleteBookmark(@Param('bookmarkId') bookmarkId: string) {
+    }
+
+    @Get('quiz/:educontentsId')
     @ApiOperation({
       summary: '학습 컨텐츠 별 퀴즈 조회',
     })
@@ -124,7 +140,15 @@ export class EducontentsController {
     })
     @ApiOkResponse({
       type: EduProgressDto,
-  })
+    })
     async getEduProgress(@Param('userId') userId: string) {
+    }
+
+    @Get('audioplayer')
+    @ApiOperation({
+      summary: '사용자 오디오 플레이어 목록 조회',
+    })
+    @ApiOkResponsePaginated(AudioPlayerDto)
+    async listAudioPlayer(@Param('userId') userId: string, @Query() query: GetListAudioPlayerDto) {
     }
 }
