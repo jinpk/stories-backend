@@ -26,6 +26,14 @@ export class Libraries{
   highestLevel: string;
 }
 
+class CompleteCount {
+  @ApiProperty({})
+  complete: number;
+
+  @ApiProperty({})
+  total: number;    
+}
+
 export class ListLibraryDto {
     @ApiProperty({})
     level: string;
@@ -38,12 +46,4 @@ export class ListLibraryDto {
 
     @ApiProperty({})
     libraries: Libraries[];
-}
-
-class CompleteCount {
-    @ApiProperty({})
-    complete: number;
-
-    @ApiProperty({})
-    total: number;    
 }
