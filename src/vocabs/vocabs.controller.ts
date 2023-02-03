@@ -15,7 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
-import { VocabDto, CoreTypeUpdateDto, CoreVocabDto } from './dto/vocab.dto';
+import { VocabDto, CoreTypeUpdateDto, CoreVocabDto, ReviewVocabDto } from './dto/vocab.dto';
 import { GetVocabsDto, GetStaticsVocabDto } from './dto/get-vocab.dto';
 import { VocabTestDto } from './dto/vocab-test.dto';
 import { VocabsService } from './vocabs.service';
@@ -89,15 +89,24 @@ export class VocabsController {
     @ApiOkResponsePaginated(CoreVocabDto)
     async getListCoreVocab(@Param('contentsId') contentsId: string) {}
 
-    @Post('reviewquiz/:vocabId')
+    @Post('reviewquiz/:reveiwVocabId')
     @ApiOperation({
       summary: '사용자 review quiz단어 등록',
     })
-    async saveUserReviewVocab(@Param('userId') userId: string, @Param('vocabId') vocabId: string) {}
+    async saveUserReviewVocab(@Param('userId') userId: string, @Param('reveiwVocabId') reveiwVocabId: string) {}
 
-    @Delete('reviewquiz/:vocabId')
+    @Delete('reviewquiz/:reveiwVocabId')
     @ApiOperation({
       summary: '사용자 review quiz단어 삭제',
     })
-    async deleteUserReviewVocab(@Param('vocabId') vocabId: string) {}
+    async deleteUserReviewVocab(@Param('reveiwVocabId') reveiwVocabId: string) {}
+
+    @Get('reviewquiz/:userId')
+    @ApiOperation({
+      summary: '사용자 review quiz단어 목록 조회',
+    })
+    @ApiOkResponsePaginated(ReviewVocabDto)
+    async getListUserReviewVocab(@Param('userId') userId: string) {}
+
+    // 사용자 review 단어 완료숫자 조회 
 }
