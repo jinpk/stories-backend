@@ -1,10 +1,12 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { join } from 'path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.enableCors({ origin: '*' });
   app.useGlobalPipes(new ValidationPipe());
@@ -18,12 +20,15 @@ async function bootstrap() {
     .addTag('coupons', '쿠폰 관리')
     .addTag('notifications', '알림 관리')
     .addTag('subscriptions', '구독 관리')
-    .addTag('admin', '관리자 전용 API')
     .addTag('files', '공통 파일 API')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('openapi', app, document);
+
+  app.useStaticAssets(join(__dirname, '..', 'public'));
+  app.setBaseViewsDir(join(__dirname, '..', 'views'));
+  app.setViewEngine('ejs');
 
   await app.listen(3000);
 }

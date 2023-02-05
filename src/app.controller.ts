@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Render } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { Public } from './auth/decorator/auth.decorator';
 
@@ -9,5 +9,14 @@ export class AppController {
   @ApiOperation({ summary: 'Health check' })
   getHealth() {
     return 'Success';
+  }
+
+  @Get('email')
+  @Public()
+  @Render('emails/template')
+  email() {
+    return {
+      host: 'http://localhost:3000',
+    };
   }
 }

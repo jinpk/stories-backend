@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      .root {
+        width: 680px;
+        display: block;
+        margin: 0 auto;
+      }
+      .container {
+        border: 1px solid #c4c4c4;
+        padding: 55px;
+        text-align: center;
+      }
+      .container-logo {
+        margin: 65px auto;
+        text-align: center;
+      }
+      .logo {
+        width: 103px;
+        height: 63px;
+      }
+      .copyright {
+        margin-top: 36px;
+        color: #9d9d9d;
+        font-size: 12px;
+        text-align: center;
+      }
+      .built {
+        margin: 50px 0;
+        text-align: center;
+        color: #9d9d9d;
+        font-size: 12px;
+      }
+      .label {
+        font-weight: bold;
+        font-size: 16px;
+        color: #000;
+        margin-top: 0px;
+      }
+      .label span {
+        color: #722efa;
+      }
+      .desc {
+        font-size: 14px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="root">
+      <div class="container-logo">
+        <img alt="logo" class="logo" src="<%= host %>/assets/images/logo.png" />
+      </div>
+      <div class="container">
+        <p class="label">
+          Let's start reading with <span>TTMIK Stories!</span>
+        </p>
+        <p class="desc">
+          안녕하세요!<br />
+          <br />
+          ____, welcome aboard TTMIK Stories!<br />
+          <br />
+          You are all set now. Let's start reading!<br />
+          Consistency is key to successful language learning.<br />
+          Try to read at least one story each day, and we'll help you with the
+          rest.<br />
+          Are you ready? Let's go!
+        </p>
+      </div>
+      <div class="copyright">
+        <span>you didn't make this request, please contact us.</span>
+      </div>
+      <div class="built"><span>TTMIK Team</span></div>
+    </div>
+  </body>
+</html>

@@ -31,6 +31,7 @@ import { ReminderModule } from './reminder/reminder.module';
 import { LibraryService } from './library/library.service';
 import { LibraryController } from './library/library.controller';
 import { LibraryModule } from './library/library.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
