@@ -10,6 +10,7 @@ import { UserCreatedEvent } from './events/create-user.event';
 import { UpdateUserDto } from './dto/update.user.dto';
 import { GetUsersDto } from './dto/get-user.dto';
 import { PagingResDto } from 'src/common/dto/response.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -143,6 +144,23 @@ export class UsersService {
     }
     return user;
   }
+
+  async createUserByAdmin(params: CreateUserDto) {
+    const user: User = {
+      email: params.email,
+      password: params.password,
+      name: params.nickname,
+      nickname: params.nickname,
+      subNewsletter: false,
+      countryCode: 'KR',
+      ttmik: false,
+      deleted: false,
+    };
+
+    const sub = await this.create(user);
+    return sub;
+  }
+
 
   async create(user: User) {
     const doc = await new this.userModel(user).save();

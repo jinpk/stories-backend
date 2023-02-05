@@ -1,5 +1,6 @@
 import {
   Body,
+  ConflictException,
   Controller,
   Get,
   NotFoundException,
@@ -14,6 +15,7 @@ import {
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -25,6 +27,7 @@ import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update.user.dto';
 import { PasswordCheckDto, PasswordUpdateDto } from './dto/password.dto';
 import { DeleteUserDto } from './dto/delete-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Controller('users')
 @ApiTags('users')
@@ -152,5 +155,23 @@ export class UsersController {
   @ApiOkResponsePaginated(UserDto)
   async getUserList(@Query() query: GetUsersDto) {
     return await this.usersService.getPagingUsers(query);
+  }
+
+  @Post('')
+  @ApiOperation({
+    summary: '(ADMIN) 회원 생성',
+    description: "국가코드는 default 'KR'로 생성됨.",
+  })
+  @ApiCreatedResponse({
+    description: 'createdUserId',
+  })
+  async createUser(@Body() body: CreateUserDto) {
+    if (await this.usersService.findOneByEmail(body.email)) {
+      throw new ConflictException('Already exist email.');
+    } else if (await this.usersService.existingNickname(body.nickname)) {
+      throw new ConflictException('Already exist nickname.');
+    }
+
+    return this.usersService.createUserByAdmin(body);
   }
 }

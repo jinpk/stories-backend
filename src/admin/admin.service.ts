@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User } from 'src/users/schemas/user.schema';
 import { UsersService } from 'src/users/users.service';
-import { CreateUserDto } from './dto/users.dto';
 import { Admin, AdminDocument } from './schemas/admin.schema';
 
 @Injectable()
@@ -29,21 +27,5 @@ export class AdminService {
       return false;
     }
     return user;
-  }
-
-  async createUser(params: CreateUserDto) {
-    const user: User = {
-      email: params.email,
-      password: params.password,
-      name: params.nickname,
-      nickname: params.nickname,
-      subNewsletter: false,
-      countryCode: 'KR',
-      ttmik: false,
-      deleted: false,
-    };
-
-    const sub = await this.usersService.create(user);
-    return sub;
   }
 }
