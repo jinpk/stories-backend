@@ -11,10 +11,13 @@ import {
   BadRequestException,
   Param,
   UnauthorizedException,
+  Header,
+  Headers,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiHeader,
   ApiOkResponse,
   ApiOperation,
   ApiResponse,
@@ -36,6 +39,7 @@ import {
 import { LocalAuthGuard, LocalAuthAdminGuard } from './guard/local-auth.guard';
 import { AdminService } from 'src/admin/admin.service';
 import { isEmail } from 'class-validator';
+import { TTMIKJwtPayload } from './interfaces';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -75,31 +79,32 @@ export class AuthController {
 
   @Post('login')
   @Public()
-  @UseGuards(LocalAuthGuard)
   @ApiOperation({
-    summary: '사용자 이메일 로그인',
+    summary: 'TTMIK 로그인',
+    description: `**본 서비스는 TTMIK 회원과 미러링 됨.**
+    \n\nTTMIK 로그인 시스템에서 발급 받은 JWT_TOKEN으로 요청.
+    \n* 스토리즈앱에 가입한적 있다면 로그인후 스토리즈앱 로그인 JWT_TOKEN 발급
+    \n* 가입한적 없다면 자동 가입 처리후 로그인 JWT_TOKEN 발급`,
+  })
+  @ApiOkResponse({
+    type: TokenDto,
   })
   @ApiBody({
-    type: LoginDto,
+    schema: {
+      description: 'token: TTMIK_JWT_TOKEN',
+      required: ['token'],
+      properties: { token: { type: 'string' } },
+    },
   })
-  @ApiOkResponse({
-    type: TokenDto,
-  })
-  async login(@Request() req) {
-    return this.authService.login(req.user);
-  }
+  async ttmkiLogin(@Body('token') token) {
+    let payload: TTMIKJwtPayload;
+    try {
+      payload = await this.authService.parseTTMIKToken(token);
+    } catch (error) {
+      throw new UnauthorizedException('Invalid TTMIK Jwt Token.');
+    }
 
-  @Post('oauth')
-  @Public()
-  @ApiOperation({
-    summary: 'OAuth 로그인 / 자동가입',
-    description: 'schema.code description 참고',
-  })
-  @ApiOkResponse({
-    type: TokenDto,
-  })
-  async oAuth(@Body() body: OAuthDto) {
-    return await this.authService.oAuthLogin(body);
+    console.log(payload);
   }
 
   @Get('users/exist')
@@ -110,86 +115,6 @@ export class AuthController {
   @ApiResponse({ description: '존재하면 true' })
   async existUser(@Query() query: ExistUserDto) {
     return await this.usersService.getExistingUser(query);
-  }
-
-  @Post('verifi')
-  @Public()
-  @ApiOperation({
-    summary: '회원가입 이메일 인증 요청',
-    description: `1. 이메일 인증 요청후 tokenId 발급
-    \n2. tokenId로 이메일 인증코드 검증
-    \n3. tokenId로 회원가입 요청`,
-  })
-  @ApiBody({
-    schema: {
-      properties: {
-        email: { type: 'string', description: '이메일' },
-      },
-    },
-  })
-  @ApiOkResponse({
-    description: 'verifiId',
-    schema: {
-      type: 'string',
-    },
-  })
-  async emailVerify(@Body('email') email: string) {
-    if (!isEmail(email)) {
-      throw new BadRequestException(
-        '올바른 형식의 이메일 주소를 입력해 주세요.',
-      );
-    } else if (await this.usersService.findOneByEmail(email)) {
-      throw new ConflictException('Already exist email.');
-    }
-    return await this.authService.requestEmailVerify(email);
-  }
-
-  @Post('verifi/:verifiId')
-  @Public()
-  @ApiOperation({
-    summary: '코드 인증',
-  })
-  @ApiBody({
-    schema: {
-      properties: {
-        code: { type: 'string', description: '인증코드' },
-      },
-    },
-  })
-  @ApiOkResponse({
-    type: Boolean,
-    description: '인증완료:true | 인증실패: false | 오류: Excepction',
-  })
-  async emailVerifyCode(
-    @Body('code') code: string,
-    @Param('verifiId') verifiId: string,
-  ) {
-    if (!code || !verifiId) {
-      throw new BadRequestException('code or verifiId is empty string.');
-    }
-    return await this.authService.verifyEmailCode(verifiId, code);
-  }
-
-  @Post('signup')
-  @Public()
-  @ApiOperation({
-    summary: '회원가입',
-  })
-  @ApiBody({
-    type: SignUpDto,
-  })
-  @ApiOkResponse({
-    type: TokenDto,
-  })
-  async signUp(@Body() body: SignUpDto) {
-    const verifi = await this.authService.parseVerifyId(body.verifiId);
-    if (await this.usersService.findOneByEmail(verifi.email)) {
-      throw new ConflictException('Already exist email.');
-    } else if (await this.usersService.existingNickname(body.nickname)) {
-      throw new ConflictException('Already exist nickname.');
-    }
-
-    return await this.authService.signUp(verifi, body);
   }
 
   @Post('passwordreset/exec')

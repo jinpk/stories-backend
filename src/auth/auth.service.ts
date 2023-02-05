@@ -2,12 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { AwsService } from 'src/aws/aws.service';
 import { User } from 'src/users/schemas/user.schema';
 import { UsersService } from 'src/users/users.service';
 import { OAuthDto, SignUpDto } from './dto';
-import { OAuthProviers } from './enums';
-import { OAuthResult } from './interfaces';
-import { OAuthService } from './oauth.service';
+import { TTMIKJwtPayload } from './interfaces';
 import { Verifi, VerifiDocument } from './schemas/verifi.schema';
 
 @Injectable()
@@ -16,62 +15,14 @@ export class AuthService {
     @InjectModel(Verifi.name) private verifiModel: Model<VerifiDocument>,
     private usersService: UsersService,
     private jwtService: JwtService,
-    private oAuthService: OAuthService,
+    private awsService: AwsService,
   ) {}
 
-  async oAuthLogin(body: OAuthDto) {
-    let result: OAuthResult;
-    switch (body.provider) {
-      case OAuthProviers.Facebook:
-        result = await this.oAuthService.decodeFacebook(body.code);
-        break;
-      case OAuthProviers.Google:
-        result = await this.oAuthService.decodeGoogle(body.code);
-        break;
-      case OAuthProviers.Apple:
-        result = await this.oAuthService.decodeApple(body.code);
-        break;
-    }
-
-    const doc = await this.usersService.findByOAuthId(
-      result.provider,
-      result.id,
-    );
-
-    if (!doc) {
-      const user: User = {
-        email: '',
-        password: '',
-        name: result.name,
-        nickname: result.name,
-        subNewsletter: false,
-        countryCode: body.countryCode || 'KR',
-        ttmik: false,
-        deleted: false,
-      };
-
-      if (
-        result.email &&
-        !(await this.usersService.findOneByEmail(result.email))
-      ) {
-        user.email = result.email;
-      }
-
-      let count = 0;
-      let nicknameUnChecked = true;
-      while (nicknameUnChecked) {
-        count++;
-        nicknameUnChecked = await this.usersService.existingNickname(user.name);
-        if (nicknameUnChecked) {
-          user.name = user.name + count;
-        }
-      }
-
-      const sub = await this.usersService.create(user);
-      return this.login(sub);
-    }
-
-    return this.login(doc._id.toString());
+  async parseTTMIKToken(token: string): Promise<TTMIKJwtPayload> {
+    const payload = await this.jwtService.verifyAsync(token, {
+      secret: this.awsService.getParentJwtSecretKey,
+    });
+    return payload
   }
 
   async parseVerifyId(verifiId: string) {
