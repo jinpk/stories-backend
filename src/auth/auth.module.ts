@@ -9,7 +9,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { Verifi, VerifiSchema } from './schemas/verifi.schema';
 import { JwtStrategy } from './strategy/jwt.strategy';
-import { LocalAdminStrategy, LocalStrategy } from './strategy/local.strategy';
+import { LocalAdminStrategy } from './strategy/local.strategy';
 import { HttpModule } from '@nestjs/axios';
 import { AwsModule } from 'src/aws/aws.module';
 
@@ -32,7 +32,6 @@ import { AwsModule } from 'src/aws/aws.module';
   controllers: [AuthController],
   providers: [
     AuthService,
-    LocalStrategy,
     JwtStrategy,
     LocalAdminStrategy,
   ],

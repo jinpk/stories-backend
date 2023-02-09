@@ -1,6 +1,5 @@
 import {
   Body,
-  ConflictException,
   Controller,
   Get,
   NotFoundException,
@@ -14,8 +13,6 @@ import {
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
-  ApiBody,
-  ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -25,66 +22,13 @@ import { UserDto } from './dto/user.dto';
 import { GetUsersDto } from './dto/get-user.dto';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update.user.dto';
-import { PasswordCheckDto, PasswordUpdateDto } from './dto/password.dto';
 import { DeleteUserDto } from './dto/delete-user.dto';
-import { CreateUserDto } from './dto/create-user.dto';
 
 @Controller('users')
 @ApiTags('users')
 @ApiBearerAuth()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
-  @Patch(':id/password')
-  @ApiOperation({
-    summary: '비밀번호 변경',
-  })
-  @ApiBody({ type: PasswordUpdateDto })
-  async patchPassword(
-    @Req() req,
-    @Param('id') id: string,
-    @Body() body: PasswordUpdateDto,
-  ) {
-    if (req.user.id !== id) {
-      throw new UnauthorizedException();
-    }
-
-    const user = await this.usersService.findById(id);
-    if (!user) {
-      throw new NotFoundException();
-    }
-
-    if (!(await this.usersService.checkCurrentPassword(user, body.password))) {
-      throw new UnauthorizedException('현재 비밀번호가 일치하지 않습니다.');
-    }
-
-    await this.usersService.updatePasswordById(id, body.updatePassword);
-  }
-
-  @Post(':id/passwordcheck')
-  @ApiOperation({
-    summary: '현재 비밀번호 확인',
-  })
-  @ApiBody({ type: PasswordCheckDto })
-  @ApiOkResponse({
-    type: Boolean,
-  })
-  async checkCurrentPassword(
-    @Req() req,
-    @Param('id') id: string,
-    @Body() body: PasswordCheckDto,
-  ) {
-    if (req.user.id !== id) {
-      throw new UnauthorizedException();
-    }
-
-    const user = await this.usersService.findById(id);
-    if (!user) {
-      throw new NotFoundException();
-    }
-
-    return await this.usersService.checkCurrentPassword(user, body.password);
-  }
 
   @Post(':id/withdrawal')
   @ApiOperation({
@@ -105,12 +49,7 @@ export class UsersController {
       throw new NotFoundException();
     }
 
-    if (
-      !req.user.isAdmin &&
-      !(await this.usersService.checkCurrentPassword(user, body.password))
-    ) {
-      throw new UnauthorizedException('현재 비밀번호가 일치하지 않습니다.');
-    }
+    // ttmik 시스템에 기존 비밀번호 확인하는 로직 필요.
 
     await this.usersService.deleteUser(id);
   }
@@ -155,23 +94,5 @@ export class UsersController {
   @ApiOkResponsePaginated(UserDto)
   async getUserList(@Query() query: GetUsersDto) {
     return await this.usersService.getPagingUsers(query);
-  }
-
-  @Post('')
-  @ApiOperation({
-    summary: '(ADMIN) 회원 생성',
-    description: "국가코드는 default 'KR'로 생성됨.",
-  })
-  @ApiCreatedResponse({
-    description: 'createdUserId',
-  })
-  async createUser(@Body() body: CreateUserDto) {
-    if (await this.usersService.findOneByEmail(body.email)) {
-      throw new ConflictException('Already exist email.');
-    } else if (await this.usersService.existingNickname(body.nickname)) {
-      throw new ConflictException('Already exist nickname.');
-    }
-
-    return this.usersService.createUserByAdmin(body);
   }
 }

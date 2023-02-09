@@ -5,7 +5,6 @@ import { Model } from 'mongoose';
 import { AwsService } from 'src/aws/aws.service';
 import { User } from 'src/users/schemas/user.schema';
 import { UsersService } from 'src/users/users.service';
-import { OAuthDto, SignUpDto } from './dto';
 import { TTMIKJwtPayload } from './interfaces';
 import { Verifi, VerifiDocument } from './schemas/verifi.schema';
 
@@ -22,7 +21,7 @@ export class AuthService {
     const payload = await this.jwtService.verifyAsync(token, {
       secret: this.awsService.getParentJwtSecretKey,
     });
-    return payload
+    return payload;
   }
 
   async parseVerifyId(verifiId: string) {
@@ -75,14 +74,6 @@ export class AuthService {
     return { verifiId: doc._id.toString(), code };
   }
 
-  async validateUser(email: string, password: string) {
-    const user = await this.usersService.findOneByEmail(email);
-    if (user && (await user.comparePassword(password))) {
-      return user._id.toString();
-    }
-    return null;
-  }
-
   async login(sub: string, isAdmin?: boolean) {
     const payload = { sub, isAdmin };
     return {
@@ -97,20 +88,12 @@ export class AuthService {
     };
   }
 
-  async signUp(verifi: VerifiDocument, params: SignUpDto) {
+  async signUp(payload: TTMIKJwtPayload, countryCode: string) {
     const user: User = {
-      email: verifi.email,
-      password: params.password,
-      name: params.nickname,
-      nickname: params.nickname,
-      subNewsletter: false,
-      countryCode: params.countryCode || 'KR',
-      ttmik: false,
-      deleted: false,
+      email: payload.email,
+      countryCode,
     };
-
     const sub = await this.usersService.create(user);
-    await verifi.delete();
     return this.login(sub);
   }
 }

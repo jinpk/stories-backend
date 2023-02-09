@@ -1,44 +1,27 @@
 import {
   Body,
-  ConflictException,
   Controller,
   Get,
   NotFoundException,
   Post,
   Request,
-  Query,
   UseGuards,
-  BadRequestException,
-  Param,
   UnauthorizedException,
-  Header,
-  Headers,
+  ConflictException,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
-  ApiHeader,
   ApiOkResponse,
   ApiOperation,
-  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { UsersService } from 'src/users/users.service';
 import { Public } from './decorator/auth.decorator';
 import { AuthService } from './auth.service';
-import {
-  AccountDto,
-  LoginDto,
-  TokenDto,
-  SignUpDto,
-  AdminLoginDto,
-  PasswordResetDto,
-  OAuthDto,
-  ExistUserDto,
-} from './dto';
-import { LocalAuthGuard, LocalAuthAdminGuard } from './guard/local-auth.guard';
+import { AccountDto, TokenDto, AdminLoginDto, PasswordResetDto } from './dto';
+import { LocalAuthAdminGuard } from './guard/local-auth.guard';
 import { AdminService } from 'src/admin/admin.service';
-import { isEmail } from 'class-validator';
 import { TTMIKJwtPayload } from './interfaces';
 
 @Controller('auth')
@@ -92,11 +75,14 @@ export class AuthController {
   @ApiBody({
     schema: {
       description: 'token: TTMIK_JWT_TOKEN',
-      required: ['token'],
-      properties: { token: { type: 'string' } },
+      required: ['token', 'countryCode'],
+      properties: {
+        token: { type: 'string' },
+        countryCode: { type: 'countryCode', description: 'Device CountryCode' },
+      },
     },
   })
-  async ttmkiLogin(@Body('token') token) {
+  async ttmkiLogin(@Body('token') token, @Body('countryCode') countryCode) {
     let payload: TTMIKJwtPayload;
     try {
       payload = await this.authService.parseTTMIKToken(token);
@@ -104,17 +90,12 @@ export class AuthController {
       throw new UnauthorizedException('Invalid TTMIK Jwt Token.');
     }
 
-    console.log(payload);
-  }
+    const user = await this.usersService.findOneByEmail(payload.email);
 
-  @Get('users/exist')
-  @Public()
-  @ApiOperation({
-    summary: '회원 존재여부 조회 (Public)',
-  })
-  @ApiResponse({ description: '존재하면 true' })
-  async existUser(@Query() query: ExistUserDto) {
-    return await this.usersService.getExistingUser(query);
+    if (!user) {
+      return await this.authService.signUp(payload, countryCode);
+    }
+    await this.authService.login(user._id.toHexString(), false);
   }
 
   @Post('passwordreset/exec')
@@ -126,7 +107,7 @@ export class AuthController {
     type: PasswordResetDto,
   })
   @ApiOkResponse({
-    description: '비밀번호 재설정 완료',
+    description: '비밀번호 재설정 완료 (이메일 전송후 사용)',
   })
   async passwordResetExecute(@Body() body: PasswordResetDto) {
     const email = await this.authService.verifyPasswordResetToken(body.token);
@@ -144,7 +125,7 @@ export class AuthController {
   @Post('passwordreset')
   @Public()
   @ApiOperation({
-    summary: '비밀번호 재설정 요청',
+    summary: '비밀번호 재설정 이메일 요청',
     description: '이메일로 링크에 토큰담아서 전송됨.',
   })
   @ApiBody({

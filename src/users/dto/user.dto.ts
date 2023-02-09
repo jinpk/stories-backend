@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsUppercase } from 'class-validator';
+import { IsEnum, IsOptional } from 'class-validator';
 import { SubscriptionTypes } from 'src/subscriptions/enums';
 import { UserStates } from '../enums';
 
@@ -39,31 +39,10 @@ export class UserDto extends UserEnumDto {
   @ApiProperty({})
   email: string;
 
-  @ApiProperty({})
-  name: string;
-
-  @ApiProperty({})
-  nickname: string;
-
-  @ApiProperty({
-    description: '뉴스레터 구독',
-  })
-  subNewsletter: boolean;
-
   @ApiProperty({
     description: '국가코드',
   })
   countryCode: string;
-
-  @ApiProperty({
-    description: 'TTMIK 멤버쉽 여부',
-  })
-  ttmik: boolean;
-
-  @ApiProperty({
-    description: '회원 탈퇴 여부',
-  })
-  deleted: boolean;
 
   @ApiProperty({
     description: '가입 날짜',
