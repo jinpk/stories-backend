@@ -4,13 +4,14 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { join } from 'path';
 import { AppModule } from './app.module';
+import { AppConfigService } from './config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.enableCors({ origin: '*' });
   app.useGlobalPipes(new ValidationPipe());
-
+  const configService = app.get(AppConfigService);
   const config = new DocumentBuilder()
     .setTitle('Stories API')
     .setDescription('The stories API description')
@@ -30,6 +31,6 @@ async function bootstrap() {
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('ejs');
 
-  await app.listen(3000);
+  await app.listen(configService.port);
 }
 bootstrap();
