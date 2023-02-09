@@ -7,7 +7,6 @@ import {
   Request,
   UseGuards,
   UnauthorizedException,
-  ConflictException,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -78,7 +77,7 @@ export class AuthController {
       required: ['token', 'countryCode'],
       properties: {
         token: { type: 'string' },
-        countryCode: { type: 'countryCode', description: 'Device CountryCode' },
+        countryCode: { type: 'string', description: 'Device CountryCode' },
       },
     },
   })
@@ -95,7 +94,7 @@ export class AuthController {
     if (!user) {
       return await this.authService.signUp(payload, countryCode);
     }
-    await this.authService.login(user._id.toHexString(), false);
+   return await this.authService.login(user._id.toHexString(), false);
   }
 
   @Post('passwordreset/exec')

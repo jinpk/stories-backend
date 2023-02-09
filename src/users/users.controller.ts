@@ -87,12 +87,12 @@ export class UsersController {
     return this.usersService._userDocToDto(user);
   }
 
-  @Get('')
+  /*@Get('')
   @ApiOperation({
     summary: '회원 조회',
   })
   @ApiOkResponsePaginated(UserDto)
   async getUserList(@Query() query: GetUsersDto) {
     return await this.usersService.getPagingUsers(query);
-  }
+  }*/
 }
