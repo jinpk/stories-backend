@@ -6,6 +6,8 @@ import {
   Patch,
   Post,
   Query,
+  UseInterceptors,
+  UploadedFile,
  } from '@nestjs/common';
  import {
   ApiBearerAuth,
@@ -20,6 +22,7 @@ import { GetVocabsDto, GetStaticsVocabDto } from './dto/get-vocab.dto';
 import { VocabTestDto } from './dto/vocab-test.dto';
 import { VocabsService } from './vocabs.service';
 import { StaticsVocabDto } from './dto/vocab-statics.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('vocabs')
 @ApiTags('vocabs')

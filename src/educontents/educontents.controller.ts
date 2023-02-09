@@ -15,23 +15,31 @@ import {
     ApiTags,
 } from '@nestjs/swagger'
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
-import { EduContentsDto, ContentsQuizDto, UserEduInfoDto, ContentsQuizResultDto } from './dto/educontents.dto';
+import { EduContentsDto, ContentsQuizDto, UserEduInfoDto, ContentsQuizResultDto, UploadContentsDto } from './dto/educontents.dto';
 import { AudioPlayerDto } from './dto/audioplayer.dto';
 import { EduProgressDto } from './dto/eduprogress.dto';
 import { GetListEduContentsDto, GetListQuizDto, GetContentsQuizResultDto} from './dto/get-educontents.dto';
 import { GetListAudioPlayerDto } from './dto/get-audioplayer.dto';
 import { EducontentsService } from './educontents.service';
+import { FilesFromBucketDto } from '../aws/dto/s3.dto'
+import { Public } from 'src/auth/decorator/auth.decorator';
 
 @Controller('educontents')
 @ApiTags('educontents')
-@ApiBearerAuth()
+// @ApiBearerAuth()
 export class EducontentsController {
     constructor(private readonly educontentsService: EducontentsService) {}
     @Post('upload')
+    @Public()
     @ApiOperation({
       summary: '(ADMIN) 컨텐츠 목록 업로드',
     })
-    async createContentsList() {
+    @ApiOkResponse({
+      status: 200,
+      type: UploadContentsDto,
+    })
+    async createContents(@Query() query: FilesFromBucketDto) {
+      await this.educontentsService.createContentsList(query.path, query.bucket)
     }
 
     @Post('quiz/:educontentsId')

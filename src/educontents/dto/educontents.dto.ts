@@ -138,3 +138,8 @@ export class UserEduInfoDto{
     })
     level_complete_rate: LevelCompleteRate[];
   }
+
+export class UploadContentsDto{
+    @ApiProperty({})
+    total: number;
+}

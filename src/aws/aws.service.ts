@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConsoleLogger } from '@nestjs/common';
 import * as AWS from 'aws-sdk';
 import { SendEmailRequest } from 'aws-sdk/clients/ses';
 import { createReadStream } from 'fs';
 import { AppConfigService } from 'src/config';
 import { SendEmailDto } from './dto/email.dto';
-import { FilesToBucketDto } from './dto/s3.dto';
+import { FilesToBucketDto, FilesFromBucketDto } from './dto/s3.dto';
+import * as XLSX from 'xlsx';
 
 @Injectable()
 export class AwsService {
@@ -47,6 +48,38 @@ export class AwsService {
         })
         .promise();
     }
+  }
+
+  async filesFromBucket(path: string, bucket: string): Promise<void> {
+    var options = {
+      ACL:'public-read',
+      Bucket : bucket,
+      Body: createReadStream(path),
+      Key: path,
+    }
+    var file = await this.s3.getObject(options).createReadStream();
+    var buffers = [];
+    file.on('data', function (data) {
+      buffers.push(data);
+    });
+    console.log(buffers)
+
+    file.on('end', function() {
+      var buffer = Buffer.concat(buffers);
+      var workbook = XLSX.read(buffer, {type: 'buffer'});
+      
+      const sheetName = workbook.SheetNames[0];
+      const sheet = workbook.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(sheet, {
+        defval: null,
+      })
+      this.logger.debug(rows);
+
+      for (const row of rows) {
+        const values = Object.keys(row).map(key => row[key]);
+        console.log(values)
+      }
+    });
   }
 
   async sendEmail(params: SendEmailDto): Promise<string> {
