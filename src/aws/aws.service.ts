@@ -52,9 +52,7 @@ export class AwsService {
 
   async filesFromBucket(path: string, bucket: string): Promise<void> {
     var options = {
-      ACL:'public-read',
       Bucket : bucket,
-      Body: createReadStream(path),
       Key: path,
     }
     var file = await this.s3.getObject(options).createReadStream();
