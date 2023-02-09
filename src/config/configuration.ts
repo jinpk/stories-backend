@@ -7,5 +7,4 @@ export default registerAs('app', () => ({
   awsSecret: process.env.AWS_SECRET_KEY,
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
   googleClientId: process.env.GOOGLE_CLIENT_ID,
-  port: process.env.PORT,
 }));

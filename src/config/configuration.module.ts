@@ -16,7 +16,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         AWS_SECRET_KEY: Joi.string().required(),
         GOOGLE_CLIENT_SECRET: Joi.string().required(),
         GOOGLE_CLIENT_ID: Joi.string().required(),
-        PORT: Joi.string().required(),
       }),
     }),
   ],

@@ -5,9 +5,6 @@ import { ConfigService } from '@nestjs/config';
 export class AppConfigService {
   constructor(private configService: ConfigService) {}
 
-  get port(): string {
-    return this.configService.get<string>('app.port');
-  }
   get mongoURI(): string {
     return this.configService.get<string>('app.mongoURI');
   }

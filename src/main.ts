@@ -11,7 +11,6 @@ async function bootstrap() {
 
   app.enableCors({ origin: '*' });
   app.useGlobalPipes(new ValidationPipe());
-  const configService = app.get(AppConfigService);
   const config = new DocumentBuilder()
     .setTitle('Stories API')
     .setDescription('The stories API description')
@@ -31,6 +30,6 @@ async function bootstrap() {
   app.setBaseViewsDir(join(__dirname, '..', 'views'));
   app.setViewEngine('ejs');
 
-  await app.listen(configService.port);
+  await app.listen(3000);
 }
 bootstrap();
