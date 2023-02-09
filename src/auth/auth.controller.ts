@@ -89,12 +89,16 @@ export class AuthController {
       throw new UnauthorizedException('Invalid TTMIK Jwt Token.');
     }
 
-    const user = await this.usersService.findOneByEmail(payload.email);
+    const user = await this.usersService.findOneByEmailAll(payload.email);
 
     if (!user) {
       return await this.authService.signUp(payload, countryCode);
     }
-   return await this.authService.login(user._id.toHexString(), false);
+
+    if (user.deleted) {
+      throw new UnauthorizedException('User Already deleted.');
+    }
+    return await this.authService.login(user._id.toHexString(), false);
   }
 
   @Post('passwordreset/exec')

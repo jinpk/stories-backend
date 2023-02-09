@@ -79,6 +79,11 @@ export class UsersService {
     return user;
   }
 
+  async findOneByEmailAll(email: string): Promise<UserDocument> {
+    const user = await this.userModel.findOne({ email });
+    return user;
+  }
+
   async existingNickname(nickname: string): Promise<boolean> {
     const user = await this.userModel.findOne({ nickname, deleted: false });
     if (user) {

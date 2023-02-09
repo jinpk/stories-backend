@@ -29,7 +29,6 @@ import { DeleteUserDto } from './dto/delete-user.dto';
 @ApiBearerAuth()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
   @Post(':id/withdrawal')
   @ApiOperation({
     summary: '회원 탈퇴(삭제)',
@@ -40,6 +39,7 @@ export class UsersController {
     @Param('id') id: string,
     @Body() body: DeleteUserDto,
   ) {
+    console.log(body, id);
     if (req.user.id !== id && !req.user.isAdmin) {
       throw new UnauthorizedException();
     }
