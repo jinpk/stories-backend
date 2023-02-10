@@ -4,12 +4,12 @@ export type ContentsType = "SERIES" | "ARTICLE"
 export type QuizType = "MULTI" | "TILE" | "OX"
 export type DetailType = "NORMAL" | "SEQUENCE"
 
-export class SeperateSentence {
+export class TimeLine {
     @ApiProperty({})
-    hint: string;
+    time: string;
 
     @ApiProperty({})
-    timeline: string;
+    sentence: string;
 }
 
 export class ChoiceAnswer {
@@ -52,7 +52,7 @@ export class EduContentsDto{
     audioFilePath: string;
   
     @ApiProperty({})
-    seperateSentence: SeperateSentence[];
+    timeLine: TimeLine[];
 }
 
 export class ContentsQuizDto{

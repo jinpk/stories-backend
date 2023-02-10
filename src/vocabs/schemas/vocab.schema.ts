@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { ContentsType, CoreType } from '../dto/vocab.dto';
+import { PreviewVocabulary } from '../dto/vocab.dto';
 
 export type VocabDocument = HydratedDocument<Vocab>;
 
@@ -10,31 +10,22 @@ export class Vocab {
   contentsSerialNum: string;
 
   @Prop()
-  level: string;
-
-  @Prop()
-  contents_type: ContentsType;
-
-  @Prop()
-  story: string;
+  audioFilePath: string;
 
   @Prop()
   vocab: string;
 
   @Prop()
-  audio_file_path: string;
-
-  @Prop()
-  sentence: string;
+  meaningEn: string;
 
   @Prop()
   value: string;
 
   @Prop()
-  meaning_en: string;
+  connSentence: string;
 
   @Prop()
-  core_type: CoreType;
+  previewVocabulary: PreviewVocabulary;
 }
 
 export const VocabSchema = SchemaFactory.createForClass(Vocab);

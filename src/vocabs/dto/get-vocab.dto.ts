@@ -1,6 +1,6 @@
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 import { ListReqDto } from 'src/common/dto/request.dto';
-import { VocabDto, ContentsType, CoreType } from './vocab.dto';
+import { VocabDto } from './vocab.dto';
 import { PagingExcelReqDto } from 'src/common/dto/request.dto';
 
 type VocabType = 'ADDED' | 'STUDIED'
@@ -24,21 +24,10 @@ export class GetVocabsDto extends PagingExcelReqDto {
   readonly level: string;
 
   @ApiProperty({
-    description: 'SERIES or ARTICLE',
-    required: false,
-  })
-  readonly contents_type: ContentsType;
-
-  @ApiProperty({
     description: '본문 단어',
     required: false,
   })
   readonly contents_vocab: string;
-
-  @ApiProperty({
-    required: false,
-  })
-  readonly core_type: CoreType;
 }
 
 export class GetStaticsVocabDto extends PagingExcelReqDto {
