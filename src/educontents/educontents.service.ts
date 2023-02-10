@@ -9,7 +9,6 @@ import {
 } from './schemas/educontents.schema';
 import { Vocab, VocabDocument } from '../vocabs/schemas/vocab.schema';
 import { AwsService } from '../aws/aws.service'
-import { stringify } from 'querystring';
 
 @Injectable()
 export class EducontentsService {
@@ -70,25 +69,6 @@ export class EducontentsService {
         questionCount: 0,
         timeLine: data.get('contents').get('1-타임라인'),
       };
-
-      const timelines = data.get('contents').get('1-타임라인');
-      for (let i = 0; i < timelines.length; i++) {
-        const timeline = timelines[i];
-        let timeString = '';
-        if (typeof timeline.time === 'number') {
-          const parsedUnix =
-            (timeline.time - this.DAYS_BETWEEN_EXCEL_FROM_UNIX_EPOCH) *
-            86400 *
-            1000;
-          const date = new Date(parsedUnix).toISOString();
-          const [minutes, seconds] = date.split('T')[1].split(':');
-          timeString = minutes + ':' + seconds;
-        } else {
-          timeString = timeline.time;
-        }
-        console.log(timeString);
-        timelines[i].timeline = timeString;
-      }
       // 퀴즈
       var quizs: Quizs = new Quizs()
       for (const quiz of data.get('contents').get('2-퀴즈')) {
@@ -138,8 +118,6 @@ export class EducontentsService {
         });
         await new this.vocabModel(vocabs).save();
       }
-
-      // DB 저장
       await new this.educontentsModel(educontent).save();
     }
   }

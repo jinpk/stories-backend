@@ -68,7 +68,8 @@ export class AwsService {
       for (const sheetname of workbook.SheetNames) {
         const sheet = workbook.Sheets[sheetname];
         const rows = XLSX.utils.sheet_to_json(sheet, {
-          defval: null,
+          defval: '',
+          raw: false,
         });
         contentmap.set(sheetname, rows)
       }
