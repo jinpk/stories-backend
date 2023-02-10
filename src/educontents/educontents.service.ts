@@ -12,8 +12,6 @@ import { AwsService } from '../aws/aws.service'
 
 @Injectable()
 export class EducontentsService {
-  readonly DAYS_BETWEEN_EXCEL_FROM_UNIX_EPOCH = 25569;
-
   constructor(
     @InjectModel(EduContents.name)
     private educontentsModel: Model<EduContentsDocument>,
