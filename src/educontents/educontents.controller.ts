@@ -39,7 +39,8 @@ export class EducontentsController {
       type: UploadContentsDto,
     })
     async createContents(@Query() query: FilesFromBucketDto) {
-      await this.educontentsService.createContentsList(query.path, query.bucket)
+      const total = await this.educontentsService.createContentsList(query.path, query.bucket)
+      return total
     }
 
     @Post('quiz/:educontentsId')

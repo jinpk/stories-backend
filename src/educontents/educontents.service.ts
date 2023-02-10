@@ -8,6 +8,7 @@ import {
   QuizsDocument,
 } from './schemas/educontents.schema';
 import { Vocab, VocabDocument } from '../vocabs/schemas/vocab.schema';
+import { UploadContentsDto } from './dto/educontents.dto';
 import { AwsService } from '../aws/aws.service'
 
 @Injectable()
@@ -38,7 +39,7 @@ export class EducontentsService {
     return educontent;
   }
 
-  async createContentsList(path: string, bucket: string): Promise<number> {
+  async createContentsList(path: string, bucket: string): Promise<UploadContentsDto> {
     var total = 0;
     var datas = [];
     const filelist = await this.awsService.filesListFromBucket(path, bucket);
@@ -48,8 +49,12 @@ export class EducontentsService {
     }    
     await this.create(datas)
     total = datas.length
+    console.log(total)
 
-    return total
+    const dto = new UploadContentsDto();
+    dto.total = total;
+
+    return dto;
   }
 
   async create(exceldata: any[]) {
