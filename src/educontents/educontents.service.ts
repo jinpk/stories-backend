@@ -4,7 +4,6 @@ import { Model } from 'mongoose';
 import { EduContents, EduContentsDocument, Quizs, QuizsDocument } from './schemas/educontents.schema';
 import { Vocab, VocabDocument } from '../vocabs/schemas/vocab.schema';
 import { AwsService } from '../aws/aws.service'
-import { stringify } from 'querystring';
 
 @Injectable()
 export class EducontentsService {
@@ -60,7 +59,6 @@ export class EducontentsService {
         questionCount: 0,
         timeLine: data.get('contents').get('1-타임라인'),
       };
-
       // 퀴즈
       var quizs: Quizs = new Quizs()
       for (const quiz of data.get('contents').get('2-퀴즈')) {
@@ -110,8 +108,6 @@ export class EducontentsService {
         });
         await new this.vocabModel(vocabs).save();
       }
-
-      // DB 저장
       await new this.educontentsModel(educontent).save();
     }
   }
