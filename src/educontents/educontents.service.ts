@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { EduContents, EduContentsDocument, Quizs, QuizsDocument } from './schemas/educontents.schema';
 import { Vocab, VocabDocument } from '../vocabs/schemas/vocab.schema';
 import { AwsService } from '../aws/aws.service'
+import { stringify } from 'querystring';
 
 @Injectable()
 export class EducontentsService {
@@ -39,13 +40,16 @@ export class EducontentsService {
       datas.push(exceldata)
     }    
     await this.create(datas)
-    return datas.length;
+    total = datas.length
+
+    return total
   }
 
   async create(exceldata: any[]) {
     for (const data of exceldata) {
-      console.log(data.get('contents').get('2-퀴즈'))
       const serial_number = data.get('contents').get('0-스토리')[0].serialNum;
+
+      // 컨텐츠, 타임라인
       const educontent: EduContents = {
         contentsSerialNum: serial_number,
         level:       data.get('contents').get('0-스토리')[0].level,
@@ -57,8 +61,10 @@ export class EducontentsService {
         timeLine: data.get('contents').get('1-타임라인'),
       };
 
+      // 퀴즈
+      var quizs: Quizs = new Quizs()
       for (const quiz of data.get('contents').get('2-퀴즈')) {
-        const quizs: Quizs = {
+        quizs = {
           contentsSerialNum: serial_number,
           quizType: quiz.type,
           question: quiz.question,
@@ -66,13 +72,47 @@ export class EducontentsService {
           answer: quiz.answer,
           options: [],
         }
-        // option 이 포함된 key의 value를 array에 초기화
-        data.get('contents').get('2-퀴즈').forEach((value, index) => {
-          console.log(value, index)
+
+        Object.entries(quiz).forEach(([key, value]) => {
+          if (key.includes('option')) {
+            if (value != null) {
+              quizs.options.push(value.toString());
+            }
+          }
         });
+        await new this.quizsModel(quizs).save();
       }
 
-      // await new this.educontentsModel(educontent).save();
+      // 단어
+      var vocabs: Vocab = new Vocab()
+      for (const vocab of data.get('contents').get('3-단어')) {
+        vocabs = {
+          contentsSerialNum: serial_number,
+          audioFilePath: vocab.audio_file_path,
+          vocab: vocab.vocab,
+          meaningEn: vocab.meaning_en,
+          value: vocab.value,
+          connSentence: vocab.conn_sentence,
+          previewVocabulary: 'N',
+        }
+        Object.entries(vocab).forEach(([key, value]) => {
+          if (key.includes('vocabulary')) {
+            if (value != null)  {
+              if (value == 'Y') {
+                vocabs.previewVocabulary = 'Y';
+              } else {
+                vocabs.previewVocabulary = 'N';
+              }
+            } else {
+              vocabs.previewVocabulary = 'N'
+            }
+          }
+        });
+        await new this.vocabModel(vocabs).save();
+      }
+
+      // DB 저장
+      await new this.educontentsModel(educontent).save();
     }
   }
 }

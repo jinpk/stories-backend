@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export type ContentsType = "SERIES" | "ARTICLE"
-export type QuizType = "MULTI" | "TILE" | "OX"
+export type QuizType = "MC" | "TN" | "OX"
 export type DetailType = "NORMAL" | "SEQUENCE"
 
 export class TimeLine {
@@ -26,10 +25,7 @@ export class EduContentsDto{
   
     @ApiProperty({})
     level: string;
-  
-    @ApiProperty({})
-    contentsType: ContentsType;
-  
+
     @ApiProperty({})
     seriesSequence: string;
   

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ContentsType} from './educontents.dto';
+// import { ContentsType} from './educontents.dto';
 
 class StartTime {
     @ApiProperty({})
@@ -16,8 +16,8 @@ export class AudioPlayerDto{
     @ApiProperty({})
     contentsId: string;
 
-    @ApiProperty({})
-    contentType: ContentsType;
+    // @ApiProperty({})
+    // contentType: ContentsType;
 
     @ApiProperty({})
     title: string;

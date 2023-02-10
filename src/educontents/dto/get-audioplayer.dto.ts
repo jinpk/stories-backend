@@ -1,6 +1,8 @@
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
-import { EduContentsDto, ContentsType} from './educontents.dto';
+import { EduContentsDto } from './educontents.dto';
 import { PagingExcelReqDto } from 'src/common/dto/request.dto';
+
+
 
 export class GetListAudioPlayerDto extends PagingExcelReqDto {
   @ApiProperty({
@@ -12,5 +14,5 @@ export class GetListAudioPlayerDto extends PagingExcelReqDto {
     description: 'COMPLETE | SERIES | ARTICLE',
     required: false,
   })
-  readonly filterType: ContentsType;
+  readonly filterType: string;
 }

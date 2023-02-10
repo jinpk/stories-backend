@@ -1,5 +1,5 @@
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
-import { EduContentsDto, ContentsType} from './educontents.dto';
+import { EduContentsDto } from './educontents.dto';
 import { PagingExcelReqDto } from 'src/common/dto/request.dto';
 
 export class GetEduContentsDto {
@@ -19,12 +19,6 @@ export class GetListEduContentsDto extends PagingExcelReqDto {
     required: false,
   })
   readonly title: string;
-
-  @ApiProperty({
-    description: 'SERIES or ARTICLE',
-    required: false,
-  })
-  readonly contentsType: ContentsType;
 
   @ApiProperty({
     description: '본문 단어',
