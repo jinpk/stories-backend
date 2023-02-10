@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export type ContentsType = "SERIES" | "ARTICLE"
-export type CoreType = 'ALL' | 'USE' | 'UNUSE'
+export type PreviewVocabulary = 'ALL' | 'USE' | 'UNUSE'
 
 export class VocabDto{
   @ApiProperty({})
@@ -9,11 +8,6 @@ export class VocabDto{
 
   @ApiProperty({})
   level: string;
-
-  @ApiProperty({
-    description: 'SERIES or ARTICLE',
-  })
-  contents_type: ContentsType;
 
   @ApiProperty({
     description: '연결된 스토리',
@@ -40,12 +34,12 @@ export class VocabDto{
   meaning_en: string;
 
   @ApiProperty({})
-  core_type: CoreType;
+  previewVocabulary: PreviewVocabulary;
 }
 
 export class CoreTypeUpdateDto{
   @ApiProperty({})
-  core_type: CoreType;
+  previewVocabulary: PreviewVocabulary;
 }
 
 export class CoreVocabDto{

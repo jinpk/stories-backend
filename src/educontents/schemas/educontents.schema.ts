@@ -1,8 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
-import { ContentsType, SeperateSentence } from '../dto/educontents.dto';
+import { TimeLine } from '../dto/educontents.dto';
 
 export type EduContentsDocument = HydratedDocument<EduContents>;
+export type QuizsDocument = HydratedDocument<Quizs>;
 
 @Schema()
 export class EduContents {
@@ -11,15 +12,6 @@ export class EduContents {
 
   @Prop()
   level: string;
-
-  @Prop()
-  contentsType: ContentsType;
-
-  @Prop()
-  seriesSequence: string;
-
-  @Prop()
-  storySequence: string;
 
   @Prop()
   title: string;
@@ -31,13 +23,35 @@ export class EduContents {
   questionCount: number;
 
   @Prop()
-  coverFilePath: string;
+  imagePath: string;
   
   @Prop()
   audioFilePath: string;
 
   @Prop()
-  seperateSentence: SeperateSentence[];
+  timeLine: TimeLine[];
+}
+
+@Schema()
+export class Quizs {
+  @Prop()
+  contentsSerialNum: string;
+
+  @Prop()
+  quizType: string;
+
+  @Prop()
+  question: string;
+
+  @Prop()
+  passage: number;
+
+  @Prop()
+  answer: string[];
+
+  @Prop()
+  options: string[];
 }
 
 export const EduContentsSchema = SchemaFactory.createForClass(EduContents);
+export const QuizsSchema = SchemaFactory.createForClass(Quizs);

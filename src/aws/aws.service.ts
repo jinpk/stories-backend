@@ -50,35 +50,92 @@ export class AwsService {
     }
   }
 
-  async filesFromBucket(path: string, bucket: string): Promise<void> {
+  async fileFromBucket(content: string, bucket: string): Promise<Map<string, any>> {
     var options = {
       Bucket : bucket,
-      Key: path,
+      Key: content,
     }
-    var file = await this.s3.getObject(options).createReadStream();
-    var buffers = [];
-    file.on('data', function (data) {
-      buffers.push(data);
-    });
-    console.log(buffers)
+    var jsonarr = [];    
+    const excelmap = new Map<string, any>();
+    excelmap.set('filename', content)
 
-    file.on('end', function() {
+    return await this.s3.getObject(options).promise().then((file) => {
+      var buffers = [];
+      const contentmap = new Map<string, any>();
+      buffers.push(file.Body)
       var buffer = Buffer.concat(buffers);
       var workbook = XLSX.read(buffer, {type: 'buffer'});
-      
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
-      const rows = XLSX.utils.sheet_to_json(sheet, {
-        defval: null,
-      })
-      this.logger.debug(rows);
-
-      for (const row of rows) {
-        const values = Object.keys(row).map(key => row[key]);
-        console.log(values)
+      for (const sheetname of workbook.SheetNames) {
+        const sheet = workbook.Sheets[sheetname];
+        const rows = XLSX.utils.sheet_to_json(sheet, {
+          defval: null,
+        });
+        contentmap.set(sheetname, rows)
       }
+
+      excelmap.set('contents', contentmap)
+
+      return excelmap
+    });
+    // var file = await this.s3.getObject(options).createReadStream();
+
+    // var buffers = [];
+    // file.on('data', function (data) {
+    //   buffers.push(data)
+    // });
+    // file.on('end', function() {
+    //   var buffer = Buffer.concat(buffers);
+    //   var workbook = XLSX.read(buffer, {type: 'buffer'});
+    //   const contentmap = new Map<string, any>();
+      
+    //   for (const sheetname of workbook.SheetNames) {
+    //     const sheet = workbook.Sheets[sheetname];
+    //     const rows = XLSX.utils.sheet_to_json(sheet, {
+    //       defval: null,
+    //     });
+    //     contentmap.set(sheetname, rows)
+    //   }
+    //   excelmap.set('contents', contentmap)
+    // });
+
+    return excelmap
+  }
+
+  async filesListFromBucket(path: string, bucket: string): Promise<string[]> {
+    var options = {
+      Bucket : bucket,
+      Prefix: path,
+    };
+    var filelist: string[] = [];
+    return await this.s3.listObjects(options).promise().then((data) => {
+      for (const content of data.Contents) {
+        if (content.Key == path) {
+        } else {
+          filelist.push(content.Key);
+        }
+      }
+      return filelist
     });
   }
+    // file.on('data', function (data) {
+    //   buffers.push(data);
+    // });
+
+    // file.on('end', function() {
+    //   var buffer = Buffer.concat(buffers);
+    //   var workbook = XLSX.read(buffer, {type: 'buffer'});
+      
+    //   const sheetName = workbook.SheetNames[1];
+    //   const sheet = workbook.Sheets[sheetName];
+    //   const rows = XLSX.utils.sheet_to_json(sheet, {
+    //     defval: null,
+    //   })
+    //   console.log(rows)
+
+    //   for (const row of rows) {
+    //     const values = Object.keys(row).map(key => row[key]);
+    //   }
+    // });
 
   async sendEmail(params: SendEmailDto): Promise<string> {
     const payload: SendEmailRequest = {
