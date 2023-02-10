@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export type PreviewVocabulary = 'ALL' | 'USE' | 'UNUSE'
+export type PreviewVocabulary = 'Y' | 'N';
 
 export class VocabDto{
   @ApiProperty({})

@@ -44,7 +44,7 @@ export class Quizs {
   question: string;
 
   @Prop()
-  passage: number;
+  passage: string;
 
   @Prop()
   answer: string[];
