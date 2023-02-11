@@ -12,6 +12,8 @@ import { JwtStrategy } from './strategy/jwt.strategy';
 import { LocalAdminStrategy } from './strategy/local.strategy';
 import { HttpModule } from '@nestjs/axios';
 import { AwsModule } from 'src/aws/aws.module';
+import { EmailModule } from 'src/email/email.module';
+import { FirebaseModule } from 'src/firebase/firebase.module';
 
 @Module({
   imports: [
@@ -19,6 +21,7 @@ import { AwsModule } from 'src/aws/aws.module';
     AwsModule,
     UsersModule,
     AdminModule,
+    FirebaseModule,
     PassportModule,
     MongooseModule.forFeature([{ name: Verifi.name, schema: VerifiSchema }]),
     JwtModule.registerAsync({

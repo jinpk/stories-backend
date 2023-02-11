@@ -70,8 +70,8 @@ export class UsersService {
   }
 
   async updatePasswordByEmail(email: string, password: string) {
-    const user = await this.userModel.findOne({ email, deleted: false });
-    await user.save();
+    throw 'ttmik method not supported yet.'
+    // TTMIK로 비밀번호 재설정 요청
   }
 
   async findOneByEmail(email: string): Promise<UserDocument> {

@@ -47,20 +47,20 @@ export class AuthService {
     return true;
   }
 
-  async requestPasswordResetEmail(email: string) {
-    //토큰 이메일 전송 필요
-    return await this.jwtService.signAsync(
-      { action: 'password', email },
+  async genResetPasswordJWT(email: string) {
+    const token = await this.jwtService.signAsync(
+      { action: 'passwordreset', email },
       { expiresIn: '30m' },
     );
+
+    return token;
   }
 
-  async verifyPasswordResetToken(token: string) {
+  async parsePasswordResetToken(token: string): Promise<string> {
     const payload = await this.jwtService.verifyAsync(token);
-    if (payload?.action === 'password') {
+    if (payload?.action === 'passwordreset') {
       return payload.email;
     }
-    return null;
   }
 
   async requestEmailVerify(email: string) {

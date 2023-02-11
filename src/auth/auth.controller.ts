@@ -7,6 +7,7 @@ import {
   Request,
   UseGuards,
   UnauthorizedException,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -18,10 +19,23 @@ import {
 import { UsersService } from 'src/users/users.service';
 import { Public } from './decorator/auth.decorator';
 import { AuthService } from './auth.service';
-import { AccountDto, TokenDto, AdminLoginDto, PasswordResetDto } from './dto';
+import {
+  AccountDto,
+  TokenDto,
+  AdminLoginDto,
+  PasswordResetDto,
+  PasswordResetQueryDto,
+} from './dto';
 import { LocalAuthAdminGuard } from './guard/local-auth.guard';
 import { AdminService } from 'src/admin/admin.service';
 import { TTMIKJwtPayload } from './interfaces';
+import { EmailService } from 'src/email/email.service';
+import { FirebaseService } from 'src/firebase/firebase.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import {
+  PasswordResetedEvent,
+  PasswordResetEvent,
+} from './events/password-reset.event';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -30,6 +44,8 @@ export class AuthController {
     private authService: AuthService,
     private usersService: UsersService,
     private adminService: AdminService,
+    private firebaseService: FirebaseService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   @Post('admin/login')
@@ -98,6 +114,7 @@ export class AuthController {
     if (user.deleted) {
       throw new UnauthorizedException('User Already deleted.');
     }
+
     return await this.authService.login(user._id.toHexString(), false);
   }
 
@@ -105,31 +122,36 @@ export class AuthController {
   @Public()
   @ApiOperation({
     summary: '비밀번호 재설정',
-  })
-  @ApiBody({
-    type: PasswordResetDto,
+    description:
+      '이메일 링크의 FirebaseDynamicLink의 query.payload에 담긴 JWT와 재설정할 비밀번호로 요청\nToken 만료기한: 30분',
   })
   @ApiOkResponse({
-    description: '비밀번호 재설정 완료 (이메일 전송후 사용)',
+    description: '비밀번호 재설정 완료',
   })
   async passwordResetExecute(@Body() body: PasswordResetDto) {
-    const email = await this.authService.verifyPasswordResetToken(body.token);
+    const email = await this.authService.parsePasswordResetToken(body.token);
     if (!email) {
       throw new UnauthorizedException('유효하지 않거나 만료된 토큰입니다.');
     }
 
     if (!(await this.usersService.findOneByEmail(email))) {
-      throw new NotFoundException('not found email.');
+      throw new NotFoundException('Not found email.');
     }
 
     await this.usersService.updatePasswordByEmail(email, body.password);
+
+    this.eventEmitter.emit(
+      PasswordResetedEvent.event,
+      new PasswordResetedEvent(email),
+    );
   }
 
   @Post('passwordreset')
   @Public()
   @ApiOperation({
-    summary: '비밀번호 재설정 이메일 요청',
-    description: '이메일로 링크에 토큰담아서 전송됨.',
+    summary: '비밀번호 재설정 링크 이메일 요청',
+    description:
+      '이메일의 링크 클릭시 Firebase InApp DeepLinking 처리\nDeepLink의 Query Spec은 Response 확인필요',
   })
   @ApiBody({
     schema: {
@@ -137,14 +159,28 @@ export class AuthController {
     },
   })
   @ApiOkResponse({
-    description: '이메일 링크 query.token에 값 전송',
+    description: 'Firebase Dynamic Link의 URL Query Spec',
+    type: PasswordResetQueryDto,
   })
   async passwordReset(@Body('email') email: string) {
     if (!(await this.usersService.findOneByEmail(email))) {
-      throw new NotFoundException('not found email.');
+      throw new NotFoundException('Not found email.');
     }
+    // 인증 JWT 생성
+    const token = await this.authService.genResetPasswordJWT(email);
 
-    return await this.authService.requestPasswordResetEmail(email);
+    // DynamicLink Query 생성
+    const rq = new PasswordResetQueryDto();
+    rq.action = 'passwordreset';
+    rq.payload = token;
+
+    // DynamicLink 생성
+    const link = await this.firebaseService.generateDynamicLink(rq);
+
+    this.eventEmitter.emit(
+      PasswordResetEvent.event,
+      new PasswordResetEvent(email, link),
+    );
   }
 
   @Get('me')

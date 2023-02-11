@@ -55,7 +55,7 @@ export class PasswordResetDto {
   @IsNotEmpty()
   password: string;
 
-  @ApiProperty({ description: '이메일 링크 query에서 파싱한 token (JWT)' })
+  @ApiProperty({ description: 'FirebaseDynamicLink url.payload (JWT)' })
   @IsNotEmpty()
   @IsJWT()
   token: string;

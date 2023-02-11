@@ -32,6 +32,7 @@ import { LibraryService } from './library/library.service';
 import { LibraryController } from './library/library.controller';
 import { LibraryModule } from './library/library.module';
 import { EmailModule } from './email/email.module';
+import { FirebaseModule } from './firebase/firebase.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { EmailModule } from './email/email.module';
     BannerModule,
     ReminderModule,
     LibraryModule,
+    FirebaseModule,
   ],
   controllers: [AppController],
   providers: [
