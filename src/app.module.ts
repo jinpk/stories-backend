@@ -33,10 +33,12 @@ import { LibraryController } from './library/library.controller';
 import { LibraryModule } from './library/library.module';
 import { EmailModule } from './email/email.module';
 import { FirebaseModule } from './firebase/firebase.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
     AppConfigModule,
+    CommonModule,
     EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
     MongooseModule.forRootAsync({

@@ -1,5 +1,5 @@
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
-import { IsDateString, IsNumberString } from 'class-validator';
+import { IsDateString, IsNumberString, IsOptional } from 'class-validator';
 
 export class PagingReqDto {
   @ApiProperty({
@@ -37,6 +37,7 @@ export class DateReqDto {
     required: false,
   })
   @IsDateString()
+  @IsOptional()
   readonly start: string;
 
   @ApiProperty({
@@ -44,6 +45,7 @@ export class DateReqDto {
     required: false,
   })
   @IsDateString()
+  @IsOptional()
   readonly end: string;
 }
 

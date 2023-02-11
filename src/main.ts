@@ -4,7 +4,6 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { join } from 'path';
 import { AppModule } from './app.module';
-import { AppConfigService } from './config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -13,7 +12,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   const config = new DocumentBuilder()
     .setTitle('Stories API')
-    .setDescription('The stories API description')
+    .setDescription('The stories API description\n모든 리스트 조회에서 excel: 1 요청시 response에 excel buffer로 내려감.')
     .setVersion('0.1')
     .addTag('auth', '서비스 인증')
     .addTag('users', '회원 관리')
@@ -23,7 +22,9 @@ async function bootstrap() {
     .addTag('files', '공통 파일 API')
     .addBearerAuth()
     .build();
+
   const document = SwaggerModule.createDocument(app, config);
+  
   SwaggerModule.setup('openapi', app, document);
 
   app.useStaticAssets(join(__dirname, '..', 'public'));

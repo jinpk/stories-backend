@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsNotEmpty } from 'class-validator';
+import { IsDate, IsDateString, IsNotEmpty } from 'class-validator';
 import { HydratedDocument } from 'mongoose';
 import { NotificationContexts } from '../enums';
 
@@ -15,7 +15,7 @@ export class Notification {
 
   @Prop()
   @ApiProperty({ description: '발송날짜' })
-  @IsDate()
+  @IsDateString()
   @IsNotEmpty()
   sendAt: Date;
 

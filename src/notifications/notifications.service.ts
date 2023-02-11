@@ -2,6 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { PagingResDto } from 'src/common/dto/response.dto';
+import { UtilsService } from 'src/common/providers';
+import { CommonExcelService } from 'src/common/providers/excel.service';
 import { GetNotificationsDto } from './dto/get-notification.dto';
 import {
   NotificationConfigDto,
@@ -13,6 +15,7 @@ import {
 } from './dto/notification-setting.dto';
 import { CreateNotificationDto, NotificationDto } from './dto/notification.dto';
 import { NotificationSettingTypes } from './enums';
+import { EXCEL_COLUMN_LIST } from './notifications.constant';
 import {
   NotificationConfig,
   NotificationConfigDocument,
@@ -30,6 +33,7 @@ import {
 export class NotificationsService {
   private readonly logger = new Logger(NotificationsService.name);
   constructor(
+    private commonExcelService: CommonExcelService,
     @InjectModel(Notification.name)
     private notificationModel: mongoose.Model<NotificationDocument>,
     @InjectModel(NotificationConfig.name)
@@ -79,7 +83,7 @@ export class NotificationsService {
 
   async getPagingNotifications(
     query: GetNotificationsDto,
-  ): Promise<PagingResDto<NotificationDto>> {
+  ): Promise<PagingResDto<NotificationDto> | Buffer> {
     const filter: mongoose.FilterQuery<NotificationDocument> = {};
 
     if (query.start) {
@@ -94,11 +98,21 @@ export class NotificationsService {
       filter.context = query.context;
     }
 
+    if (query.excel === '1') {
+      const docs = await this.notificationModel
+        .find(filter)
+        .sort({ createdAt: -1 });
+      return await this.commonExcelService.listToExcelBuffer(
+        EXCEL_COLUMN_LIST,
+        docs,
+      );
+    }
+
     const docs = await this.notificationModel
       .find(filter)
+      .sort({ createdAt: -1 })
       .limit(parseInt(query.limit))
-      .skip((parseInt(query.page) - 1) * parseInt(query.limit))
-      .sort({ createdAt: -1 });
+      .skip((parseInt(query.page) - 1) * parseInt(query.limit));
 
     const total = await this.notificationModel.countDocuments(filter);
     const data: NotificationDto[] = docs.map((doc) =>
@@ -117,7 +131,7 @@ export class NotificationsService {
       imagePath: body.imagePath,
       title: body.title,
       message: body.message,
-    });
+    }).save();
     return doc._id.toString();
   }
 
