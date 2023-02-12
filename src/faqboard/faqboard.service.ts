@@ -9,11 +9,19 @@ export class FaqboardService {
         @InjectModel(FaqBoard.name) private faqboardModel: Model<FaqBoardDocument>,
       ) {}
     
-      async GetVocab(faqboard_id: string): Promise<FaqBoardDocument | false> {
+      async GetFaq(faqboard_id: string): Promise<FaqBoardDocument | false> {
         const faqboard = await this.faqboardModel.findById(faqboard_id);
         if (!faqboard) {
           return false;
         }
         return faqboard;
+      }
+
+      async existFaqById(id: string): Promise<boolean> {
+        const faqboard = await this.faqboardModel.findById(id);
+        if (!faqboard) {
+          return false;
+        }
+        return true;
       }
 }

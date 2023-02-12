@@ -6,6 +6,7 @@ import {
     Patch,
     Post,
     Query,
+    NotFoundException,
 } from '@nestjs/common';
 import {
     ApiBearerAuth,
@@ -18,6 +19,7 @@ import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator
 import { FaqBoardDto, FaqCategoryDto } from './dto/faqboard.dto';
 import { GetFaqBoardDto } from './dto/get-faqboard.dto';
 import { FaqboardService } from './faqboard.service';
+import { Public } from 'src/auth/decorator/auth.decorator';
   
 @Controller('faqboard')
 @ApiTags('faqboard')
@@ -71,8 +73,10 @@ export class FaqboardController {
       type: FaqBoardDto,
     })
     async getFaq(@Param('faq_id') faq_id: string) {
-      const faq = new FaqBoardDto();
-      return faq;
+      if (!(await this.faqboardService.existFaqById(faq_id))) {
+        throw new NotFoundException('NotFound FaQ');
+      }
+      return await this.faqboardService.GetFaq(faq_id);;
     }
 
     @Get('')

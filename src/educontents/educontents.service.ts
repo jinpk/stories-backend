@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   EduContents,
   EduContentsDocument,
@@ -8,14 +8,13 @@ import {
   QuizsDocument,
 } from './schemas/educontents.schema';
 import { Vocab, VocabDocument } from '../vocabs/schemas/vocab.schema';
-import { UploadContentsDto } from './dto/educontents.dto';
+import { EduContentsDto, UploadContentsDto } from './dto/educontents.dto';
 import { AwsService } from '../aws/aws.service'
 
 @Injectable()
 export class EducontentsService {
   constructor(
-    @InjectModel(EduContents.name)
-    private educontentsModel: Model<EduContentsDocument>,
+    @InjectModel(EduContents.name) private educontentsModel: Model<EduContentsDocument>,
     @InjectModel(Quizs.name) private quizsModel: Model<QuizsDocument>,
     @InjectModel(Vocab.name) private vocabModel: Model<VocabDocument>,
     private awsService: AwsService,
@@ -29,6 +28,19 @@ export class EducontentsService {
       return false;
     }
     return educontents;
+  }
+
+  async existEduContentById(id: string): Promise<boolean> {
+    const educontent = await this.educontentsModel.findById(id);
+    if (!educontent) {
+      return false;
+    }
+    return true;
+  }
+
+  async getEduContentById(id: string): Promise<EduContentsDto> {
+    const doc = await this.educontentsModel.findById(id);
+    return this._docToEduContentsDto(doc);
   }
 
   async findById(id: string): Promise<EduContentsDocument | false> {
@@ -123,5 +135,20 @@ export class EducontentsService {
       }
       await new this.educontentsModel(educontent).save();
     }
+  }
+
+  _docToEduContentsDto(doc: EduContentsDocument): EduContentsDto {
+    const dto = new EduContentsDto();
+    dto.id = doc._id.toString();
+    dto.contentsSerialNum = doc.contentsSerialNum;
+    dto.level = doc.level;
+    dto.title = doc.title;
+    dto.vocabCount = doc.vocabCount;
+    dto.questionCount = doc.questionCount;
+    dto.imagePath = doc.imagePath;
+    dto.audioFilePath = doc.audioFilePath;
+    dto.timeLine = doc.timeLine;
+
+    return dto;
   }
 }
