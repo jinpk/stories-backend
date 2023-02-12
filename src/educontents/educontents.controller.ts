@@ -6,6 +6,7 @@ import {
     Patch,
     Post,
     Query,
+    NotFoundException,
 } from '@nestjs/common';
 import {
     ApiBearerAuth,
@@ -105,10 +106,15 @@ export class EducontentsController {
     }
     
     @Get(':educontentsId')
+    @Public()
     @ApiOperation({
       summary: '학습 컨텐츠 상세 조회',
     })
     async getEduContents(@Param('educontentsId') educontentsId: string) {
+      if (!(await this.educontentsService.existEduContentById(educontentsId))) {
+        throw new NotFoundException('NotFound Contents');
+      }
+      return await this.educontentsService.getEduContentById(educontentsId);
     }
 
     @Post('result')

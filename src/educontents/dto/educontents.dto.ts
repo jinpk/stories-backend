@@ -20,35 +20,32 @@ export class ChoiceAnswer {
 }
 
 export class EduContentsDto{
-    @ApiProperty({})
-    contentsSerialNum: string;
-  
-    @ApiProperty({})
-    level: string;
+  @ApiProperty({})
+  id: string;
 
-    @ApiProperty({})
-    seriesSequence: string;
+  @ApiProperty({})
+  contentsSerialNum: string;
   
-    @ApiProperty({})
-    storySequence: string;
+  @ApiProperty({})
+  level: string;
   
-    @ApiProperty({})
-    title: string;
-  
-    @ApiProperty({})
-    vocabCount: number;
-  
-    @ApiProperty({})
-    questionCount: number;
+  @ApiProperty({})
+  title: string;
 
-    @ApiProperty({})
-    coverFilePath: string;
-    
-    @ApiProperty({})
-    audioFilePath: string;
+  @ApiProperty({})
+  vocabCount: number;
+
+  @ApiProperty({})
+  questionCount: number;
+
+  @ApiProperty({})
+  imagePath: string;
   
-    @ApiProperty({})
-    timeLine: TimeLine[];
+  @ApiProperty({})
+  audioFilePath: string;
+
+  @ApiProperty({})
+  timeLine: TimeLine[];
 }
 
 export class ContentsQuizDto{

@@ -78,28 +78,6 @@ export class AwsService {
 
       return excelmap
     });
-    // var file = await this.s3.getObject(options).createReadStream();
-
-    // var buffers = [];
-    // file.on('data', function (data) {
-    //   buffers.push(data)
-    // });
-    // file.on('end', function() {
-    //   var buffer = Buffer.concat(buffers);
-    //   var workbook = XLSX.read(buffer, {type: 'buffer'});
-    //   const contentmap = new Map<string, any>();
-      
-    //   for (const sheetname of workbook.SheetNames) {
-    //     const sheet = workbook.Sheets[sheetname];
-    //     const rows = XLSX.utils.sheet_to_json(sheet, {
-    //       defval: null,
-    //     });
-    //     contentmap.set(sheetname, rows)
-    //   }
-    //   excelmap.set('contents', contentmap)
-    // });
-
-    return excelmap
   }
 
   async filesListFromBucket(path: string, bucket: string): Promise<string[]> {
@@ -118,25 +96,6 @@ export class AwsService {
       return filelist
     });
   }
-    // file.on('data', function (data) {
-    //   buffers.push(data);
-    // });
-
-    // file.on('end', function() {
-    //   var buffer = Buffer.concat(buffers);
-    //   var workbook = XLSX.read(buffer, {type: 'buffer'});
-      
-    //   const sheetName = workbook.SheetNames[1];
-    //   const sheet = workbook.Sheets[sheetName];
-    //   const rows = XLSX.utils.sheet_to_json(sheet, {
-    //     defval: null,
-    //   })
-    //   console.log(rows)
-
-    //   for (const row of rows) {
-    //     const values = Object.keys(row).map(key => row[key]);
-    //   }
-    // });
 
   async sendEmail(params: SendEmailDto): Promise<string> {
     const payload: SendEmailRequest = {
