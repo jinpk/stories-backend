@@ -17,6 +17,32 @@ export class AppController {
   email(@Query('type') type: string) {
     const nickname = 'david';
     if (type === 'joined') {
+      const welcomeImage = '';
+      return {
+        host: 'http://localhost:3000',
+        title: 'Welcome to',
+        intro: `안녕하세요! Hello, ${nickname}!<br />
+        We are very exited to have you with us on TTMIK Stories.<br /><br />
+        You are going to embark on a very enjoyable and meaningful journey with us.
+        As a Korean learner, you have been learning with various resources, but it has most certainly been difficult to find
+         sufficient reading materials for your current level... until now!<br /><br />
+        With TTMIK Stories, you can improve your Korean through reading, on the go, conveniently on you mobile device.
+         1,500 stories are waiting for your inside. Thease stories have been specially and carefully 
+         created for Korean learners of various levels.<br /><br />
+        The stories are divided into 10 different levels. You can choose a level that is not too challenging for you
+         and start with it! The effective learning tools in our app will help you learn and imporve more effectively.
+         
+         <div class='image-bg'>
+          <img src=${welcomeImage} alt='welcome' />
+         </div>
+
+        You don't need to prepare anything else. Just sit back and start reading your first story.`,
+        button: 'Open TTMIK Stories',
+        caption: '',
+        link: 'https://ttmik.com',
+      };
+    }
+    if (type === 'paymented') {
       return {
         host: 'http://localhost:3000',
         title: "Let's start reading with",

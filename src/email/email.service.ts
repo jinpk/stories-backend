@@ -5,7 +5,9 @@ import { AwsService } from 'src/aws/aws.service';
 export class EmailService {
   constructor(private awsService: AwsService) {}
 
-  sendPaymendtedEmail() {}
+  async sendJoinedEmail() {}
+
+  async sendPaymendtedEmail() {}
 
   async sendPasswordResetEmail(email: string, link: string) {
     let html = '';
