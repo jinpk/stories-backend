@@ -66,11 +66,15 @@ export class UsersService {
       set.fcmToken = body.fcmToken;
     }
 
+    if (body.nickname !== undefined) {
+      set.nickname = body.nickname;
+    }
+
     await this.userModel.findByIdAndUpdate(userId, { $set: set });
   }
 
   async updatePasswordByEmail(email: string, password: string) {
-    throw 'ttmik method not supported yet.'
+    throw 'ttmik method not supported yet.';
     // TTMIK로 비밀번호 재설정 요청
   }
 
