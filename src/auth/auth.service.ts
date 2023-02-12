@@ -1,17 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { AwsService } from 'src/aws/aws.service';
 import { User } from 'src/users/schemas/user.schema';
 import { UsersService } from 'src/users/users.service';
 import { TTMIKJwtPayload } from './interfaces';
-import { Verifi, VerifiDocument } from './schemas/verifi.schema';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectModel(Verifi.name) private verifiModel: Model<VerifiDocument>,
     private usersService: UsersService,
     private jwtService: JwtService,
     private awsService: AwsService,
@@ -22,29 +18,6 @@ export class AuthService {
       secret: this.awsService.getParentJwtSecretKey,
     });
     return payload;
-  }
-
-  async parseVerifyId(verifiId: string) {
-    const verifi = await this.verifiModel.findById(verifiId);
-    if (!verifi || !verifi.verified) {
-      throw new Error('Invalid verifiId');
-    }
-
-    return verifi;
-  }
-
-  async verifyEmailCode(verifiId: string, code: string) {
-    const verifi = await this.verifiModel.findById(verifiId);
-    if (!verifi || verifi.verified) {
-      throw new Error('잘못된 접근입니다.');
-    }
-    if (verifi.code !== code) {
-      return false;
-    }
-
-    verifi.verified = true;
-    await verifi.save();
-    return true;
   }
 
   async genResetPasswordJWT(email: string) {
@@ -61,17 +34,6 @@ export class AuthService {
     if (payload?.action === 'passwordreset') {
       return payload.email;
     }
-  }
-
-  async requestEmailVerify(email: string) {
-    const code = Math.floor(100000 + Math.random() * 900000);
-    const doc = await new this.verifiModel({
-      email,
-      code,
-    }).save();
-
-    //이메일 전송 - 이메일 전송이 필수, 이벤트기반 X
-    return { verifiId: doc._id.toString(), code };
   }
 
   async login(sub: string, isAdmin?: boolean) {
@@ -92,6 +54,7 @@ export class AuthService {
     const user: User = {
       email: payload.email,
       countryCode,
+      nickname: payload.name,
     };
     const sub = await this.usersService.create(user);
     return this.login(sub);

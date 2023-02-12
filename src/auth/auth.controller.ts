@@ -7,7 +7,6 @@ import {
   Request,
   UseGuards,
   UnauthorizedException,
-  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -29,7 +28,6 @@ import {
 import { LocalAuthAdminGuard } from './guard/local-auth.guard';
 import { AdminService } from 'src/admin/admin.service';
 import { TTMIKJwtPayload } from './interfaces';
-import { EmailService } from 'src/email/email.service';
 import { FirebaseService } from 'src/firebase/firebase.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
@@ -82,7 +80,8 @@ export class AuthController {
     description: `**본 서비스는 TTMIK 회원과 미러링 됨.**
     \n\nTTMIK 로그인 시스템에서 발급 받은 JWT_TOKEN으로 요청.
     \n* 스토리즈앱에 가입한적 있다면 로그인후 스토리즈앱 로그인 JWT_TOKEN 발급
-    \n* 가입한적 없다면 자동 가입 처리후 로그인 JWT_TOKEN 발급`,
+    \n* 가입한적 없다면 자동 가입 처리후 로그인 JWT_TOKEN 발급
+    \n* countryCode는 Device에서 받아와 항상 요청 필요`,
   })
   @ApiOkResponse({
     type: TokenDto,
