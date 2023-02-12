@@ -8,4 +8,7 @@ export class CouponDto extends OmitType(Coupon, [
 ]) {
   @ApiProperty({ description: '쿠폰 ID' })
   id: string;
+
+  @ApiProperty({ description: '총 사용 횟수' })
+  usedCount: number;
 }

@@ -1,7 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, ProjectionFields, Types } from 'mongoose';
+import {
+  FilterQuery,
+  Model,
+  PipelineStage,
+  ProjectionFields,
+  Types,
+} from 'mongoose';
 import { PagingResDto } from 'src/common/dto/response.dto';
+import { CommonExcelService, UtilsService } from 'src/common/providers';
+import { SubscriptionStates } from 'src/subscriptions/enums';
+import { EXCEL_COLUMN_LIST, EXCEL_COLUMN_LIST_SENT } from './coupons.constant';
 import { CouponDto } from './dto/coupon.dto';
 import { CreateCouponDto } from './dto/create-coupon.dto';
 import { GetCouponsDto, GetCouponsSentDto } from './dto/get-coupon.dto';
@@ -13,6 +22,8 @@ import { UserCoupon, UserCouponDocument } from './schemas/user-coupon.schema';
 @Injectable()
 export class CouponsService {
   constructor(
+    private utilsService: UtilsService,
+    private commonExcelService: CommonExcelService,
     @InjectModel(Coupon.name) private couponModel: Model<CouponDocument>,
     @InjectModel(UserCoupon.name)
     private userCouponModel: Model<UserCouponDocument>,
@@ -52,32 +63,17 @@ export class CouponsService {
 
   async getPagingCouponSentList(
     query: GetCouponsSentDto,
-  ): Promise<PagingResDto<UserCouponDto>> {
-    const filter: FilterQuery<UserCouponDocument> = {
+  ): Promise<PagingResDto<UserCouponDto> | Buffer> {
+    const filter: FilterQuery<UserCouponDto> = {
       name: { $regex: query.name || '', $options: 'i' },
+      used: { $eq: query.used === '1' },
     };
 
     if (query.userId) {
       filter.userId = new Types.ObjectId(query.userId);
     }
 
-    const projection: ProjectionFields<UserCouponDto> = {
-      _id: 0,
-      subscriptionId: 1,
-      userId: 1,
-      createdAt: 1,
-      userCouponId: '$_id',
-      nickname: '$users.nickname',
-      id: '$coupons._id',
-      name: '$coupons.name',
-      description: '$coupons.description',
-      type: '$coupons.type',
-      start: '$coupons.start',
-      end: '$coupons.end',
-      value: '$coupons.value',
-    };
-
-    const cursor = await this.userCouponModel.aggregate([
+    const lookups: PipelineStage[] = [
       {
         $lookup: {
           from: 'coupons',
@@ -106,22 +102,51 @@ export class CouponsService {
           preserveNullAndEmptyArrays: false,
         },
       },
+      {
+        $lookup: {
+          from: 'subscriptions',
+          foreignField: 'userCouponId',
+          localField: '_id',
+          as: 'subscriptions',
+        },
+      },
+    ];
+
+    const projection: ProjectionFields<UserCouponDto> = {
+      _id: 0,
+      id: '$coupons._id',
+      userCouponId: '$_id',
+      nickname: '$users.nickname',
+      name: '$coupons.name',
+      description: '$coupons.description',
+      type: '$coupons.type',
+      start: '$coupons.start',
+      end: '$coupons.end',
+      value: '$coupons.value',
+      userId: 1,
+      createdAt: 1,
+      used: {
+        $cond: [{ $gte: [{ $size: '$subscriptions' }, 1] }, true, false],
+      },
+    };
+
+    const cursor = await this.userCouponModel.aggregate([
+      ...lookups,
       { $project: projection },
       { $match: filter },
       { $sort: { createdAt: -1 } },
-      {
-        $facet: {
-          metadata: [{ $count: 'total' }],
-          data: [
-            { $skip: (parseInt(query.page) - 1) * parseInt(query.limit) },
-            { $limit: parseInt(query.limit) },
-          ],
-        },
-      },
+      this.utilsService.getCommonMongooseFacet(query),
     ]);
 
     const metdata = cursor[0].metadata;
     const data = cursor[0].data;
+
+    if (query.excel === '1') {
+      return await this.commonExcelService.listToExcelBuffer(
+        EXCEL_COLUMN_LIST_SENT,
+        data,
+      );
+    }
 
     return {
       total: metdata[0]?.total || 0,
@@ -131,23 +156,77 @@ export class CouponsService {
 
   async getPagingCoupons(
     query: GetCouponsDto,
-  ): Promise<PagingResDto<CouponDto>> {
+  ): Promise<PagingResDto<CouponDto> | Buffer> {
     const filter: FilterQuery<CouponDocument> = {
       name: { $regex: query.name || '', $options: 'i' },
       deleted: false,
     };
 
-    const docs = await this.couponModel
-      .find(filter)
-      .limit(parseInt(query.limit))
-      .skip((parseInt(query.page) - 1) * parseInt(query.limit))
-      .sort({ createdAt: -1 });
+    const lookups: PipelineStage[] = [
+      {
+        $lookup: {
+          from: 'subscriptions',
+          let: { couponId: '$_id' },
+          pipeline: [
+            {
+              $lookup: {
+                from: 'usercoupons',
+                let: { couponId: '$$couponId', userCouponId: '$userCouponId' },
+                pipeline: [
+                  {
+                    $match: {
+                      couponId: { $eq: '$$couponId' },
+                      _id: { $eq: '$$userCouponId' },
+                    },
+                  },
+                ],
+                as: 'usedcoupons',
+              },
+            },
+            {
+              $match: {
+                $expr: {
+                  $gte: [{ $size: '$usedcoupons' }, 1],
+                },
+              },
+            },
+          ],
+          as: 'subscriptions',
+        },
+      },
+    ];
 
-    const total = await this.couponModel.countDocuments(filter);
-    const data: CouponDto[] = docs.map((doc) => this._docToCouponDto(doc));
+    const projection: ProjectionFields<CouponDto> = {
+      name: 1,
+      description: 1,
+      type: 1,
+      value: 1,
+      start: 1,
+      end: 1,
+      usedCount: { $size: '$subscriptions' },
+    };
+
+    const cursor = await this.couponModel.aggregate([
+      { $match: filter },
+      ...lookups,
+      { $project: projection },
+      { $sort: { createdAt: -1 } },
+      this.utilsService.getCommonMongooseFacet(query),
+    ]);
+
+    const metdata = cursor[0].metadata;
+    const data = cursor[0].data;
+
+    if (query.excel === '1') {
+      return await this.commonExcelService.listToExcelBuffer(
+        EXCEL_COLUMN_LIST,
+        data,
+      );
+    }
+
     return {
-      total,
-      data,
+      total: metdata[0]?.total || 0,
+      data: data,
     };
   }
 

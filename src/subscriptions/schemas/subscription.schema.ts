@@ -3,6 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty } from 'class-validator';
 import { HydratedDocument, Types, SchemaTypes } from 'mongoose';
 import { AppOS } from 'src/common/enums';
+import { SubscriptionStates } from '../enums';
 
 export type SubscriptionDocument = HydratedDocument<Subscription>;
 
@@ -16,6 +17,12 @@ export class Subscription {
   @ApiProperty({ description: '결제(주문) ID' })
   @IsNotEmpty()
   transactionId: string;
+
+  @Prop({ enum: SubscriptionStates })
+  @ApiProperty({ description: '구독 상태', enum: SubscriptionStates })
+  @IsEnum(SubscriptionStates)
+  @IsNotEmpty()
+  state: string;
 
   @Prop()
   @ApiProperty({ description: '상품 ID (subscriptionId)' })

@@ -13,7 +13,6 @@ export class UserCouponDto extends PickType(
     'start',
     'value',
     'end',
-    'subscriptionId',
     'userId',
   ] as const,
 ) {
@@ -25,6 +24,9 @@ export class UserCouponDto extends PickType(
 
   @ApiProperty({ description: '발송 날짜' })
   createdAt: Date;
+
+  @ApiProperty({ description: '쿠폰 사용 여부' })
+  used: boolean;
 }
 
 export class CreateUserCouponDto {

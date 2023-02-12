@@ -15,4 +15,11 @@ export class GetCouponsSentDto extends GetCouponsDto {
     required: false,
   })
   readonly userId: string;
+
+  @ApiProperty({
+    description: '쿠폰 사용 여부 (only "1" is true)',
+    required: false,
+    enum: ['', '1'],
+  })
+  readonly used: string;
 }

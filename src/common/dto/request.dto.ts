@@ -51,9 +51,9 @@ export class DateReqDto {
 
 export class PagingExcelReqDto extends PagingReqDto {
   @ApiProperty({
-    description: '엑셀 다운로드',
+    description: '엑셀 다운로드 (only "1" is true)',
     required: false,
-    enum: ['', '0', '1'],
+    enum: ['', '1'],
   })
   readonly excel: string;
 }

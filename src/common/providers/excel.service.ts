@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ExcelColumnList } from '../interfaces';
-import * as dayjs from 'dayjs';
 import * as xlsx from 'xlsx';
+import { UtilsService } from './utils.service';
 
 @Injectable()
 export class CommonExcelService {
+  constructor(private utilsService: UtilsService) {}
+
   async listToExcelBuffer(
     columns: ExcelColumnList[],
     data: any[],
@@ -16,19 +18,17 @@ export class CommonExcelService {
         columns.forEach((z) => {
           let nKey = z.label;
           let val = x[z.key];
+
           switch (z.format) {
+            case 'render':
+              obj[nKey] = z.render(x);
+              break;
             case 'enum':
               obj[nKey] = z.enumLabel[val];
               break;
             case 'date':
-              if (val) {
-                obj[nKey] = dayjs(val).format('YYYY-MM-DD');
-              }
-              break;
             case 'date-time':
-              if (val) {
-                obj[nKey] = dayjs(val).format('YYYY-MM-DD HH:mm');
-              }
+              obj[nKey] = this.utilsService.formatDate(val, z.format);
               break;
             default:
               obj[nKey] = val;
@@ -50,7 +50,7 @@ export class CommonExcelService {
       },
     }));
     xlsx.utils.book_append_sheet(workbook, worksheet, 'sheet-0');
-   
+
     const xlsxBuffer = xlsx.write(workbook, {
       bookType: 'xlsx',
       type: 'buffer',
@@ -58,4 +58,6 @@ export class CommonExcelService {
 
     return xlsxBuffer;
   }
+
+ 
 }
