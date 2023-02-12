@@ -37,7 +37,7 @@
       }
       .label {
         font-weight: bold;
-        font-size: 16px;
+        font-size: 18px;
         color: #000;
         margin-top: 0px;
       }
@@ -45,8 +45,27 @@
         color: #722efa;
       }
       .desc {
-        font-size: 14px;
+        font-size: 16px;
+        line-height: 32px;
         text-align: center;
+      }
+      .logo-bg {
+        background-color: #d9d9d9;
+        height: 151px;
+        border-radius: 10px;
+        margin: 2rem 0px;
+      }
+      .button {
+        background-color: #722efa;
+        color: #fff;
+        padding: 18px;
+        font-size: 16px;
+        text-align: center;
+        border-radius: 10px;
+        border: none;
+        width: 100%;
+        cursor: pointer;
+        margin: 1rem 0px;
       }
     </style>
   </head>
@@ -56,25 +75,34 @@
         <img alt="logo" class="logo" src="<%= host %>/assets/images/logo.png" />
       </div>
       <div class="container">
-        <p class="label">
-          Let's start reading with <span>TTMIK Stories!</span>
-        </p>
-        <p class="desc">
-          안녕하세요!<br />
-          <br />
-          ____, welcome aboard TTMIK Stories!<br />
-          <br />
-          You are all set now. Let's start reading!<br />
-          Consistency is key to successful language learning.<br />
-          Try to read at least one story each day, and we'll help you with the
-          rest.<br />
-          Are you ready? Let's go!
-        </p>
+        <!-- title -->
+        <p class="label"><%= title %> <span>TTMIK Stories!</span></p>
+        
+        <!-- logo image -->
+        <div class="logo-bg"></div>
+
+        <!-- intro -->
+        <p class="desc"><%- intro %></p>
+
+        <!-- button -->
+        <% if (button) { %>
+        <button onclick="buttonClick()" class="button"><%- button %></button>
+        <% } %>
+
+        <!-- caption -->
+        <% if (caption) { %>
+        <p class="desc"><%- caption %></p>
+        <% } %>
       </div>
       <div class="copyright">
         <span>you didn't make this request, please contact us.</span>
       </div>
       <div class="built"><span>TTMIK Team</span></div>
     </div>
+    <script type="text/javascript">
+      function buttonClick() {
+        window.open('<%= link %>');
+      }
+    </script>
   </body>
 </html>
