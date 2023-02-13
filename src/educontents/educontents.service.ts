@@ -32,6 +32,7 @@ export class EducontentsService {
 
   async existEduContentById(id: string): Promise<boolean> {
     const educontent = await this.educontentsModel.findById(id);
+    console.log(educontent)
     if (!educontent) {
       return false;
     }
@@ -49,6 +50,10 @@ export class EducontentsService {
       return false;
     }
     return educontent;
+  }
+
+  async findAll(): Promise<EduContents[]> {
+    return this.educontentsModel.find().exec();
   }
 
   async createContentsList(path: string, bucket: string): Promise<UploadContentsDto> {
@@ -131,6 +136,7 @@ export class EducontentsService {
             }
           }
         });
+        console.log(vocabs)
         await new this.vocabModel(vocabs).save();
       }
       await new this.educontentsModel(educontent).save();

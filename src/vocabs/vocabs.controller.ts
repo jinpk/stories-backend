@@ -6,8 +6,7 @@ import {
   Patch,
   Post,
   Query,
-  UseInterceptors,
-  UploadedFile,
+  NotFoundException,
  } from '@nestjs/common';
  import {
   ApiBearerAuth,
@@ -23,6 +22,7 @@ import { VocabTestDto } from './dto/vocab-test.dto';
 import { VocabsService } from './vocabs.service';
 import { StaticsVocabDto } from './dto/vocab-statics.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Public } from 'src/auth/decorator/auth.decorator';
 
 @Controller('vocabs')
 @ApiTags('vocabs')
@@ -31,7 +31,7 @@ export class VocabsController {
     constructor(private readonly vocabsService: VocabsService) {}
     @Patch('coretype/:vocabId')
     @ApiOperation({
-      summary: '(ADMIN) 핵심 단어 적용, USE or UNUSE',
+      summary: '(ADMIN) 핵심 단어 적용, Y or N',
     })
     @ApiBody({ type: CoreTypeUpdateDto })
     async patchCoreType(@Param('vocabId') vocabId: string) {}
@@ -67,15 +67,19 @@ export class VocabsController {
     async getStaticsVocab(@Query() qeury: GetStaticsVocabDto) {}
     
     @Get(':vocabId')
+    @Public()
     @ApiOperation({
       summary: 'Vocab 상세 조회',
     })
     @ApiOkResponse({
+      status: 200,
       type: VocabDto,
     })
     async getVocab(@Param('vocabId') vocabId: string) {
-      const vocab = new VocabDto();
-      return vocab;
+      if (!(await this.vocabsService.existVocabById(vocabId))) {
+        throw new NotFoundException('NotFound Contents');
+      }
+      return await this.vocabsService.getVocabById(vocabId);
     }
 
     @Get('')

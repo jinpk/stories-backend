@@ -4,15 +4,21 @@ export type PreviewVocabulary = 'Y' | 'N';
 
 export class VocabDto{
   @ApiProperty({})
+  id: string;
+
+  @ApiProperty({})
   contentsSerialNum: string;
 
   @ApiProperty({})
   level: string;
 
+  @ApiProperty({})
+  title: string;
+
   @ApiProperty({
     description: '연결된 스토리',
   })
-  story: string;
+  connStory: string;
 
   @ApiProperty({})
   vocab: string;
@@ -20,18 +26,18 @@ export class VocabDto{
   @ApiProperty({
     description: '오디오 파일 저장 경로',
   })
-  audio_file_path: string;
+  audioFilePath: string;
 
   @ApiProperty({
     description: '연결된 컨텐츠 문장',
   })
-  sentence: string;
+  connSentence: string;
 
   @ApiProperty({})
   value: string;
 
   @ApiProperty({})
-  meaning_en: string;
+  meaningEn: string;
 
   @ApiProperty({})
   previewVocabulary: PreviewVocabulary;
