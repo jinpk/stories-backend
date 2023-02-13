@@ -3,10 +3,11 @@ import {
   Get,
   Param,
   Delete,
-  Patch,
+  Put,
   Post,
   Query,
   NotFoundException,
+  Body,
  } from '@nestjs/common';
  import {
   ApiBearerAuth,
@@ -16,7 +17,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
-import { VocabDto, CoreTypeUpdateDto, CoreVocabDto, ReviewVocabDto } from './dto/vocab.dto';
+import { VocabDto, CoreVocabDto, ReviewVocabDto } from './dto/vocab.dto';
+import { UpdateVocabDto } from './dto/update-vocab.dto';
 import { GetVocabsDto, GetStaticsVocabDto } from './dto/get-vocab.dto';
 import { VocabTestDto } from './dto/vocab-test.dto';
 import { VocabsService } from './vocabs.service';
@@ -29,23 +31,27 @@ import { Public } from 'src/auth/decorator/auth.decorator';
 @ApiBearerAuth()
 export class VocabsController {
     constructor(private readonly vocabsService: VocabsService) {}
-    @Patch('coretype/:vocabId')
-    @ApiOperation({
-      summary: '(ADMIN) 핵심 단어 적용, Y or N',
-    })
-    @ApiBody({ type: CoreTypeUpdateDto })
-    async patchCoreType(@Param('vocabId') vocabId: string) {}
-    
-    @Patch('vocab/:vocabId')
+    @Put(':vocabId')
     @ApiOperation({
       summary: '(ADMIN) 등록 단어 수정',
     })
-    @ApiBody({ type: VocabDto })
-    async patchVocab(@Param('vocabId') vocabId: string) {}
+    async updateVocab(@Body() body: UpdateVocabDto, @Param('vocabId') vocabId: string) {
+      console.log(body)
+      if (!(await this.vocabsService.existVocabById(vocabId))) {
+        throw new NotFoundException('NotFound Vocab');
+      }
+      await this.vocabsService.updateVocabById(vocabId, body)
+    }
 
     @Delete(':vocabId')
     @ApiOperation({ summary: '(ADMIN) 단어 삭제' })
-    deleteVocab(@Param('vocabId') vocabId: string) {}
+    @ApiOkResponse({
+      status: 200,
+      type: String,
+    })
+    async deleteVocab(@Param('vocabId') vocabId: string) {
+      return await this.vocabsService.deleteVocab(vocabId);
+    }
 
     @Post('test/:vocabId')
     @ApiOperation({
@@ -67,7 +73,6 @@ export class VocabsController {
     async getStaticsVocab(@Query() qeury: GetStaticsVocabDto) {}
     
     @Get(':vocabId')
-    @Public()
     @ApiOperation({
       summary: 'Vocab 상세 조회',
     })
@@ -77,7 +82,7 @@ export class VocabsController {
     })
     async getVocab(@Param('vocabId') vocabId: string) {
       if (!(await this.vocabsService.existVocabById(vocabId))) {
-        throw new NotFoundException('NotFound Contents');
+        throw new NotFoundException('NotFound Vocab');
       }
       return await this.vocabsService.getVocabById(vocabId);
     }
@@ -87,7 +92,9 @@ export class VocabsController {
       summary: '(ADMIN) Vocab 조회',
     })
     @ApiOkResponsePaginated(VocabDto)
-    async getListVocab(@Query() query: GetVocabsDto) {}
+    async listVocabs(@Query() query: GetVocabsDto) {
+      return await this.vocabsService.getPagingVocabs(query)
+    }
 
     @Get('corevocab/:contentsId')
     @ApiOperation({

@@ -1,11 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { now, HydratedDocument } from 'mongoose';
 import { TimeLine } from '../dto/educontents.dto';
 
 export type EduContentsDocument = HydratedDocument<EduContents>;
 export type QuizsDocument = HydratedDocument<Quizs>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class EduContents {
   @Prop()
   contentsSerialNum: string;
@@ -15,6 +15,9 @@ export class EduContents {
 
   @Prop()
   title: string;
+
+  @Prop()
+  content: string;
 
   @Prop()
   vocabCount: number;
@@ -30,9 +33,12 @@ export class EduContents {
 
   @Prop()
   timeLine: TimeLine[];
+
+  @Prop({default: now()})
+  createdAt?: Date;
 }
 
-@Schema()
+@Schema({ timestamps: true })
 export class Quizs {
   @Prop()
   contentsSerialNum: string;
@@ -51,6 +57,9 @@ export class Quizs {
 
   @Prop()
   options: string[];
+
+  @Prop({default: now()})
+  createdAt?: Date;
 }
 
 export const EduContentsSchema = SchemaFactory.createForClass(EduContents);

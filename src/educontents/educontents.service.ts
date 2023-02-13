@@ -66,7 +66,6 @@ export class EducontentsService {
     }    
     await this.create(datas)
     total = datas.length
-    console.log(total)
 
     const dto = new UploadContentsDto();
     dto.total = total;
@@ -87,6 +86,7 @@ export class EducontentsService {
         audioFilePath: data.get('contents').get('0-스토리')[0].audioFilePath,
         vocabCount: 0,
         questionCount: 0,
+        content: data.get('contents').get('0-스토리')[0].content,
         timeLine: data.get('contents').get('1-타임라인'),
       };
       // 퀴즈
@@ -136,7 +136,6 @@ export class EducontentsService {
             }
           }
         });
-        console.log(vocabs)
         await new this.vocabModel(vocabs).save();
       }
       await new this.educontentsModel(educontent).save();
@@ -154,6 +153,7 @@ export class EducontentsService {
     dto.imagePath = doc.imagePath;
     dto.audioFilePath = doc.audioFilePath;
     dto.timeLine = doc.timeLine;
+    dto.content = doc.content;
 
     return dto;
   }

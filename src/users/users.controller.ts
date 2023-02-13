@@ -62,13 +62,14 @@ export class UsersController {
   @ApiOkResponse({
     type: UpdateUserDto,
   })
-  async updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
-    const user = await this.usersService.findById(id);
-    if (!user) {
-      throw new NotFoundException();
-    }
+  async updateUser(@Body() body: UpdateUserDto) {
+    console.log(body)
+    // const user = await this.usersService.findById(id);
+    // if (!user) {
+    //   throw new NotFoundException();
+    // }
 
-    return await this.usersService.updateById(id, body);
+    // return await this.usersService.updateById(id, body);
   }
 
   @Get(':id')

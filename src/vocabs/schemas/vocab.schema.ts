@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { now, HydratedDocument } from 'mongoose';
 import { PreviewVocabulary } from '../dto/vocab.dto';
 
 export type VocabDocument = HydratedDocument<Vocab>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Vocab {
   @Prop()
   contentsSerialNum: string;
@@ -26,6 +26,9 @@ export class Vocab {
 
   @Prop()
   previewVocabulary: PreviewVocabulary;
+
+  @Prop({default: now()})
+  createdAt?: Date;
 }
 
 export const VocabSchema = SchemaFactory.createForClass(Vocab);

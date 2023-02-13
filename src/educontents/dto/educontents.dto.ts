@@ -33,6 +33,9 @@ export class EduContentsDto{
   title: string;
 
   @ApiProperty({})
+  content: string;
+
+  @ApiProperty({})
   vocabCount: number;
 
   @ApiProperty({})
