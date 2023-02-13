@@ -19,7 +19,7 @@ import {
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
 import { VocabDto, CoreVocabDto, ReviewVocabDto } from './dto/vocab.dto';
 import { UpdateVocabDto } from './dto/update-vocab.dto';
-import { GetVocabsDto, GetStaticsVocabDto } from './dto/get-vocab.dto';
+import { GetVocabsDto, GetStaticsVocabDto, GetCoreVocabDto } from './dto/get-vocab.dto';
 import { VocabTestDto } from './dto/vocab-test.dto';
 import { VocabsService } from './vocabs.service';
 import { StaticsVocabDto } from './dto/vocab-statics.dto';
@@ -65,13 +65,6 @@ export class VocabsController {
       return true;
     }
 
-    @Get('statics')
-    @ApiOperation({
-      summary: '(ADMIN) Vocab 퀴즈 이용 통계',
-    })
-    @ApiOkResponsePaginated(StaticsVocabDto)
-    async getStaticsVocab(@Query() qeury: GetStaticsVocabDto) {}
-    
     @Get(':vocabId')
     @ApiOperation({
       summary: 'Vocab 상세 조회',
@@ -87,6 +80,15 @@ export class VocabsController {
       return await this.vocabsService.getVocabById(vocabId);
     }
 
+    // @Get('statics')
+    // @ApiOperation({
+    //   summary: '(ADMIN) Vocab 퀴즈 이용 통계',
+    // })
+    // @ApiOkResponsePaginated(StaticsVocabDto)
+    // async getStaticsVocab(@Query() qeury: GetStaticsVocabDto) {
+    //   return await this.vocabsService.getStaticVocabs(query)
+    // }
+
     @Get('')
     @ApiOperation({
       summary: '(ADMIN) Vocab 조회',
@@ -96,12 +98,14 @@ export class VocabsController {
       return await this.vocabsService.getPagingVocabs(query)
     }
 
-    @Get('corevocab/:contentsId')
+    @Get('corevocab/:serialNum')
     @ApiOperation({
-      summary: '시리즈별 핵심 Vocab 목록 조회',
+      summary: '핵심 Vocab 목록 조회 By serialNum',
     })
     @ApiOkResponsePaginated(CoreVocabDto)
-    async getListCoreVocab(@Param('contentsId') contentsId: string) {}
+    async getListCoreVocab(@Query() query: GetCoreVocabDto) {
+      return await this.vocabsService.getPagingCoreVocabsBySerialNum(query)
+    }
 
     @Post('reviewquiz/:reveiwVocabId')
     @ApiOperation({

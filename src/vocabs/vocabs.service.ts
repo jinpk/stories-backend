@@ -12,7 +12,7 @@ import { PagingResDto } from 'src/common/dto/response.dto';
 import { Vocab, VocabDocument } from './schemas/vocab.schema';
 import { VocabDto, CoreVocabDto, ReviewVocabDto } from './dto/vocab.dto';
 import { UpdateVocabDto } from './dto/update-vocab.dto';
-import { GetVocabsDto, GetStaticsVocabDto } from './dto/get-vocab.dto';
+import { GetVocabsDto, GetStaticsVocabDto, GetCoreVocabDto } from './dto/get-vocab.dto';
 import { EXCEL_COLUMN_LIST } from './vocabs.constant';
 import { CommonExcelService, UtilsService } from 'src/common/providers';
 
@@ -157,4 +157,39 @@ export class VocabsService {
     };
   }
 
+  async getPagingCoreVocabsBySerialNum(
+    query: GetCoreVocabDto,
+  ): Promise<PagingResDto<VocabDto> | Buffer> {
+    var filter: FilterQuery<VocabDocument> = {contentsSerialNum: ''}
+    filter = {
+      contentsSerialNum: { $eq: query.contentsSerialNum },
+      previewVocabulary: { $eq: 'Y' },
+    };
+
+    const projection: ProjectionFields<VocabDto> = {
+      _id: 1,
+      contentsSerialNum: 1,
+      vocab: 1,
+      audioFilePath: 1,
+      meaningEn: 1,
+      value: 1,
+      connSentence: 1,
+      previewVocabulary: 1,
+    };
+
+    const cursor = await this.vocabModel.aggregate([
+      { $match: filter },
+      { $project: projection },
+      { $sort: { createdAt: -1 } },
+      this.utilsService.getCommonMongooseFacet(query),
+    ]);
+    console.log(cursor)
+    const metdata = cursor[0].metadata;
+    const data = cursor[0].data;
+
+    return {
+      total: metdata[0]?.total || 0,
+      data: data,
+    };
+  }
 }

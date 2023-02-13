@@ -1,7 +1,6 @@
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
-import { ListReqDto } from 'src/common/dto/request.dto';
 import { VocabDto } from './vocab.dto';
-import { PagingExcelReqDto } from 'src/common/dto/request.dto';
+import { PagingReqDto, PagingExcelReqDto } from 'src/common/dto/request.dto';
 
 type VocabType = 'ADDED' | 'STUDIED'
 
@@ -48,4 +47,9 @@ export class GetStaticsVocabDto extends PagingExcelReqDto {
     required: false,
   })
   readonly end: string;
+}
+
+export class GetCoreVocabDto extends PagingReqDto{
+  @ApiProperty({})
+  contentsSerialNum: string
 }
