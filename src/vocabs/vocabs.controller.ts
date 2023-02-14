@@ -53,18 +53,6 @@ export class VocabsController {
       return await this.vocabsService.deleteVocab(vocabId);
     }
 
-    @Post('test/:vocabId')
-    @ApiOperation({
-      summary: 'Vocab 테스트 제출',
-    })
-    @ApiBody({ type: VocabTestDto })
-    @ApiOkResponse({
-      type: Boolean,
-    })
-    async checkVocabTest(@Query('userId') userId: string, @Param('vocabId') vocabId: string) {
-      return true;
-    }
-
     @Get(':vocabId')
     @ApiOperation({
       summary: 'Vocab 상세 조회',
@@ -80,15 +68,6 @@ export class VocabsController {
       return await this.vocabsService.getVocabById(vocabId);
     }
 
-    // @Get('statics')
-    // @ApiOperation({
-    //   summary: '(ADMIN) Vocab 퀴즈 이용 통계',
-    // })
-    // @ApiOkResponsePaginated(StaticsVocabDto)
-    // async getStaticsVocab(@Query() qeury: GetStaticsVocabDto) {
-    //   return await this.vocabsService.getStaticVocabs(query)
-    // }
-
     @Get('')
     @ApiOperation({
       summary: '(ADMIN) Vocab 조회',
@@ -100,8 +79,8 @@ export class VocabsController {
 
     @Get('corevocab/:serialNum')
     @ApiOperation({
-      summary: '핵심 Vocab 목록 조회 By serialNum',
-      description: "contentsSerialNumber 사용, 각 스토리에 해당하는 핵심 단어 목록 호출"
+      summary: 'Vocab 목록 조회 By serialNum',
+      description: "contentsSerialNumber 사용, 각 스토리에 해당하는 단어 목록 호출, 'Y'인 경우 핵심단어만, 'N'인 경우 전체 단어"
     })
     @ApiOkResponsePaginated(CoreVocabDto)
     async getListCoreVocab(@Query() query: GetCoreVocabDto) {

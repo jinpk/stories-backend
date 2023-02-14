@@ -193,10 +193,16 @@ export class VocabsService {
     query: GetCoreVocabDto,
   ): Promise<PagingResDto<VocabDto> | Buffer> {
     var filter: FilterQuery<VocabDocument> = {contentsSerialNum: ''}
-    filter = {
-      contentsSerialNum: { $eq: query.contentsSerialNum },
-      previewVocabulary: { $eq: 'Y' },
-    };
+    if (query.previewVocabulary == 'N') {
+      filter = {
+        contentsSerialNum: { $eq: query.contentsSerialNum },
+      };
+    } else {
+      filter = {
+        contentsSerialNum: { $eq: query.contentsSerialNum },
+        previewVocabulary: { $eq: 'Y' },
+      };
+    }
 
     const projection: ProjectionFields<VocabDto> = {
       _id: 1,
