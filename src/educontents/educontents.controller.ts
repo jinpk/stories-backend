@@ -23,7 +23,7 @@ import { EduContentsDto, ContentsQuizDto, UserEduInfoDto, ContentsQuizResultDto,
 import { AudioPlayerDto } from './dto/audioplayer.dto';
 import { EduProgressDto } from './dto/eduprogress.dto';
 import { GetListEduContentsDto, GetListQuizDto, GetContentsQuizResultDto} from './dto/get-educontents.dto';
-import { UpdateEduContentsDto } from './dto/update-educontents.dto';
+import { UpdateEduContentsDto, UpdateQuizsDto } from './dto/update-educontents.dto';
 import { GetListAudioPlayerDto } from './dto/get-audioplayer.dto';
 import { EducontentsService } from './educontents.service';
 import { FilesFromBucketDto } from '../aws/dto/s3.dto'
@@ -64,7 +64,20 @@ export class EducontentsController {
   @ApiOperation({
     summary: '(ADMIN) 컨텐츠 단어 퀴즈 수정',
   })
-  async patchContentsQuiz(@Param('quizId') quizId: string, @Request() req) {
+  @ApiBody({
+    type: UpdateQuizsDto,
+  })
+  async updateContentsQuiz(
+    @Param('quizId') quizId: string,
+    @Request() req,
+    @Body() body) {
+      if (!req.user.isAdmin) {
+        throw new UnauthorizedException('Not an Admin')
+      }
+      if (!(await this.educontentsService.existQuizsById(quizId))) {
+        throw new NotFoundException('NotFound Quiz');
+      }
+      return await this.educontentsService.updateQuizsById(quizId, body);
   }
 
   @Delete('quiz/:quizId')
@@ -75,6 +88,10 @@ export class EducontentsController {
     if (!req.user.isAdmin) {
       throw new UnauthorizedException('Not an Admin')
     }
+    if (!(await this.educontentsService.existQuizsById(quizId))) {
+      throw new NotFoundException('NotFound Quiz');
+    }
+    return await this.educontentsService.deleteQuizs(quizId);
   }
 
   @Put(':educontentsId')
@@ -89,6 +106,9 @@ export class EducontentsController {
       if (!req.user.isAdmin) {
         throw new UnauthorizedException('Not an Admin')
       }
+      if (!(await this.educontentsService.existEduContentById(educontentsId))) {
+        throw new NotFoundException('NotFound Contents');
+      }
       return await this.educontentsService.updateEduContentsById(educontentsId, body)
   }
 
@@ -101,6 +121,9 @@ export class EducontentsController {
     @Request() req) {
       if (!req.user.isAdmin) {
         throw new UnauthorizedException('Not an Admin')
+      }
+      if (!(await this.educontentsService.existEduContentById(educontentsId))) {
+        throw new NotFoundException('NotFound Contents');
       }
       return await this.educontentsService.deleteEduContents(educontentsId);
   }

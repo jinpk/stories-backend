@@ -17,7 +17,7 @@ import {
 import { PagingResDto } from 'src/common/dto/response.dto';
 import { Vocab, VocabDocument } from '../vocabs/schemas/vocab.schema';
 import { EduContentsDto, UploadContentsDto } from './dto/educontents.dto';
-import { UpdateEduContentsDto } from './dto/update-educontents.dto';
+import { UpdateEduContentsDto, UpdateQuizsDto } from './dto/update-educontents.dto';
 import { GetListEduContentsDto } from './dto/get-educontents.dto';
 import { AwsService } from '../aws/aws.service';
 import { EXCEL_COLUMN_LIST } from './educontents.constant';
@@ -44,6 +44,25 @@ export class EducontentsService {
     return educontents;
   }
 
+  async deleteQuizs(id: string) {
+    await this.quizsModel.findByIdAndDelete(id);
+    return id
+  }
+
+  async updateQuizsById(id: string, body: UpdateQuizsDto) {
+    await this.quizsModel.findByIdAndUpdate(id, { 
+      $set: {body, updatedAt: now()}
+    });
+  }
+
+  async existQuizsById(id: string): Promise<boolean> {
+    const quiz = await this.quizsModel.findById(id);
+    if (!quiz) {
+      return false;
+    }
+    return true;
+  }
+
   async deleteEduContents(id: string) {
     await this.educontentsModel.findByIdAndDelete(id);
     return id
@@ -57,7 +76,6 @@ export class EducontentsService {
 
   async existEduContentById(id: string): Promise<boolean> {
     const educontent = await this.educontentsModel.findById(id);
-    console.log(educontent)
     if (!educontent) {
       return false;
     }

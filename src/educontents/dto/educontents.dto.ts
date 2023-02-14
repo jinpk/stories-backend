@@ -11,14 +11,6 @@ export class TimeLine {
     sentence: string;
 }
 
-export class ChoiceAnswer {
-    @ApiProperty({})
-    choice: string;
-
-    @ApiProperty({})
-    answer: string;
-}
-
 export class EduContentsDto{
   @ApiProperty({})
   id: string;
@@ -61,13 +53,16 @@ export class ContentsQuizDto{
     detailType: DetailType;
   
     @ApiProperty({})
-    quiz: string;
+    question: string;
 
     @ApiProperty({})
-    example: string;
+    passage: string;
 
     @ApiProperty({})
-    choiceAnswer: ChoiceAnswer[];
+    answer: string[];
+
+    @ApiProperty({})
+    options: string[];
 }
 
 export class ContentsQuizResultDto{
