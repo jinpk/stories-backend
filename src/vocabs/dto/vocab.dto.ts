@@ -95,27 +95,34 @@ export class CoreVocabDto{
 
 export class ReviewVocabDto{
   @ApiProperty({})
+  @IsString()
+  id: string;
+
+  @ApiProperty({})
+  @IsString()
   vocabId: string;
 
   @ApiProperty({})
+  @IsString()
   vocab: string;
 
   @ApiProperty({
     description: '오디오 파일 저장 경로',
   })
-  audio_file_path: string;
+  @IsString()
+  audioFilePath: string;
 
   @ApiProperty({
     description: '연결된 컨텐츠 문장',
   })
-  sentence: string;
+  @IsString()
+  connSentence: string;
 
   @ApiProperty({})
+  @IsString()
   value: string;
 
   @ApiProperty({})
-  meaning_en: string;
-
-  @ApiProperty({})
-  multiple: string[];
+  @IsString()
+  meaningEn: string;
 }

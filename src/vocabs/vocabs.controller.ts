@@ -8,6 +8,7 @@ import {
   Query,
   NotFoundException,
   Body,
+  Request,
  } from '@nestjs/common';
  import {
   ApiBearerAuth,
@@ -19,7 +20,7 @@ import {
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
 import { VocabDto, CoreVocabDto, ReviewVocabDto } from './dto/vocab.dto';
 import { UpdateVocabDto } from './dto/update-vocab.dto';
-import { GetVocabsDto, GetStaticsVocabDto, GetCoreVocabDto } from './dto/get-vocab.dto';
+import { GetVocabsDto, GetReviewVocabDto, GetCoreVocabDto } from './dto/get-vocab.dto';
 import { VocabTestDto } from './dto/vocab-test.dto';
 import { VocabsService } from './vocabs.service';
 import { StaticsVocabDto } from './dto/vocab-statics.dto';
@@ -36,7 +37,6 @@ export class VocabsController {
       summary: '(ADMIN) 등록 단어 수정',
     })
     async updateVocab(@Body() body: UpdateVocabDto, @Param('vocabId') vocabId: string) {
-      console.log(body)
       if (!(await this.vocabsService.existVocabById(vocabId))) {
         throw new NotFoundException('NotFound Vocab');
       }
@@ -101,30 +101,54 @@ export class VocabsController {
     @Get('corevocab/:serialNum')
     @ApiOperation({
       summary: '핵심 Vocab 목록 조회 By serialNum',
+      description: "contentsSerialNumber 사용, 각 스토리에 해당하는 핵심 단어 목록 호출"
     })
     @ApiOkResponsePaginated(CoreVocabDto)
     async getListCoreVocab(@Query() query: GetCoreVocabDto) {
       return await this.vocabsService.getPagingCoreVocabsBySerialNum(query)
     }
 
-    @Post('reviewquiz/:reveiwVocabId')
+    @Post('reviewquiz/:vocabId')
     @ApiOperation({
       summary: '사용자 review quiz단어 등록',
     })
-    async saveUserReviewVocab(@Param('userId') userId: string, @Param('reveiwVocabId') reveiwVocabId: string) {}
-
-    @Delete('reviewquiz/:reveiwVocabId')
-    @ApiOperation({
-      summary: '사용자 review quiz단어 삭제',
+    @ApiOkResponse({
+      status: 200,
+      type: String,
     })
-    async deleteUserReviewVocab(@Param('reveiwVocabId') reveiwVocabId: string) {}
+    async saveUserReviewVocab(@Request() req, @Param('vocabId') vocabId: string) {
+      if (!(await this.vocabsService.existVocabById(vocabId))) {
+        throw new NotFoundException('NotFound Vocab');
+      }
+      return await this.vocabsService.createReviewVocab(req.user.id, vocabId)
+    }
+
+    @Put('reviewquiz/:reviewvocabId')
+    @ApiOperation({
+      summary: '사용자 review quiz단어 완료',
+      description: 'complete을 false => true로 업데이트'
+    })
+    @ApiOkResponse({
+      status: 200,
+      type: String,
+    })
+    async updateUserReviewVocab(@Request() req, @Param('reviewvocabId') reviewvocabId: string) {
+      if (!(await this.vocabsService.existReviewVocabById(req.user.id, reviewvocabId))) {
+        throw new NotFoundException('NotFound ReviewVocab');
+      }
+      return await this.vocabsService.updateReviewVocabById(reviewvocabId)
+    }
 
     @Get('reviewquiz/:userId')
     @ApiOperation({
-      summary: '사용자 review quiz단어 목록 조회',
+      summary: '사용자 review quiz 단어 목록 조회',
+      description: 'total: 남은 갯수, completed: 완료한 갯수',
     })
     @ApiOkResponsePaginated(ReviewVocabDto)
-    async getListUserReviewVocab(@Param('userId') userId: string) {}
-
-    // 사용자 review 단어 완료숫자 조회 
+    async getListUserReviewVocab(@Request() req, @Param('userId') userId: string) {
+      if (req.user.id != userId) {
+        throw new NotFoundException('NotFound Same user');
+      }
+      return await this.vocabsService.getPagingReviewVocabs(userId)
+    }
 }

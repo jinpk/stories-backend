@@ -7,3 +7,14 @@ export class PagingResDto<T> {
   })
   total: number;
 }
+
+export class ReviewVocabPagingResDto<T> {
+  data: T[];
+  @ApiProperty({
+    description: 'total',
+  })
+  total: number;
+
+  completed: number;
+}
+

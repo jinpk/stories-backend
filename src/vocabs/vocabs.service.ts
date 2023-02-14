@@ -8,11 +8,12 @@ import {
   ProjectionFields,
   Types,
 } from 'mongoose';
-import { PagingResDto } from 'src/common/dto/response.dto';
+import { PagingResDto, ReviewVocabPagingResDto } from 'src/common/dto/response.dto';
 import { Vocab, VocabDocument } from './schemas/vocab.schema';
+import { ReviewVocab, ReviewVocabDocument } from './schemas/review-vocab.schema';
 import { VocabDto, CoreVocabDto, ReviewVocabDto } from './dto/vocab.dto';
 import { UpdateVocabDto } from './dto/update-vocab.dto';
-import { GetVocabsDto, GetStaticsVocabDto, GetCoreVocabDto } from './dto/get-vocab.dto';
+import { GetVocabsDto, GetReviewVocabDto, GetCoreVocabDto } from './dto/get-vocab.dto';
 import { EXCEL_COLUMN_LIST } from './vocabs.constant';
 import { CommonExcelService, UtilsService } from 'src/common/providers';
 
@@ -22,6 +23,7 @@ export class VocabsService {
     private utilsService: UtilsService,
     private commonExcelService: CommonExcelService,
     @InjectModel(Vocab.name) private vocabModel: Model<VocabDocument>,
+    @InjectModel(ReviewVocab.name) private reviewvocabModel: Model<ReviewVocabDocument>,
   ) {}
 
   async deleteVocab(id: string) {
@@ -41,6 +43,36 @@ export class VocabsService {
       return false;
     }
     return true;
+  }
+
+  async existReviewVocabById(user_id, id: string): Promise<boolean> {
+    const reviewvocab = await this.reviewvocabModel.findById(id);
+    if (!reviewvocab) {
+      return false;
+    }
+    if (reviewvocab.userId != user_id) {
+      return false;
+    }
+    return true;
+  }
+
+  async createReviewVocab(id: string, vocab_id: string) {
+    var reviewVocab: ReviewVocab = new ReviewVocab()
+    var objVocabId = new Types.ObjectId(vocab_id)
+    reviewVocab = {
+      userId: id,
+      vocabId: objVocabId,
+      complete: false,
+    }
+    const result = await new this.reviewvocabModel(reviewVocab).save()
+    return result._id.toString()
+  }
+
+  async updateReviewVocabById(vocab_id: string) {
+    await this.reviewvocabModel.findByIdAndUpdate(vocab_id, { 
+      $set: {complete: true, updatedAt: now()}
+    });
+    return vocab_id
   }
 
   async getVocabById(id: string): Promise<VocabDto> {
@@ -183,12 +215,76 @@ export class VocabsService {
       { $sort: { createdAt: -1 } },
       this.utilsService.getCommonMongooseFacet(query),
     ]);
-    console.log(cursor)
+
     const metdata = cursor[0].metadata;
     const data = cursor[0].data;
 
     return {
       total: metdata[0]?.total || 0,
+      data: data,
+    };
+  }
+
+  async getPagingReviewVocabs(
+    user_id: string,
+  ): Promise<ReviewVocabPagingResDto<ReviewVocabDto> | Buffer> {
+    var query = new GetReviewVocabDto()
+    query.userId = user_id;
+    query.page = '1';
+    query.limit = '1000';
+
+    const lookups: PipelineStage[] = [
+      {
+        $lookup: {
+          from: 'vocabs',
+          localField: 'vocabId',
+          foreignField: '_id',
+          as: 'vocabs',
+        },
+      },
+      {
+        $unwind: {
+          path: '$vocabs',
+          preserveNullAndEmptyArrays: false,
+        },
+      },
+    ];
+
+    var filter: FilterQuery<ReviewVocabDocument> = {userId: {}}
+    filter = {
+      userId: { $eq: query.userId },
+      complete: { $eq: false },
+    };
+
+    const projection: ProjectionFields<VocabDto> = {
+      _id: 1,
+      vocab: "$vocabs.vocab",
+      audioFilePath: "$vocabs.audioFilePath",
+      meaningEn: "$vocabs.meaningEn",
+      value: "$vocabs.value",
+      connSentence: "$vocabs.connSentence",
+      complete: 1,
+    };
+
+    const cursor = await this.reviewvocabModel.aggregate([
+      ...lookups,
+      { $match: filter },
+      { $project: projection },
+      { $sort: { createdAt: -1 } },
+      this.utilsService.getCommonMongooseFacet(query),
+    ]);
+
+    const metdata = cursor[0].metadata;
+    const data = cursor[0].data;
+
+    const completed_count = await this.reviewvocabModel.find({
+      userId: { $eq: query.userId },
+      complete: { $eq: true },
+    }).count();
+
+    return {
+      total: metdata[0]?.total || 0,
+      completed: completed_count || 0,
       data: data,
     };
   }

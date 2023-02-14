@@ -1,6 +1,7 @@
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
-import { VocabDto } from './vocab.dto';
 import { PagingReqDto, PagingExcelReqDto } from 'src/common/dto/request.dto';
+import { IsString } from 'class-validator';
+import { Types } from 'mongoose';
 
 type VocabType = 'ADDED' | 'STUDIED'
 
@@ -52,4 +53,9 @@ export class GetStaticsVocabDto extends PagingExcelReqDto {
 export class GetCoreVocabDto extends PagingReqDto{
   @ApiProperty({})
   contentsSerialNum: string
+}
+
+export class GetReviewVocabDto extends PagingReqDto{
+  @ApiProperty({})
+  userId: string;
 }
