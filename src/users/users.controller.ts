@@ -39,7 +39,6 @@ export class UsersController {
     @Param('id') id: string,
     @Body() body: DeleteUserDto,
   ) {
-    console.log(body, id);
     if (req.user.id !== id && !req.user.isAdmin) {
       throw new UnauthorizedException();
     }

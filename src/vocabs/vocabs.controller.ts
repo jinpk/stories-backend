@@ -7,6 +7,7 @@ import {
   Post,
   Query,
   NotFoundException,
+  UnauthorizedException,
   Body,
   Request,
  } from '@nestjs/common';
@@ -21,7 +22,6 @@ import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator
 import { VocabDto, CoreVocabDto, ReviewVocabDto } from './dto/vocab.dto';
 import { UpdateVocabDto } from './dto/update-vocab.dto';
 import { GetVocabsDto, GetReviewVocabDto, GetCoreVocabDto } from './dto/get-vocab.dto';
-import { VocabTestDto } from './dto/vocab-test.dto';
 import { VocabsService } from './vocabs.service';
 import { StaticsVocabDto } from './dto/vocab-statics.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -36,11 +36,17 @@ export class VocabsController {
     @ApiOperation({
       summary: '(ADMIN) 등록 단어 수정',
     })
-    async updateVocab(@Body() body: UpdateVocabDto, @Param('vocabId') vocabId: string) {
-      if (!(await this.vocabsService.existVocabById(vocabId))) {
-        throw new NotFoundException('NotFound Vocab');
-      }
-      await this.vocabsService.updateVocabById(vocabId, body)
+    async updateVocab(
+      @Body() body: UpdateVocabDto,
+      @Param('vocabId') vocabId: string,
+      @Request() req) {
+        if (!req.user.isAdmin) {
+          throw new UnauthorizedException('Not an Admin')
+        }
+        if (!(await this.vocabsService.existVocabById(vocabId))) {
+          throw new NotFoundException('NotFound Vocab');
+        }
+        await this.vocabsService.updateVocabById(vocabId, body)
     }
 
     @Delete(':vocabId')
@@ -49,7 +55,13 @@ export class VocabsController {
       status: 200,
       type: String,
     })
-    async deleteVocab(@Param('vocabId') vocabId: string) {
+    async deleteVocab(@Param('vocabId') vocabId: string, @Request() req) {
+      if (!req.user.isAdmin) {
+        throw new UnauthorizedException('Not an Admin')
+      }
+      if (!(await this.vocabsService.existVocabById(vocabId))) {
+        throw new NotFoundException('NotFound Vocab');
+      }
       return await this.vocabsService.deleteVocab(vocabId);
     }
 

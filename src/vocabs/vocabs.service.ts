@@ -1,7 +1,7 @@
 import { Injectable, ConsoleLogger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { now } from 'mongoose';
 import {
+  now,
   FilterQuery,
   Model,
   PipelineStage,
