@@ -3,13 +3,6 @@ import { ListReqDto } from 'src/common/dto/request.dto';
 import { LevelTestDto } from './leveltest.dto';
 import { PagingReqDto } from 'src/common/dto/request.dto';
 
-export class GetLevelTestDto {
-  @ApiProperty({
-    required: false,
-  })
-  readonly id: string;
-}
-
 export class GetPagingLevelTestDto extends PagingReqDto {
   @ApiProperty({
     required: false,

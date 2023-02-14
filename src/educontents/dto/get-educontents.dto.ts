@@ -21,7 +21,13 @@ export class GetListEduContentsDto extends PagingExcelReqDto {
   readonly title: string;
 
   @ApiProperty({
-    description: '본문 단어',
+    description: 'SERIES or ARTICLE',
+    required: false,
+  })
+  readonly contentType: string;
+
+  @ApiProperty({
+    description: '시리얼 번호',
     required: false,
   })
   readonly contentsSerialNum: string;

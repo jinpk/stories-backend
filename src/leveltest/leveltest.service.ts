@@ -4,15 +4,13 @@ import {
   now,
   FilterQuery,
   Model,
-  PipelineStage,
   ProjectionFields,
-  Types,
 } from 'mongoose';
 import { PagingResDto } from 'src/common/dto/response.dto';
 import { LevelTest, LevelTestDocument } from './schemas/leveltest.schema';
 import { LevelTestDto } from './dto/leveltest.dto';
 import { UpdateLevelTestDto } from './dto/update-leveltest.dto';
-import { GetLevelTestDto, GetPagingLevelTestDto } from './dto/get-leveltest.dto';
+import { GetPagingLevelTestDto } from './dto/get-leveltest.dto';
 import { UtilsService } from 'src/common/providers';
 
 @Injectable()

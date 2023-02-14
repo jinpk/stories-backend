@@ -1,19 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import {
+  now,
+  FilterQuery,
+  Model,
+  PipelineStage,
+  ProjectionFields,
+  Types,
+} from 'mongoose';
 import {
   EduContents,
   EduContentsDocument,
   Quizs,
   QuizsDocument,
 } from './schemas/educontents.schema';
+import { PagingResDto } from 'src/common/dto/response.dto';
 import { Vocab, VocabDocument } from '../vocabs/schemas/vocab.schema';
 import { EduContentsDto, UploadContentsDto } from './dto/educontents.dto';
-import { AwsService } from '../aws/aws.service'
+import { GetListEduContentsDto } from './dto/get-educontents.dto';
+import { AwsService } from '../aws/aws.service';
+import { EXCEL_COLUMN_LIST } from './educontents.constant';
+import { CommonExcelService, UtilsService } from 'src/common/providers';
 
 @Injectable()
 export class EducontentsService {
   constructor(
+    private utilsService: UtilsService,
+    private commonExcelService: CommonExcelService,
     @InjectModel(EduContents.name) private educontentsModel: Model<EduContentsDocument>,
     @InjectModel(Quizs.name) private quizsModel: Model<QuizsDocument>,
     @InjectModel(Vocab.name) private vocabModel: Model<VocabDocument>,
@@ -52,10 +65,6 @@ export class EducontentsService {
     return educontent;
   }
 
-  async findAll(): Promise<EduContents[]> {
-    return this.educontentsModel.find().exec();
-  }
-
   async createContentsList(path: string, bucket: string): Promise<UploadContentsDto> {
     var total = 0;
     var datas = [];
@@ -84,8 +93,8 @@ export class EducontentsService {
         title: data.get('contents').get('0-스토리')[0].title,
         imagePath: data.get('contents').get('0-스토리')[0].imagePath,
         audioFilePath: data.get('contents').get('0-스토리')[0].audioFilePath,
-        vocabCount: 0,
-        questionCount: 0,
+        vocabCount: data.get('contents').get('3-단어').length,
+        questionCount: data.get('contents').get('2-퀴즈').length,
         content: data.get('contents').get('0-스토리')[0].content,
         timeLine: data.get('contents').get('1-타임라인'),
       };
@@ -140,6 +149,63 @@ export class EducontentsService {
       }
       await new this.educontentsModel(educontent).save();
     }
+  }
+
+  async getPagingEduContents(
+    query: GetListEduContentsDto,
+  ): Promise<PagingResDto<EduContentsDto> | Buffer> {
+    var filter: FilterQuery<EduContentsDocument> = {}
+    if (query.level != undefined) {
+      filter.level = { $eq: query.level };
+    }
+    if (query.title != undefined) {
+      filter.title = { $regex: query.title, $options: 'i' };
+    }
+    if (query.contentType != undefined) {
+      if (query.contentType == 'SERIES'){
+        filter.contentsSerialNum = { $regex: 'S', $options: 'i' };
+      }
+      if (query.contentType == 'ARTICLE'){
+        filter.contentsSerialNum = { $regex: 'A', $options: 'i' };
+      }
+    }
+    if (query.contentsSerialNum != undefined) {
+      filter.contentsSerialNum = { $regex: query.contentsSerialNum, $options: 'i' };
+    }
+
+    const projection: ProjectionFields<EduContentsDto> = {
+      _id: 1,
+      contentsSerialNum: 1,
+      level: 1,
+      title: 1,
+      content: 1,
+      vocabCount: 1,
+      questionCount: 1,
+      imagePath: 1,
+      audioFilePath: 1,
+      timeLine: 1,
+    };
+    
+    const cursor = await this.educontentsModel.aggregate([
+      { $match: filter },
+      { $project: projection },
+      { $sort: { createdAt: -1 } },
+      this.utilsService.getCommonMongooseFacet(query),
+    ]);
+
+    const metdata = cursor[0].metadata;
+    const data = cursor[0].data;
+
+    if (query.excel === '1') {
+      return await this.commonExcelService.listToExcelBuffer(
+        EXCEL_COLUMN_LIST,
+        data,
+      );
+    }
+    return {
+      total: metdata[0]?.total || 0,
+      data: data,
+    };
   }
 
   _docToEduContentsDto(doc: EduContentsDocument): EduContentsDto {
