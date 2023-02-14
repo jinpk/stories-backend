@@ -47,7 +47,9 @@ export class EduContentsDto{
   @ApiProperty({})
   audioFilePath: string;
 
-  @ApiProperty({})
+  @ApiProperty({
+    description: "format: [{'time': '0:23', 'sentence': 'example'}]"
+  })
   timeLine: TimeLine[];
 }
 

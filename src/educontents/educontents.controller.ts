@@ -23,10 +23,10 @@ import { EduContentsDto, ContentsQuizDto, UserEduInfoDto, ContentsQuizResultDto,
 import { AudioPlayerDto } from './dto/audioplayer.dto';
 import { EduProgressDto } from './dto/eduprogress.dto';
 import { GetListEduContentsDto, GetListQuizDto, GetContentsQuizResultDto} from './dto/get-educontents.dto';
+import { UpdateEduContentsDto } from './dto/update-educontents.dto';
 import { GetListAudioPlayerDto } from './dto/get-audioplayer.dto';
 import { EducontentsService } from './educontents.service';
 import { FilesFromBucketDto } from '../aws/dto/s3.dto'
-import { Public } from 'src/auth/decorator/auth.decorator';
 
 @Controller('educontents')
 @ApiTags('educontents')
@@ -57,41 +57,59 @@ export class EducontentsController {
   @ApiBody({
     type:ContentsQuizDto,
   })
-  async createContentsQuiz(@Param('educontents_id') educontents_id: string) {
+  async createContentsQuiz(@Param('educontents_id') educontents_id: string, @Request() req) {
   }
 
   @Put('quiz/:quizId')
   @ApiOperation({
     summary: '(ADMIN) 컨텐츠 단어 퀴즈 수정',
   })
-  async patchContentsQuiz(@Param('quizId') quizId: string) {
+  async patchContentsQuiz(@Param('quizId') quizId: string, @Request() req) {
   }
 
   @Delete('quiz/:quizId')
   @ApiOperation({
     summary: '(ADMIN) 컨텐츠 단어 퀴즈 삭제',
   })
-  async deleteContentsQuiz(@Param('quizId') quizId: string) {
+  async deleteContentsQuiz(@Param('quizId') quizId: string, @Request() req) {
+    if (!req.user.isAdmin) {
+      throw new UnauthorizedException('Not an Admin')
+    }
   }
 
   @Put(':educontentsId')
   @ApiOperation({
     summary: '(ADMIN) 학습 컨텐츠 수정',
   })
-  @ApiBody({ type: EduContentsDto })
-  async patchEduContents(@Param('educontentsId') educontentsId: string) {}
+  @ApiBody({ type: UpdateEduContentsDto })
+  async patchEduContents(
+    @Param('educontentsId') educontentsId: string,
+    @Request() req,
+    @Body() body) {
+      if (!req.user.isAdmin) {
+        throw new UnauthorizedException('Not an Admin')
+      }
+      return await this.educontentsService.updateEduContentsById(educontentsId, body)
+  }
 
   @Delete(':educontentsId')
   @ApiOperation({
       summary: '(ADMIN) 학습 컨텐츠 삭제'
   })
-  async deleteEduContents(@Param('educontentsId') educontentsId: string) {}
+  async deleteEduContents(
+    @Param('educontentsId') educontentsId: string,
+    @Request() req) {
+      if (!req.user.isAdmin) {
+        throw new UnauthorizedException('Not an Admin')
+      }
+      return await this.educontentsService.deleteEduContents(educontentsId);
+  }
 
   @Get('downloadexecel')
   @ApiOperation({
     summary: '(ADMIN) 업로드 액셀 양식 다운로드',
   })
-  async getExcelDownloadPath() {
+  async getExcelDownloadPath(@Request() req) {
   }
 
   @Get('eduinfo')
@@ -101,14 +119,16 @@ export class EducontentsController {
   @ApiOkResponse({
       type: UserEduInfoDto,
   })
-  async getUserLevelTest(@Param('userId') userId: string) {}
+  async getUserLevelTest(@Param('userId') userId: string, @Request() req) {
+
+  }
 
   @Get('')
   @ApiOperation({
-    summary: '학습 컨텐츠 조회',
+    summary: '(ADMIN) 학습 컨텐츠 조회',
   })
   @ApiOkResponsePaginated(EduContentsDto)
-  async listEduContents(@Query() query: GetListEduContentsDto) {
+  async listEduContents(@Query() query: GetListEduContentsDto, @Request() req) {
     return await this.educontentsService.getPagingEduContents(query)
   }
   

@@ -17,6 +17,7 @@ import {
 import { PagingResDto } from 'src/common/dto/response.dto';
 import { Vocab, VocabDocument } from '../vocabs/schemas/vocab.schema';
 import { EduContentsDto, UploadContentsDto } from './dto/educontents.dto';
+import { UpdateEduContentsDto } from './dto/update-educontents.dto';
 import { GetListEduContentsDto } from './dto/get-educontents.dto';
 import { AwsService } from '../aws/aws.service';
 import { EXCEL_COLUMN_LIST } from './educontents.constant';
@@ -41,6 +42,17 @@ export class EducontentsService {
       return false;
     }
     return educontents;
+  }
+
+  async deleteEduContents(id: string) {
+    await this.educontentsModel.findByIdAndDelete(id);
+    return id
+  }
+
+  async updateEduContentsById(id: string, body: UpdateEduContentsDto) {
+    await this.educontentsModel.findByIdAndUpdate(id, { 
+      $set: {body, updatedAt: now()}
+    });
   }
 
   async existEduContentById(id: string): Promise<boolean> {
@@ -185,7 +197,7 @@ export class EducontentsService {
       audioFilePath: 1,
       timeLine: 1,
     };
-    
+
     const cursor = await this.educontentsModel.aggregate([
       { $match: filter },
       { $project: projection },
