@@ -14,8 +14,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         JWT_SECRET: Joi.string().required(),
         AWS_ACCESS_KEY: Joi.string().required(),
         AWS_SECRET_KEY: Joi.string().required(),
-        GOOGLE_CLIENT_SECRET: Joi.string().required(),
-        GOOGLE_CLIENT_ID: Joi.string().required(),
       }),
     }),
   ],
