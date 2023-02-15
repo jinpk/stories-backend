@@ -133,16 +133,19 @@ export class AuthController {
       throw new UnauthorizedException('유효하지 않거나 만료된 토큰입니다.');
     }
 
-    if (!(await this.usersService.findOneByEmail(email))) {
+    const user = await this.usersService.findOneByEmail(email);
+    if (!user) {
       throw new NotFoundException('Not found email.');
     }
 
     await this.usersService.updatePasswordByEmail(email, body.password);
 
-    this.eventEmitter.emit(
-      PasswordResetedEvent.event,
-      new PasswordResetedEvent(email),
-    );
+    this.authService.genResetPasswordLink(email).then((link) => {
+      this.eventEmitter.emit(
+        PasswordResetedEvent.event,
+        new PasswordResetedEvent(email, user.nickname, link),
+      );
+    });
   }
 
   @Post('passwordreset')
@@ -162,23 +165,16 @@ export class AuthController {
     type: PasswordResetQueryDto,
   })
   async passwordReset(@Body('email') email: string) {
-    if (!(await this.usersService.findOneByEmail(email))) {
+    const user = await this.usersService.findOneByEmail(email);
+    if (!user) {
       throw new NotFoundException('Not found email.');
     }
-    // 인증 JWT 생성
-    const token = await this.authService.genResetPasswordJWT(email);
 
-    // DynamicLink Query 생성
-    const rq = new PasswordResetQueryDto();
-    rq.action = 'passwordreset';
-    rq.payload = token;
-
-    // DynamicLink 생성
-    const link = await this.firebaseService.generateDynamicLink(rq);
+    const link = await this.authService.genResetPasswordLink(email);
 
     this.eventEmitter.emit(
       PasswordResetEvent.event,
-      new PasswordResetEvent(email, link),
+      new PasswordResetEvent(email, user.nickname, link),
     );
   }
 

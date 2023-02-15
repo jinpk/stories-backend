@@ -24,6 +24,7 @@ export class EventService {
     );
 
     this.notificationsService.initUserNotificationSettings(payload.userId);
+    this.emailService.sendJoinedEmail(payload.email, payload.nickname);
   }
 
   // 비밀번호 재설정 요청 이벤트
@@ -32,7 +33,11 @@ export class EventService {
     this.logger.debug(
       `event detected: ${PasswordResetEvent.event}, ${payload.email}`,
     );
-    this.emailService.sendPasswordResetEmail(payload.email, payload.link);
+    this.emailService.sendPasswordResetEmail(
+      payload.email,
+      payload.nickname,
+      payload.link,
+    );
   }
 
   // 비밀번호 재설정 완료 이벤트
@@ -41,6 +46,12 @@ export class EventService {
     this.logger.debug(
       `event detected: ${PasswordResetedEvent.event}, ${payload.email}`,
     );
-    this.emailService.sendPasswordChangedEmail(payload.email);
+    this.emailService.sendPasswordChangedEmail(
+      payload.email,
+      payload.nickname,
+      payload.resetLink,
+    );
   }
+
+  // 결제 검증 완료 이벤트
 }

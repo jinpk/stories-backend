@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AwsService } from 'src/aws/aws.service';
+import { DynamicLinkActions } from 'src/common/enums';
+import { FirebaseService } from 'src/common/providers';
 import { User } from 'src/users/schemas/user.schema';
 import { UsersService } from 'src/users/users.service';
+import { PasswordResetQueryDto } from './dto';
 import { TTMIKJwtPayload } from './interfaces';
 
 @Injectable()
@@ -11,6 +14,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private awsService: AwsService,
+    private firebaseService: FirebaseService,
   ) {}
 
   async parseTTMIKToken(token: string): Promise<TTMIKJwtPayload> {
@@ -20,18 +24,26 @@ export class AuthService {
     return payload;
   }
 
-  async genResetPasswordJWT(email: string) {
+  async genResetPasswordLink(email: string): Promise<string> {
+    // 인증 JWT 생성
     const token = await this.jwtService.signAsync(
-      { action: 'passwordreset', email },
+      { action: DynamicLinkActions.PasswordReset, email },
       { expiresIn: '30m' },
     );
 
-    return token;
+    // DynamicLink Query 생성
+    const rq = new PasswordResetQueryDto();
+    rq.action = DynamicLinkActions.PasswordReset;
+    rq.payload = token;
+
+    // DynamicLink 생성
+    const link = await this.firebaseService.generateDynamicLink(rq);
+    return link;
   }
 
   async parsePasswordResetToken(token: string): Promise<string> {
     const payload = await this.jwtService.verifyAsync(token);
-    if (payload?.action === 'passwordreset') {
+    if (payload?.action === DynamicLinkActions.PasswordReset) {
       return payload.email;
     }
   }

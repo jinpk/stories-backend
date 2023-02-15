@@ -17,6 +17,8 @@ lerna-debug.log*
 # OS
 .DS_Store
 
+firebase-adminsdk.json
+
 # Tests
 /coverage
 /.nyc_output

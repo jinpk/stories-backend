@@ -109,7 +109,7 @@ export class UsersService {
 
     this.eventEmitter.emit(
       UserCreatedEvent.event,
-      new UserCreatedEvent(doc._id.toString()),
+      new UserCreatedEvent(doc._id.toString(), doc.email, doc.nickname),
     );
 
     return doc._id.toString();
