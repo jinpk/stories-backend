@@ -14,10 +14,14 @@ export class Notification {
   context: NotificationContexts;
 
   @Prop()
-  @ApiProperty({ description: '발송날짜' })
+  @ApiProperty({ description: '발송시간' })
   @IsDateString()
   @IsNotEmpty()
   sendAt: Date;
+
+  @Prop({ default: false })
+  @ApiProperty({ description: 'PUSH 발송여부' })
+  sent: boolean;
 
   @Prop({})
   @ApiProperty({ description: 'Image Path', required: false })

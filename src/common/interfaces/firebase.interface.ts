@@ -7,5 +7,5 @@ export interface PushParams {
   tokens: string[];
   title: string;
   message: string;
-  payload: any;
+  payload?: object;
 }

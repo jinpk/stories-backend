@@ -16,6 +16,18 @@ export class UsersService {
     private eventEmitter: EventEmitter2,
   ) {}
 
+  async getActiveFCMUsers(): Promise<string[]> {
+    const docs = await this.userModel
+      .find()
+      .and([
+        { fcmToken: { $ne: '' } },
+        { fcmToken: { $ne: null } },
+        { deleted: false },
+      ]);
+
+    return docs.map((doc) => doc.fcmToken);
+  }
+
   async getPagingUsers(query: GetUsersDto): Promise<PagingResDto<UserDto>> {
     const filter: FilterQuery<UserDocument> = {};
 
@@ -125,6 +137,7 @@ export class UsersService {
     const user = new UserDto();
     user.id = doc._id.toString();
     user.email = doc.email;
+    user.nickname = doc.nickname;
     user.countryCode = doc.countryCode;
     user.createdAt = doc.createdAt;
     return user;

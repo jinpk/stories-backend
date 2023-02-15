@@ -14,13 +14,14 @@ export class NotificationConfig {
   })
   @ApiProperty({ description: '자동 알림 유형', enum: NotificationConfigTypes })
   @IsEnum(NotificationConfigTypes)
+  @IsNotEmpty()
   type: string;
 
   @Prop({
     default: false,
   })
   @ApiProperty({ description: '자동 알림' })
-  on: boolean;
+  on?: boolean;
 
   @Prop({
     default: NotificationContexts.All,
@@ -28,16 +29,15 @@ export class NotificationConfig {
   })
   @ApiProperty({ description: '알림 실행 대상', enum: NotificationContexts })
   @IsEnum(NotificationContexts)
-  context: string;
+  context?: string;
 
-  @Prop()
+  @Prop({ default: '' })
   @ApiProperty({ description: '알림 메시지' })
-  @IsNotEmpty()
-  message: string;
+  message?: string;
 
-  @Prop()
+  @Prop({ default: '' })
   @ApiProperty({ description: 'type별 알림 발송 계산 기간' })
-  day: number;
+  day?: number;
 }
 
 export const NotificationConfigSchema =

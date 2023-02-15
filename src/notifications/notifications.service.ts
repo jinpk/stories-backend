@@ -2,7 +2,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { PagingResDto } from 'src/common/dto/response.dto';
-import { UtilsService } from 'src/common/providers';
 import { CommonExcelService } from 'src/common/providers/excel.service';
 import { GetNotificationsDto } from './dto/get-notification.dto';
 import {
@@ -14,7 +13,11 @@ import {
   UpdateNotificationSettingDto,
 } from './dto/notification-setting.dto';
 import { CreateNotificationDto, NotificationDto } from './dto/notification.dto';
-import { NotificationSettingTypes } from './enums';
+import {
+  NotificationConfigTypes,
+  NotificationContexts,
+  NotificationSettingTypes,
+} from './enums';
 import { EXCEL_COLUMN_LIST } from './notifications.constant';
 import {
   NotificationConfig,
@@ -63,6 +66,27 @@ export class NotificationsService {
     );
 
     return data;
+  }
+
+  async getPendingPushNotifications(): Promise<NotificationDto[]> {
+    const now = new Date();
+    const docs = await this.notificationModel.find({
+      sent: false,
+      context: { $ne: NotificationContexts.InApp },
+      sendAt: { $lte: now },
+    });
+
+    const data: NotificationDto[] = docs.map((doc) =>
+      this._notificationDocToDto(doc),
+    );
+    return data;
+  }
+
+  async sentNotifications(ids: string[]) {
+    await this.notificationModel.updateMany(
+      { _id: { $in: ids } },
+      { $set: { sent: true } },
+    );
   }
 
   async updateNotificationConfigs(
@@ -133,6 +157,33 @@ export class NotificationsService {
       message: body.message,
     }).save();
     return doc._id.toString();
+  }
+
+  async initNotificationConfigs() {
+    const configs: NotificationConfig[] = [
+      {
+        type: NotificationConfigTypes.AppConn,
+      },
+      {
+        type: NotificationConfigTypes.LevelUp,
+      },
+      {
+        type: NotificationConfigTypes.Paymented,
+      },
+      {
+        type: NotificationConfigTypes.PrePayment,
+      },
+      {
+        type: NotificationConfigTypes.Quiz,
+      },
+      {
+        type: NotificationConfigTypes.Reminder,
+      },
+    ];
+    for await (const config of configs) {
+      await new this.notificationConfigModel(config).save();
+    }
+    this.logger.log(`initialized notification configs`);
   }
 
   async initUserNotificationSettings(userId: string) {

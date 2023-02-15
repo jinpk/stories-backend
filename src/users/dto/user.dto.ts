@@ -36,6 +36,10 @@ export class UserDto extends UserEnumDto {
   @ApiProperty({ description: 'userId' })
   id: string;
 
+
+  @ApiProperty({ description: 'nickname' })
+  nickname: string;
+
   @ApiProperty({})
   email: string;
 
