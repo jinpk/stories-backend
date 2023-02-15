@@ -28,12 +28,12 @@ import {
 import { LocalAuthAdminGuard } from './guard/local-auth.guard';
 import { AdminService } from 'src/admin/admin.service';
 import { TTMIKJwtPayload } from './interfaces';
-import { FirebaseService } from 'src/firebase/firebase.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   PasswordResetedEvent,
   PasswordResetEvent,
 } from './events/password-reset.event';
+import { FirebaseService } from 'src/common/providers';
 
 @Controller('auth')
 @ApiTags('auth')

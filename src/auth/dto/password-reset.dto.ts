@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { DynamicLinkQuery } from 'src/firebase/interfaces';
+import { DynamicLinkQuery } from 'src/common/interfaces';
 
 export class PasswordResetQueryDto implements DynamicLinkQuery {
   @ApiProperty({

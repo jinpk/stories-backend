@@ -10,7 +10,6 @@ import { JwtStrategy } from './strategy/jwt.strategy';
 import { LocalAdminStrategy } from './strategy/local.strategy';
 import { HttpModule } from '@nestjs/axios';
 import { AwsModule } from 'src/aws/aws.module';
-import { FirebaseModule } from 'src/firebase/firebase.module';
 
 @Module({
   imports: [
@@ -18,7 +17,6 @@ import { FirebaseModule } from 'src/firebase/firebase.module';
     AwsModule,
     UsersModule,
     AdminModule,
-    FirebaseModule,
     PassportModule,
     JwtModule.registerAsync({
       useFactory: async (configService: AppConfigService) => ({

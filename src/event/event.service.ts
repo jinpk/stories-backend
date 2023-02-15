@@ -4,7 +4,7 @@ import {
   PasswordResetedEvent,
   PasswordResetEvent,
 } from 'src/auth/events/password-reset.event';
-import { EmailService } from 'src/email/email.service';
+import { EmailService } from 'src/common/providers';
 import { NotificationsService } from 'src/notifications/notifications.service';
 import { UserCreatedEvent } from 'src/users/events/create-user.event';
 

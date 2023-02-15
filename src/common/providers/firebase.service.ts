@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DynamicLinkQuery } from './interfaces';
+import { DynamicLinkQuery } from '../interfaces';
 
 @Injectable()
 export class FirebaseService {

@@ -23,7 +23,6 @@ import { PopupModule } from './popup/popup.module';
 import { BannerModule } from './banner/banner.module';
 import { ReminderModule } from './reminder/reminder.module';
 import { LibraryModule } from './library/library.module';
-import { FirebaseModule } from './firebase/firebase.module';
 import { CommonModule } from './common/common.module';
 
 @Module({
@@ -55,7 +54,6 @@ import { CommonModule } from './common/common.module';
     BannerModule,
     ReminderModule,
     LibraryModule,
-    FirebaseModule,
   ],
   controllers: [AppController],
   providers: [
