@@ -19,7 +19,7 @@ phases:
       - echo Build completed on `date`
       - echo Pushing the Docker images...
       - docker push $REPOSITORY_URI/$IMAGE_REPO_NAME:$IMAGE_TAG
-      - printf '[{"name":"first-run-task-definition:3","imageUri":"%s"}]' $REPOSITORY_URI/$IMAGE_REPO_NAME:$IMAGE_TAG > imagedefinitions.json
+      - printf '[{"name":"stories","imageUri":"%s"}]' $REPOSITORY_URI/$IMAGE_REPO_NAME:$IMAGE_TAG > imagedefinitions.json
 
 artifacts:
     files: imagedefinitions.json
