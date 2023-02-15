@@ -4,6 +4,13 @@ import { Public } from './auth/decorator/auth.decorator';
 
 @Controller()
 export class AppController {
+  @Get('')
+  @Public()
+  @ApiOperation({ summary: 'Health check' })
+  index() {
+    return 'Success';
+  }
+
   @Get('health')
   @Public()
   @ApiOperation({ summary: 'Health check' })
