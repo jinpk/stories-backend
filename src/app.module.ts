@@ -24,6 +24,8 @@ import { BannerModule } from './banner/banner.module';
 import { ReminderModule } from './reminder/reminder.module';
 import { LibraryModule } from './library/library.module';
 import { CommonModule } from './common/common.module';
+import { EdustatusModule } from './edustatus/edustatus.module';
+import { AudioplayerModule } from './audioplayer/audioplayer.module';
 
 @Module({
   imports: [
@@ -54,6 +56,8 @@ import { CommonModule } from './common/common.module';
     BannerModule,
     ReminderModule,
     LibraryModule,
+    EdustatusModule,
+    AudioplayerModule,
   ],
   controllers: [AppController],
   providers: [

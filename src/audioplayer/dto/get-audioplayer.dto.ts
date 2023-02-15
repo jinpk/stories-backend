@@ -1,5 +1,4 @@
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
-import { EduContentsDto } from './educontents.dto';
 import { PagingExcelReqDto } from 'src/common/dto/request.dto';
 
 

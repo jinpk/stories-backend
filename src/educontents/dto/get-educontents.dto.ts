@@ -1,6 +1,6 @@
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 import { EduContentsDto } from './educontents.dto';
-import { PagingExcelReqDto } from 'src/common/dto/request.dto';
+import { PagingReqDto, PagingExcelReqDto } from 'src/common/dto/request.dto';
 
 export class GetEduContentsDto {
   @ApiProperty({
@@ -33,7 +33,7 @@ export class GetListEduContentsDto extends PagingExcelReqDto {
   readonly contentsSerialNum: string;
 }
 
-export class GetListQuizDto extends PagingExcelReqDto {
+export class GetListQuizDto extends PagingReqDto {
 }
 
 export class GetContentsQuizResultDto{
@@ -42,4 +42,7 @@ export class GetContentsQuizResultDto{
 
   @ApiProperty({})
   contentsId: string;
+}
+
+export class GetListBookmarkDto extends PagingReqDto {
 }

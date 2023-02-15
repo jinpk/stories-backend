@@ -19,19 +19,21 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
-import { EduContentsDto, ContentsQuizDto, UserEduInfoDto, ContentsQuizResultDto, UploadContentsDto } from './dto/educontents.dto';
-import { AudioPlayerDto } from './dto/audioplayer.dto';
-import { EduProgressDto } from './dto/eduprogress.dto';
-import { GetListEduContentsDto, GetListQuizDto, GetContentsQuizResultDto} from './dto/get-educontents.dto';
+import {
+  EduContentsDto,
+  ContentsQuizDto,
+  ContentsQuizResultDto,
+  UploadContentsDto,
+  BookmarkDto
+} from './dto/educontents.dto';
+import { GetListEduContentsDto, GetListQuizDto, GetContentsQuizResultDto, GetListBookmarkDto} from './dto/get-educontents.dto';
 import { UpdateEduContentsDto, UpdateQuizsDto } from './dto/update-educontents.dto';
-import { GetListAudioPlayerDto } from './dto/get-audioplayer.dto';
 import { EducontentsService } from './educontents.service';
 import { FilesFromBucketDto } from '../aws/dto/s3.dto'
 
 @Controller('educontents')
 @ApiTags('educontents')
 @ApiBearerAuth()
-// @ApiBearerAuth()
 export class EducontentsController {
   constructor(private readonly educontentsService: EducontentsService) {}
   @Post('upload')
@@ -48,50 +50,6 @@ export class EducontentsController {
     }
     const total = await this.educontentsService.createContentsList(query.path, query.bucket)
     return total
-  }
-
-  @Post('quiz/:educontentsId')
-  @ApiOperation({
-    summary: '(ADMIN) 컨텐츠 퀴즈 등록',
-  })
-  @ApiBody({
-    type:ContentsQuizDto,
-  })
-  async createContentsQuiz(@Param('educontents_id') educontents_id: string, @Request() req) {
-  }
-
-  @Put('quiz/:quizId')
-  @ApiOperation({
-    summary: '(ADMIN) 컨텐츠 단어 퀴즈 수정',
-  })
-  @ApiBody({
-    type: UpdateQuizsDto,
-  })
-  async updateContentsQuiz(
-    @Param('quizId') quizId: string,
-    @Request() req,
-    @Body() body) {
-      if (!req.user.isAdmin) {
-        throw new UnauthorizedException('Not an Admin')
-      }
-      if (!(await this.educontentsService.existQuizsById(quizId))) {
-        throw new NotFoundException('NotFound Quiz');
-      }
-      return await this.educontentsService.updateQuizsById(quizId, body);
-  }
-
-  @Delete('quiz/:quizId')
-  @ApiOperation({
-    summary: '(ADMIN) 컨텐츠 단어 퀴즈 삭제',
-  })
-  async deleteContentsQuiz(@Param('quizId') quizId: string, @Request() req) {
-    if (!req.user.isAdmin) {
-      throw new UnauthorizedException('Not an Admin')
-    }
-    if (!(await this.educontentsService.existQuizsById(quizId))) {
-      throw new NotFoundException('NotFound Quiz');
-    }
-    return await this.educontentsService.deleteQuizs(quizId);
   }
 
   @Put(':educontentsId')
@@ -135,17 +93,6 @@ export class EducontentsController {
   async getExcelDownloadPath(@Request() req) {
   }
 
-  @Get('eduinfo')
-  @ApiOperation({
-    summary: '(ADMIN) 회원상세 학습정보',
-  })
-  @ApiOkResponse({
-      type: UserEduInfoDto,
-  })
-  async getUserLevelTest(@Param('userId') userId: string, @Request() req) {
-
-  }
-
   @Get('')
   @ApiOperation({
     summary: '(ADMIN) 학습 컨텐츠 조회',
@@ -166,53 +113,92 @@ export class EducontentsController {
     return await this.educontentsService.getEduContentById(educontentsId);
   }
 
-  @Post('result')
+  @Post('quiz')
   @ApiOperation({
-    summary: '사용자 학습컨텐츠 퀴즈 결과 제출',
+    summary: '(ADMIN) 컨텐츠 퀴즈 등록',
   })
-  @ApiBody({ type: GetContentsQuizResultDto })
-  @ApiOkResponse({
-    type:    ContentsQuizResultDto,
+  @ApiBody({
+    type:ContentsQuizDto,
   })
-  async saveLevelTestResult(@Param('userId') userId: string) {}
-
-  @Post('bookmark')
-  @ApiOperation({
-    summary: '컨텐츠 북마크 등록',
-  })
-  async saveBookmark() {
+  async createContentsQuiz(
+    @Body() body,
+    @Request() req) {
+      if (!req.user.isAdmin) {
+        throw new UnauthorizedException('Not an Admin')
+      }
+      return await this.educontentsService.createQuiz(body);
   }
 
-  @Delete('bookmark')
+  @Put('quiz/:quizId')
   @ApiOperation({
-    summary: '컨텐츠 북마크 삭제',
+    summary: '(ADMIN) 컨텐츠 단어 퀴즈 수정',
   })
-  async deleteBookmark(@Param('bookmarkId') bookmarkId: string) {
+  @ApiBody({
+    type: UpdateQuizsDto,
+  })
+  async updateContentsQuiz(
+    @Param('quizId') quizId: string,
+    @Request() req,
+    @Body() body) {
+      if (!req.user.isAdmin) {
+        throw new UnauthorizedException('Not an Admin')
+      }
+      if (!(await this.educontentsService.existQuizsById(quizId))) {
+        throw new NotFoundException('NotFound Quiz');
+      }
+      return await this.educontentsService.updateQuizsById(quizId, body);
   }
 
-  @Get('quiz/:educontentsId')
+  @Delete('quiz/:quizId')
+  @ApiOperation({
+    summary: '(ADMIN) 컨텐츠 단어 퀴즈 삭제',
+  })
+  async deleteContentsQuiz(@Param('quizId') quizId: string, @Request() req) {
+    if (!req.user.isAdmin) {
+      throw new UnauthorizedException('Not an Admin')
+    }
+    if (!(await this.educontentsService.existQuizsById(quizId))) {
+      throw new NotFoundException('NotFound Quiz');
+    }
+    return await this.educontentsService.deleteQuizs(quizId);
+  }
+
+  @Get('quiz/:contentsSerialNum')
   @ApiOperation({
     summary: '학습 컨텐츠 별 퀴즈 조회',
   })
   @ApiOkResponsePaginated(ContentsQuizDto)
-  async listContentsQuiz(@Query() query: GetListQuizDto) {
+  async listContentsQuiz(
+    @Param('contentsSerialNum') contentsSerialNum: string,
+    @Query() query: GetListQuizDto,
+    @Request() req) {
+      return await this.educontentsService.getPagingQuizs(contentsSerialNum, query)
   }
 
-  @Get('progress')
+  @Post('bookmark/:educontentsId')
   @ApiOperation({
-    summary: 'HOME 사용자 학습 진행상황',
+    summary: '컨텐츠 북마크 등록',
   })
-  @ApiOkResponse({
-    type: EduProgressDto,
-  })
-  async getEduProgress(@Param('userId') userId: string) {
+  async saveBookmark(
+    @Param('educontentsId') educontentsId: string,
+    @Request() req) {
+      return await this.educontentsService.createBookmark(req.user.id, educontentsId);
   }
 
-  @Get('audioplayer')
+  @Delete('bookmark/:bookmarkId')
   @ApiOperation({
-    summary: '사용자 오디오 플레이어 목록 조회',
+    summary: '컨텐츠 북마크 삭제',
   })
-  @ApiOkResponsePaginated(AudioPlayerDto)
-  async listAudioPlayer(@Param('userId') userId: string, @Query() query: GetListAudioPlayerDto) {
+  async deleteBookmark(@Param('bookmarkId') bookmarkId: string, @Request() req) {
+    return await this.educontentsService.deleteBookmark(req.user.id, bookmarkId);
+  }
+
+  @Get('bookmark/me')
+  @ApiOperation({
+    summary: '나의 컨텐츠 북마크 리스트 조회',
+  })
+  @ApiOkResponsePaginated(BookmarkDto)
+  async listBookmark(@Query() query: GetListBookmarkDto, @Request() req) {
+    return await this.educontentsService.getPagingBookmark(req.user.id, query)
   }
 }

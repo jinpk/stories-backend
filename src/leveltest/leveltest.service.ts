@@ -69,7 +69,6 @@ export class LeveltestService {
       };
     }
 
-    console.log(filter)
     const projection: ProjectionFields<LevelTestDto> = {
       _id: 1,
       contentsSerialNum: 1,

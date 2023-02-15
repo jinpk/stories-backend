@@ -16,9 +16,10 @@ import {
 } from './schemas/educontents.schema';
 import { PagingResDto } from 'src/common/dto/response.dto';
 import { Vocab, VocabDocument } from '../vocabs/schemas/vocab.schema';
-import { EduContentsDto, UploadContentsDto } from './dto/educontents.dto';
+import { Bookmark, BookmarkDocument } from './schemas/bookmark.schema';
+import { EduContentsDto, UploadContentsDto, ContentsQuizDto, BookmarkDto } from './dto/educontents.dto';
 import { UpdateEduContentsDto, UpdateQuizsDto } from './dto/update-educontents.dto';
-import { GetListEduContentsDto } from './dto/get-educontents.dto';
+import { GetListEduContentsDto, GetListQuizDto, GetListBookmarkDto } from './dto/get-educontents.dto';
 import { AwsService } from '../aws/aws.service';
 import { EXCEL_COLUMN_LIST } from './educontents.constant';
 import { CommonExcelService, UtilsService } from 'src/common/providers';
@@ -31,6 +32,7 @@ export class EducontentsService {
     @InjectModel(EduContents.name) private educontentsModel: Model<EduContentsDocument>,
     @InjectModel(Quizs.name) private quizsModel: Model<QuizsDocument>,
     @InjectModel(Vocab.name) private vocabModel: Model<VocabDocument>,
+    @InjectModel(Bookmark.name) private bookmarkModel: Model<BookmarkDocument>,
     private awsService: AwsService,
   ) {}
 
@@ -42,25 +44,6 @@ export class EducontentsService {
       return false;
     }
     return educontents;
-  }
-
-  async deleteQuizs(id: string) {
-    await this.quizsModel.findByIdAndDelete(id);
-    return id
-  }
-
-  async updateQuizsById(id: string, body: UpdateQuizsDto) {
-    await this.quizsModel.findByIdAndUpdate(id, { 
-      $set: {body, updatedAt: now()}
-    });
-  }
-
-  async existQuizsById(id: string): Promise<boolean> {
-    const quiz = await this.quizsModel.findById(id);
-    if (!quiz) {
-      return false;
-    }
-    return true;
   }
 
   async deleteEduContents(id: string) {
@@ -252,5 +235,120 @@ export class EducontentsService {
     dto.content = doc.content;
 
     return dto;
+  }
+
+  // Educontents Quiz Services  
+  async deleteQuizs(id: string) {
+    await this.quizsModel.findByIdAndDelete(id);
+    return id
+  }
+
+  async updateQuizsById(id: string, body: UpdateQuizsDto) {
+    await this.quizsModel.findByIdAndUpdate(id, { 
+      $set: {body, updatedAt: now()}
+    });
+  }
+
+  async existQuizsById(id: string): Promise<boolean> {
+    const quiz = await this.quizsModel.findById(id);
+    if (!quiz) {
+      return false;
+    }
+    return true;
+  }
+
+  async createQuiz(body: ContentsQuizDto): Promise<string> {
+    var quiz: Quizs = new Quizs()
+    quiz = {
+      contentsSerialNum: body.contentsSerialNum,
+      quizType: body.quizType,
+      question: body.question,
+      passage: body.passage,
+      answer: body.answer,
+      options: body.options,
+    }
+    const result = await new this.quizsModel(quiz).save();
+    return result._id.toString();
+  }
+
+  async getPagingQuizs(
+    contentsSerialNum: string, 
+    query: GetListQuizDto,
+  ): Promise<PagingResDto<ContentsQuizDto> | Buffer> {
+    const filter: FilterQuery<VocabDocument> = {
+      contentsSerialNum: { $eq: contentsSerialNum }
+    };
+
+    const projection: ProjectionFields<ContentsQuizDto> = {
+      _id: 1,
+      contentsSerialNum: 1,
+      quizType: 1,
+      question: 1,
+      passage: 1,
+      answer: 1,
+      options: 1,
+    };
+
+    const cursor = await this.quizsModel.aggregate([
+      { $match: filter },
+      { $project: projection },
+      { $sort: { createdAt: -1 } },
+      this.utilsService.getCommonMongooseFacet(query),
+    ]);
+
+    const metdata = cursor[0].metadata;
+    const data = cursor[0].data;
+
+    return {
+      total: metdata[0]?.total || 0,
+      data: data,
+    };
+  }
+
+  // EduContents Bookmark Services
+  async createBookmark(user_id, educontents_id: string): Promise<string> {
+    var bookmark: Bookmark = new Bookmark()
+    bookmark = {
+      userId: user_id,
+      eduContentsId: educontents_id,
+    }
+    const result = await new this.bookmarkModel(bookmark).save();
+    return result._id.toString();
+  }
+
+  async deleteBookmark(user_id, bookmark_id: string): Promise<string> {
+    await this.bookmarkModel.findByIdAndDelete(
+      {_id: new Types.ObjectId(bookmark_id), userId: user_id}
+    );
+    return bookmark_id
+  }
+
+  async getPagingBookmark(
+    user_id, query: GetListBookmarkDto,
+  ): Promise<PagingResDto<BookmarkDto> | Buffer> {
+    const filter: FilterQuery<VocabDocument> = {
+      userId: { $eq: user_id }
+    };
+
+    const projection: ProjectionFields<BookmarkDto> = {
+      _id: 1,
+      userId: 1,
+      eduContentsId: 1,
+    };
+
+    const cursor = await this.bookmarkModel.aggregate([
+      { $match: filter },
+      { $project: projection },
+      { $sort: { createdAt: -1 } },
+      this.utilsService.getCommonMongooseFacet(query),
+    ]);
+
+    const metdata = cursor[0].metadata;
+    const data = cursor[0].data;
+
+    return {
+      total: metdata[0]?.total || 0,
+      data: data,
+    };
   }
 }
