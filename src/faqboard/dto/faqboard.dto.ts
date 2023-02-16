@@ -9,9 +9,15 @@ export class FaqBoardDto{
   
     @ApiProperty({})
     answer: string;
+
+    @ApiProperty({})
+    createdAt?: Date;
   }
 
 export class FaqCategoryDto{
     @ApiProperty({})
-    category: string[];
+    category: string;
+
+    @ApiProperty({})
+    createdAt?: Date;
 }

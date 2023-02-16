@@ -1,14 +1,12 @@
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
-import { ListReqDto } from 'src/common/dto/request.dto';
-import { FaqBoardDto } from './faqboard.dto';
-import { PagingExcelReqDto } from 'src/common/dto/request.dto';
+import { PagingReqDto } from 'src/common/dto/request.dto';
 
-export class GetFaqBoardDto extends PagingExcelReqDto {
+export class GetListFaqBoardDto extends PagingReqDto {
     @ApiProperty({
       required: false,
     })
     readonly category: string;
   }
   
-export class GetFaqCategoryDto {
+export class GetListFaqCategoryDto extends PagingReqDto {
 }

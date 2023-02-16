@@ -48,7 +48,7 @@ export class EducontentsController {
     if (!req.user.isAdmin) {
       throw new UnauthorizedException('Not an Admin')
     }
-    const total = await this.educontentsService.createContentsList(query.path, query.bucket)
+    const total = await this.educontentsService.createContentsList(query.path)
     return total
   }
 
