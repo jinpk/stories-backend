@@ -8,14 +8,17 @@ export class BannerDto{
     title: string;
   
     @ApiProperty({})
-    startDate: string;
+    startDate: Date;
   
     @ApiProperty({})
-    endDate: string;
+    endDate: Date;
   
     @ApiProperty({})
     imageFilePath: string;
   
     @ApiProperty({})
     link: string;
-  }
+
+    @ApiProperty({})
+    createdAt?: Date;
+}

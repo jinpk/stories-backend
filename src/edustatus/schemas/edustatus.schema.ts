@@ -22,7 +22,7 @@ export class EduStatus {
     selectedLevel: string;
 
     @Prop()
-    levelProgress: LevelProgress;
+    levelProgress: LevelProgress[];
 
     @Prop()
     recentSeries: RecentSeries;
@@ -30,8 +30,8 @@ export class EduStatus {
     @Prop()
     recentArticle: RecentArticle;
 
-    @Prop()
-    static: Statics;
+    @Prop({default: {}})
+    statics: Statics;
 
     @Prop()
     levelCompleteRate: LevelCompleteRate[];

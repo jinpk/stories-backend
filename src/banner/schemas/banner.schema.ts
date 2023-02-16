@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { now, HydratedDocument } from 'mongoose';
 
 export type BannerDocument = HydratedDocument<Banner>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Banner {
   @Prop()
   active: boolean;
@@ -12,16 +12,19 @@ export class Banner {
   title: string;
 
   @Prop()
-  startDate: string;
+  startDate: Date;
 
   @Prop()
-  endDate: string;
+  endDate: Date;
 
   @Prop()
   imageFilePath: string;
 
   @Prop()
   link: string;
+
+  @Prop({default: now()})
+  createdAt?: Date;
 }
 
 export const BannerSchema = SchemaFactory.createForClass(Banner);

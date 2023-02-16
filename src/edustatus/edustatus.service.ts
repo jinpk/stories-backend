@@ -66,7 +66,7 @@ export class EdustatusService {
     }
 
   async createEduStatus(user_id: string, body: LevelTestResultDto): Promise<string> {
-    var edustatus: EduStatusDto = new EduStatusDto();
+    var edustatus: EduStatus = new EduStatus();
     edustatus = {
       firstLevel: body.level,
       levelProgress: [],

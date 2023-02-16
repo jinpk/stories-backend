@@ -71,12 +71,12 @@ export class EdustatusController {
     @ApiOperation({
         summary: '사용자 레벨별 진행현황 업데이트',
     })
+    @ApiBody({
+        type:[LevelCompleteRate],
+    })
     @ApiOkResponse({
         status: 200,
         type: String,
-    })
-    @ApiBody({
-        type:[LevelCompleteRate],
     })
     async updateEduLevel(
         @Body() body,

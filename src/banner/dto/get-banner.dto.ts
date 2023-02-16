@@ -3,7 +3,7 @@ import { ListReqDto } from 'src/common/dto/request.dto';
 import { BannerDto } from './banner.dto';
 import { PagingReqDto } from 'src/common/dto/request.dto';
 
-export class GetBannerDto extends PagingReqDto {
+export class GetListBannerDto extends PagingReqDto {
     @ApiProperty({
       required: false,
     })

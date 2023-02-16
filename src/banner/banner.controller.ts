@@ -1,22 +1,27 @@
 import {
-    Controller,
-    Get,
-    Param,
-    Delete,
-    Patch,
-    Post,
-    Query,
+  Controller,
+  Get,
+  Param,
+  Delete,
+  Put,
+  Post,
+  Query,
+  NotFoundException,
+  UnauthorizedException,
+  Body,
+  Request,
 } from '@nestjs/common';
 import {
-    ApiBearerAuth,
-    ApiBody,
-    ApiOkResponse,
-    ApiOperation,
-    ApiTags,
+  ApiBearerAuth,
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
 } from '@nestjs/swagger'
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
 import { BannerDto } from './dto/banner.dto';
-import { GetBannerDto } from './dto/get-banner.dto';
+import { GetListBannerDto } from './dto/get-banner.dto';
+import { UpdateBannerDto } from './dto/update-banner.dto';
 import { BannerService } from './banner.service';
 
 @Controller('banner')
@@ -29,31 +34,70 @@ export class BannerController {
       summary: '(ADMIN) 배너 등록',
     })
     @ApiBody({ type: BannerDto })
-    async createBanner() {}
+    @ApiOkResponse({
+      status: 200,
+      type: String,
+    })
+    async saveBanner(@Body() body, @Request() req) {
+      if (!req.user.isAdmin) {
+        throw new UnauthorizedException('Not an Admin')
+      }
+      return await this.bannerService.createBanner(body)
+    }
 
-    @Patch(':banner_id')
+    @Put(':bannerId')
     @ApiOperation({
       summary: '(ADMIN) 배너 수정',
     })
-    @ApiBody({ type: BannerDto })
-    async patchBanner(@Param('banner_id') banner_id: string) {}
+    @ApiBody({ type: UpdateBannerDto })
+    @ApiOkResponse({
+      status: 200,
+      type: String,
+    })
+    async updateBanner(
+      @Param('bannerId') bannerId: string,
+      @Body() body,
+      @Request() req) {
+        if (!req.user.isAdmin) {
+          throw new UnauthorizedException('Not an Admin')
+        }
+        if (!(await this.bannerService.existBanner(bannerId))) {
+          throw new NotFoundException('NotFound Banner');
+        }
+        return await this.bannerService.updateBanner(bannerId, body);
+    }
 
-    @Delete(':banner_id')
+    @Delete(':bannerId')
     @ApiOperation({
         summary: '(ADMIN) 배너 삭제'
     })
-    async deleteBanner(@Param('banner_id') banner_id: string) {}
+    @ApiOkResponse({
+      status: 200,
+      type: String,
+    })
+    async deleteBanner(@Param('bannerId') bannerId: string, @Request() req) {
+      if (!req.user.isAdmin) {
+        throw new UnauthorizedException('Not an Admin')
+      }
+      if (!(await this.bannerService.existBanner(bannerId))) {
+        throw new NotFoundException('NotFound Banner');
+      }
+      return await this.bannerService.deleteBanner(bannerId);
+    }
 
-    @Get(':banner_id')
+    @Get(':bannerId')
     @ApiOperation({
       summary: '배너 상세 조회',
     })
     @ApiOkResponse({
+      status: 200,
       type: BannerDto,
     })
-    async getBanner(@Param('banner_id') banner_id: string) {
-      const banner = new BannerDto();
-      return banner;
+    async getBanner(@Param('bannerId') bannerId: string) {
+      if (!(await this.bannerService.existBanner(bannerId))) {
+        throw new NotFoundException('NotFound Banner');
+      }
+      return await this.bannerService.getBannerById(bannerId);
     }
 
     @Get('')
@@ -61,6 +105,7 @@ export class BannerController {
       summary: '배너 조회',
     })
     @ApiOkResponsePaginated(BannerDto)
-    async listBanner(@Query() query: GetBannerDto) {
+    async listBanner(@Query() query: GetListBannerDto) {
+      return await this.bannerService.getPagingBanners(query)
     }
 }
