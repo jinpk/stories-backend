@@ -100,9 +100,9 @@ export class BannerController {
       return await this.bannerService.getBannerById(bannerId);
     }
 
-    @Get('list')
+    @Get('')
     @ApiOperation({
-      summary: '배너 조회',
+      summary: '배너 라스트 조회',
     })
     @ApiOkResponsePaginated(BannerDto)
     async listBanner(@Query() query: GetListBannerDto) {
