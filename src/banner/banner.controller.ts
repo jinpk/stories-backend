@@ -100,7 +100,7 @@ export class BannerController {
       return await this.bannerService.getBannerById(bannerId);
     }
 
-    @Get('')
+    @Get('list')
     @ApiOperation({
       summary: '배너 조회',
     })

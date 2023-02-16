@@ -1,22 +1,26 @@
 import {
-    Controller,
-    Get,
-    Param,
-    Delete,
-    Patch,
-    Post,
-    Query,
+  Controller,
+  Get,
+  Param,
+  Delete,
+  Put,
+  Post,
+  Query,
+  NotFoundException,
+  UnauthorizedException,
+  Body,
+  Request,
 } from '@nestjs/common';
 import {
-    ApiBearerAuth,
-    ApiBody,
-    ApiOkResponse,
-    ApiOperation,
-    ApiTags,
+  ApiBearerAuth,
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
 } from '@nestjs/swagger'
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
 import { PopupDto } from './dto/popup.dto';
-import { GetPopupDto } from './dto/get-popup.dto';
+import { GetListPopupDto } from './dto/get-popup.dto';
 import { PopupService } from './popup.service';
 
 @Controller('popup')
@@ -29,38 +33,78 @@ export class PopupController {
       summary: '(ADMIN) 팝업 등록',
     })
     @ApiBody({ type: PopupDto })
-    async createPopup() {}
+    @ApiOkResponse({
+      status: 200,
+      type: String,
+    })
+    async savePopup(@Body() body, @Request() req) {
+      if (!req.user.isAdmin) {
+        throw new UnauthorizedException('Not an Admin')
+      }
+      return await this.popupService.createPopup(body)
+    }
 
-    @Patch(':popup_id')
+    @Put(':popupId')
     @ApiOperation({
       summary: '(ADMIN) 팝업 수정',
     })
     @ApiBody({ type: PopupDto })
-    async patchPopup(@Param('popup_id') popup_id: string) {}
+    @ApiOkResponse({
+      status: 200,
+      type: String,
+    })
+    async patchPopup(
+      @Param('popupId') popupId: string,
+      @Body() body,
+      @Request() req) {
+        if (!req.user.isAdmin) {
+          throw new UnauthorizedException('Not an Admin')
+        }
+        if (!(await this.popupService.existPopup(popupId))) {
+          throw new NotFoundException('NotFound Popup');
+        }
+        return await this.popupService.updatePopup(popupId, body);
+    }
 
-    @Delete(':popup_id')
+    @Delete(':popupId')
     @ApiOperation({
         summary: '(ADMIN) 팝업 삭제'
     })
-    async deletePopup(@Param('popup_id') popup_id: string) {}
+    @ApiOkResponse({
+      status: 200,
+      type: String,
+    })
+    async deletePopup(@Param('popupId') popupId: string, @Request() req) {
+      if (!req.user.isAdmin) {
+        throw new UnauthorizedException('Not an Admin')
+      }
+      if (!(await this.popupService.existPopup(popupId))) {
+        throw new NotFoundException('NotFound Popup');
+      }
+      return await this.popupService.deletePopup(popupId);
+    }
 
-    @Get(':popup_id')
+    @Get(':popupId')
     @ApiOperation({
       summary: '팝업 상세 조회',
     })
     @ApiOkResponse({
+      status: 200,
       type: PopupDto,
     })
-    async getPopup(@Param('popup_id') popup_id: string) {
-      const popup = new PopupDto();
-      return popup;
+    async getPopup(@Param('popupId') popupId: string) {
+      if (!(await this.popupService.existPopup(popupId))) {
+        throw new NotFoundException('NotFound Popup');
+      }
+      return await this.popupService.getPopupById(popupId);
     }
 
-    @Get('')
+    @Get('list')
     @ApiOperation({
       summary: '팝업 조회',
     })
     @ApiOkResponsePaginated(PopupDto)
-    async listPopup(@Query() query: GetPopupDto) {
+    async listPopup(@Query() query: GetListPopupDto) {
+      return await this.popupService.getPagingPopups(query)
     }
 }

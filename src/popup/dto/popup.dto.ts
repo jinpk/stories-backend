@@ -37,4 +37,7 @@ export class PopupDto{
   
     @ApiProperty({})
     link: PopupLink;
+
+    @ApiProperty({})
+    createdAt?: Date;
   }
