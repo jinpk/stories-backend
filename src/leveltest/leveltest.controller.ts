@@ -19,7 +19,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
-import { LevelTestDto, LevelTestResultDto } from './dto/leveltest.dto';
+import { LevelTestDto } from './dto/leveltest.dto';
 import { UpdateLevelTestDto } from './dto/update-leveltest.dto';
 import { GetPagingLevelTestDto, GetStaticsLevelTestDto } from './dto/get-leveltest.dto';
 import { StaticsLevelTestDto } from './dto/leveltest-statics.dto';
@@ -88,13 +88,6 @@ export class LeveltestController {
   })
   @ApiOkResponsePaginated(StaticsLevelTestDto)
   async getStaticsLevelTest(@Query() qeury: GetStaticsLevelTestDto) {}
-
-  @Post('result')
-  @ApiOperation({
-    summary: '사용자 레벨 테스트 최종결과 제출',
-  })
-  @ApiBody({ type: LevelTestResultDto })
-  async saveLevelTestResult(@Param('userId') userId: string) {}
 
   @Get(':leveltestId')
   @ApiOperation({

@@ -16,11 +16,3 @@ export class LevelTestDto{
   @ApiProperty({})
   correct_answer: number;
 }
-
-export class LevelTestResultDto{
-  @ApiProperty({})
-  correct_answer: number;
-
-  @ApiProperty({})
-  total_answer: number;
-}

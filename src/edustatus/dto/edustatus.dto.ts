@@ -57,7 +57,7 @@ export class Statics {
     read: number;
 
     @ApiProperty({})
-    correct_rate: number;
+    correctRate: number;
 
     @ApiProperty({})
     words: number;
@@ -100,6 +100,7 @@ export class EduStatusDto {
 
     @ApiProperty({
     description: '개인 학습정보 통계 지표',
+    default: {},
     })
     statics: Statics;
 
@@ -107,4 +108,13 @@ export class EduStatusDto {
     description: '레벨별 완료율',
     })
     levelCompleteRate: LevelCompleteRate[];
+
+    @ApiProperty({})
+    userId: string;
+
 }
+
+export class LevelTestResultDto{
+    @ApiProperty({})
+    level: string
+  }

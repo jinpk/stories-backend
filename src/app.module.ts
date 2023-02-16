@@ -26,6 +26,8 @@ import { LibraryModule } from './library/library.module';
 import { CommonModule } from './common/common.module';
 import { EdustatusModule } from './edustatus/edustatus.module';
 import { AudioplayerModule } from './audioplayer/audioplayer.module';
+import { StaticController } from './static/static.controller';
+import { StaticModule } from './static/static.module';
 
 @Module({
   imports: [
@@ -58,8 +60,9 @@ import { AudioplayerModule } from './audioplayer/audioplayer.module';
     LibraryModule,
     EdustatusModule,
     AudioplayerModule,
+    StaticModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, StaticController],
   providers: [
     AppConfigService,
     {

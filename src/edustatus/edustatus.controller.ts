@@ -19,7 +19,7 @@ import {
     ApiTags,
 } from '@nestjs/swagger'
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
-import { EduStatusDto } from './dto/edustatus.dto';
+import { EduStatusDto, Statics, LevelCompleteRate, LevelTestResultDto } from './dto/edustatus.dto';
 import { EdustatusService } from './edustatus.service';
   
 @Controller('edustatus')
@@ -32,6 +32,7 @@ export class EdustatusController {
         summary: '(ADMIN) 회원상세 학습정보',
     })
     @ApiOkResponse({
+        status: 200,
         type: EduStatusDto,
     })
     async getUserEduInfo(
@@ -40,7 +41,67 @@ export class EdustatusController {
         if (!req.user.isAdmin) {
             throw new UnauthorizedException('Not an Admin')
         }
+        if (!(await this.edustatusService.existEdustatus(userId))) {
+            throw new NotFoundException('NotFound Edustatus');
+        }
         return await this.edustatusService.getEduStatusById(userId); 
+    }
+
+    @Put('static')
+    @ApiOperation({
+        summary: '사용자 학습 통계지표 업데이트',
+    })
+    @ApiBody({
+        type: Statics
+    })
+    @ApiOkResponse({
+        status: 200,
+        type: String,
+    })
+    async updateEduStatics(
+        @Body() body,
+        @Request() req) {
+            if (!(await this.edustatusService.existEdustatus(req.user.id))) {
+                throw new NotFoundException('NotFound Edustatus');
+            }
+            return await this.edustatusService.updateUserEduStatic(req.user.id, body);
+    }
+
+    @Put('level')
+    @ApiOperation({
+        summary: '사용자 레벨별 진행현황 업데이트',
+    })
+    @ApiOkResponse({
+        status: 200,
+        type: String,
+    })
+    @ApiBody({
+        type:[LevelCompleteRate],
+    })
+    async updateEduLevel(
+        @Body() body,
+        @Request() req){
+            if (!(await this.edustatusService.existEdustatus(req.user.id))) {
+                throw new NotFoundException('NotFound Edustatus');
+            }
+            return await this.edustatusService.updateUserEduLevel(req.user.id, body);
+    }
+
+    @Post('leveltest')
+    @ApiOperation({
+      summary: '사용자 최초 레벨 테스트 결과 제출',
+    })
+    @ApiBody({ type: LevelTestResultDto })
+    @ApiOkResponse({
+        status: 200,
+        type: String,
+    })
+    async saveLevelTestResult(@Request() req,@Body() body) {
+        if (!(await this.edustatusService.existEdustatus(req.user.id))) {
+            return await this.edustatusService.createEduStatus(req.user.id, body)
+        } else {
+            return '이미 존재하는 user_id 입니다.'
+        }
     }
 
     // @Post('result')
@@ -58,34 +119,19 @@ export class EdustatusController {
     //     return await this.edustatusService.updateEduStatus(userId, body)
     // }
 
-    @Get(':userId')
+    @Get('me')
     @ApiOperation({
         summary: 'HOME 사용자 학습 진행상황',
     })
     @ApiOkResponse({
+        status: 200,
         type: EduStatusDto,
     })
-    async getEduStatus(
-        @Param('userId') userId: string,
-        @Request() req) {
-        if (userId == req.user.id) {
-            return await this.edustatusService.getEduStatusById(req.user.id);
+    async getEduStatus(@Request() req) {
+        if (!(await this.edustatusService.existEdustatus(req.user.id))) {
+            throw new NotFoundException('NotFound Edustatus');
         }
-    }
-
-    @Put('static/:userId')
-    @ApiOperation({
-        summary: '사용자 학습 통계지표 업데이트',
-    })
-    async updateEduStatics() {
-
-    }
-
-    @Put('level/:userId')
-    @ApiOperation({
-        summary: '사용자 레벨별 진행현황 업데이트',
-    })
-    async updateEduLevel() {
-
+        return await this.edustatusService.getEduStatusById(req.user.id);
+        
     }
 }

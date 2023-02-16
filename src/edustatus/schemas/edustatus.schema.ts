@@ -36,6 +36,9 @@ export class EduStatus {
     @Prop()
     levelCompleteRate: LevelCompleteRate[];
 
+    @Prop()
+    userId: string;
+
     @Prop({default: now()})
     createdAt?: Date;
 }
