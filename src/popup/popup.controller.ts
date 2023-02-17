@@ -99,9 +99,9 @@ export class PopupController {
       return await this.popupService.getPopupById(popupId);
     }
 
-    @Get('list')
+    @Get('')
     @ApiOperation({
-      summary: '팝업 조회',
+      summary: '팝업 리스트 조회',
     })
     @ApiOkResponsePaginated(PopupDto)
     async listPopup(@Query() query: GetListPopupDto) {

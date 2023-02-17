@@ -1,21 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { now, HydratedDocument } from 'mongoose';
 
-export type FaqBoardDocument = HydratedDocument<FaqBoard>;
+export type FaqCategoryDocument = HydratedDocument<FaqCategory>;
 
 @Schema({ timestamps: true })
-export class FaqBoard {
+export class FaqCategory {
   @Prop()
   category: string;
-
-  @Prop()
-  question: string;
-
-  @Prop()
-  answer: string;
 
   @Prop({default: now()})
   createdAt?: Date;
 }
 
-export const FaqBoardSchema = SchemaFactory.createForClass(FaqBoard);
+export const FaqCategorySchema = SchemaFactory.createForClass(FaqCategory);

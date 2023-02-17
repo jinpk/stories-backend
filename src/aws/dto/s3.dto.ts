@@ -17,9 +17,4 @@ export class FilesFromBucketDto {
   @IsNotEmpty()
   // local relative paths
   path: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  bucket: string;
 }

@@ -78,9 +78,11 @@ export class EducontentsService {
     return educontent;
   }
 
-  async createContentsList(path: string, bucket: string): Promise<UploadContentsDto> {
+  async createContentsList(path: string): Promise<UploadContentsDto> {
+    const bucket: string = 'ttmikstories-data';
     var total = 0;
     var datas = [];
+
     const filelist = await this.awsService.filesListFromBucket(path, bucket);
     for (const file of filelist) {
       const exceldata = await this.awsService.fileFromBucket(file, bucket);
