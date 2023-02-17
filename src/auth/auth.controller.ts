@@ -33,7 +33,6 @@ import {
   PasswordResetedEvent,
   PasswordResetEvent,
 } from './events/password-reset.event';
-import { FirebaseService } from 'src/common/providers';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -42,7 +41,6 @@ export class AuthController {
     private authService: AuthService,
     private usersService: UsersService,
     private adminService: AdminService,
-    private firebaseService: FirebaseService,
     private eventEmitter: EventEmitter2,
   ) {}
 
@@ -138,7 +136,7 @@ export class AuthController {
       throw new NotFoundException('Not found email.');
     }
 
-    await this.usersService.updatePasswordByEmail(email, body.password);
+    await this.authService.resetTTMIKPassword(email, body.password);
 
     this.authService.genResetPasswordLink(email).then((link) => {
       this.eventEmitter.emit(

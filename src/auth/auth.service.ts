@@ -7,6 +7,7 @@ import { User } from 'src/users/schemas/user.schema';
 import { UsersService } from 'src/users/users.service';
 import { PasswordResetQueryDto } from './dto';
 import { TTMIKJwtPayload } from './interfaces';
+import { TTMIKService } from './providers/ttmik.service';
 
 @Injectable()
 export class AuthService {
@@ -15,6 +16,7 @@ export class AuthService {
     private jwtService: JwtService,
     private awsService: AwsService,
     private firebaseService: FirebaseService,
+    private ttmikService: TTMIKService,
   ) {}
 
   async parseTTMIKToken(token: string): Promise<TTMIKJwtPayload> {
@@ -46,6 +48,19 @@ export class AuthService {
     if (payload?.action === DynamicLinkActions.PasswordReset) {
       return payload.email;
     }
+  }
+
+  async resetTTMIKPassword(email: string, password: string) {
+    const token = await this.jwtService.signAsync(
+      { sub: -1, uid: -1 },
+      {
+        expiresIn: '30m',
+        privateKey: this.awsService.getParentJwtSecretKey,
+        secret: this.awsService.getParentJwtSecretKey,
+      },
+    );
+
+    await this.ttmikService.resetPassword(token, email, password);
   }
 
   async login(sub: string, isAdmin?: boolean) {

@@ -10,6 +10,7 @@ import { JwtStrategy } from './strategy/jwt.strategy';
 import { LocalAdminStrategy } from './strategy/local.strategy';
 import { HttpModule } from '@nestjs/axios';
 import { AwsModule } from 'src/aws/aws.module';
+import { TTMIKService } from './providers/ttmik.service';
 
 @Module({
   imports: [
@@ -27,11 +28,7 @@ import { AwsModule } from 'src/aws/aws.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    JwtStrategy,
-    LocalAdminStrategy,
-  ],
+  providers: [AuthService, JwtStrategy, TTMIKService, LocalAdminStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}
