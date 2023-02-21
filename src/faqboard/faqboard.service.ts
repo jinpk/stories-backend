@@ -29,13 +29,14 @@ export class FaqboardService {
     if (!faqboard) {
       return false;
     }
+
     return faqboard;
   }
 
   async createFaq(body: FaqBoardDto): Promise<string> {
     var faqboard: FaqBoard = new FaqBoard();
     faqboard = {
-      category: body.category,
+      categoryId: body.categoryId,
       question: body.question,
       answer: body.answer
     }
@@ -54,7 +55,7 @@ export class FaqboardService {
   async updateFaq(faqboard_id: string, body: UpdateFaqBoardDto): Promise<string> {
     const result = await this.faqboardModel.findByIdAndUpdate(faqboard_id, { 
       $set: {
-        category: body.category,
+        categoryId: body.categoryId,
         question: body.question,
         answer: body.answer,
         updatedAt: now()}
@@ -72,13 +73,13 @@ export class FaqboardService {
     query: GetListFaqBoardDto,
   ): Promise<PagingResDto<FaqBoardDto> | Buffer> {
     var filter: FilterQuery<FaqBoardDocument> = {}
-    if (query.category != undefined) {
-      filter.title = { $regex: query.category };
+    if (query.categoryId != undefined) {
+      filter.categoryId = { $regex: new Types.ObjectId(query.categoryId) };
     }
 
     const projection: ProjectionFields<FaqBoardDto> = {
       _id: 1,
-      category: 1,
+      categoryId: 1,
       question: 1,
       answer: 1,
       createdAt: 1,

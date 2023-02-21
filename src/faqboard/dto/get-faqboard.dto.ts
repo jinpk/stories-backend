@@ -5,7 +5,7 @@ export class GetListFaqBoardDto extends PagingReqDto {
     @ApiProperty({
       required: false,
     })
-    readonly category: string;
+    readonly categoryId: string;
   }
   
 export class GetListFaqCategoryDto extends PagingReqDto {

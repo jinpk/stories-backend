@@ -22,8 +22,13 @@ export class BannerService {
     @InjectModel(Banner.name) private bannerModel: Model<BannerDocument>,
   ) {}
 
-  async getBannerById(banner_id: string): Promise<BannerDto> {
-    return await this.bannerModel.findOne({banner_id});
+  async getBannerById(banner_id: string): Promise<BannerDocument | false> {
+    const banner = await this.bannerModel.findById(banner_id);
+    if (!banner) {
+      return false;
+    }
+
+    return banner;
   }
 
   async createBanner(body: BannerDto): Promise<string> {

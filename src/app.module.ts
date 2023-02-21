@@ -21,7 +21,6 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { FaqboardModule } from './faqboard/faqboard.module';
 import { PopupModule } from './popup/popup.module';
 import { BannerModule } from './banner/banner.module';
-import { ReminderModule } from './reminder/reminder.module';
 import { LibraryModule } from './library/library.module';
 import { CommonModule } from './common/common.module';
 import { EdustatusModule } from './edustatus/edustatus.module';
@@ -56,7 +55,6 @@ import { StaticModule } from './static/static.module';
     FaqboardModule,
     PopupModule,
     BannerModule,
-    ReminderModule,
     LibraryModule,
     EdustatusModule,
     AudioplayerModule,

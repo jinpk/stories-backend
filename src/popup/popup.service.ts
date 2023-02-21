@@ -22,8 +22,13 @@ export class PopupService {
     @InjectModel(Popup.name) private popupModel: Model<PopupDocument>,
   ) {}
 
-  async getPopupById(popup_id: string): Promise<PopupDto> {
-    return await this.popupModel.findOne({popup_id});
+  async getPopupById(popup_id: string): Promise<PopupDocument | false> {
+    const popup =  await this.popupModel.findById(popup_id);
+    if (!popup) {
+      return false;
+    }
+
+    return popup;
   }
 
   async createPopup(body: PopupDto): Promise<string> {

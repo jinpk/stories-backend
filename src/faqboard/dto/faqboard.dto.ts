@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class FaqBoardDto{
     @ApiProperty({})
-    category: string;
+    categoryId: string;
   
     @ApiProperty({})
     question: string;

@@ -6,7 +6,7 @@ export type FaqBoardDocument = HydratedDocument<FaqBoard>;
 @Schema({ timestamps: true })
 export class FaqBoard {
   @Prop()
-  category: string;
+  categoryId: string;
 
   @Prop()
   question: string;
