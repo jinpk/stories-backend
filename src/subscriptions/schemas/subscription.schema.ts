@@ -8,15 +8,33 @@ import { SubscriptionStates } from '../enums';
 export type SubscriptionDocument = HydratedDocument<Subscription>;
 
 @Schema({ timestamps: true })
+class VerifiedResult {
+  @Prop({ type: String })
+  data: any;
+  @Prop({ default: null })
+  createdAt?: Date;
+}
+
+export const SubscriptionVerifiedResult =
+  SchemaFactory.createForClass(VerifiedResult);
+
+@Schema({ timestamps: true })
 export class Subscription {
   @Prop({ type: SchemaTypes.ObjectId })
   @ApiProperty({ description: '사용자 ID', type: String })
   userId: Types.ObjectId;
 
   @Prop()
-  @ApiProperty({ description: '결제(주문) ID' })
+  @ApiProperty({ description: '구독 ID = orderId' })
   @IsNotEmpty()
   transactionId: string;
+
+  @Prop()
+  @ApiProperty({
+    description: '유저 쿠폰 ID(첫 결제에서만 보내면 됨.)',
+    required: false,
+  })
+  userCouponId: string;
 
   @Prop({ enum: SubscriptionStates })
   @ApiProperty({ description: '구독 상태', enum: SubscriptionStates })
@@ -35,24 +53,12 @@ export class Subscription {
   @IsEnum(AppOS)
   os: AppOS;
 
-  @Prop()
-  @ApiProperty({ description: 'IOS 결제 데이터', required: false })
-  receiptData: string;
-
-  @Prop()
-  @ApiProperty({ description: 'Android 결제검증 Token', required: false })
-  token: string;
-
-  @Prop()
-  @ApiProperty({ description: '유저 쿠폰 ID(첫 결제에서만)', required: false })
-  userCouponId: string;
+  @Prop({ default: [], type: [SubscriptionVerifiedResult] })
+  verifiedResults: [VerifiedResult];
 
   @Prop({ default: null })
   @ApiProperty({ description: '주문 날짜' })
   createdAt?: Date;
-
-  @Prop({ default: null })
-  updatedAt?: Date;
 }
 
 export const SubscriptionSchema = SchemaFactory.createForClass(Subscription);

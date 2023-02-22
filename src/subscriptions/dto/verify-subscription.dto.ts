@@ -1,4 +1,4 @@
-import { PickType } from '@nestjs/swagger';
+import { ApiProperty, PickType } from '@nestjs/swagger';
 import { Subscription } from '../schemas/subscription.schema';
 
 export class VerifySubscriptionDto extends PickType(Subscription, [
@@ -6,7 +6,11 @@ export class VerifySubscriptionDto extends PickType(Subscription, [
   'productId',
   'os',
   'userId',
-  'receiptData',
-  'token',
   'userCouponId',
-] as const) {}
+] as const) {
+  @ApiProperty({ description: '안드로이드 결제 Token' })
+  token: string;
+
+  @ApiProperty({ default: 'IOS 결제 영수증' })
+  receiptData: string;
+}

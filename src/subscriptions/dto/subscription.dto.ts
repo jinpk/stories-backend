@@ -1,10 +1,7 @@
 import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { Subscription } from '../schemas/subscription.schema';
 
-export class SubscriptionsDto extends OmitType(Subscription, [
-  'receiptData',
-  'token',
-] as const) {
+export class SubscriptionsDto extends OmitType(Subscription, [] as const) {
   @ApiProperty({})
   id: string;
 

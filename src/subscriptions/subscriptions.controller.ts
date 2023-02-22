@@ -4,11 +4,14 @@ import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator
 import { GetSubscriptionsDto } from './dto/get-subscription.dto';
 import { SubscriptionsDto } from './dto/subscription.dto';
 import { VerifySubscriptionDto } from './dto/verify-subscription.dto';
+import { SubscriptionsService } from './subscriptions.service';
 
 @Controller('subscriptions')
 @ApiTags('subscriptions')
 @ApiBearerAuth()
 export class SubscriptionsController {
+  constructor(private subscriptionsService: SubscriptionsService) {}
+
   @Post('verify')
   @ApiOperation({
     summary: '구독 첫 결졔(검증) | 갱신 | 다운그레이드 | 취소 | 업그레이드',
@@ -19,7 +22,9 @@ export class SubscriptionsController {
     \n그 외 다운/업그레이드 및 취소 액션이 일어나면 해당 API호출
     \n(호출시 서버에서 각 OS 서버로 결제 검증하여 업데이트 함)`,
   })
-  verifySubscription(@Body() body: VerifySubscriptionDto) {}
+  async verifySubscription(@Body() body: VerifySubscriptionDto) {
+    await this.subscriptionsService.verify(body);
+  }
 
   @Get('')
   @ApiOperation({
