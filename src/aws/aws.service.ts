@@ -41,7 +41,7 @@ export class AwsService {
     for await (const path of paths) {
       await this.s3
         .putObject({
-          ACL: 'public-read',
+          //ACL: 'public-read',
           Bucket: bucket,
           Body: createReadStream(path),
           Key: path,
@@ -50,51 +50,60 @@ export class AwsService {
     }
   }
 
-  async fileFromBucket(content: string, bucket: string): Promise<Map<string, any>> {
+  async fileFromBucket(
+    content: string,
+    bucket: string,
+  ): Promise<Map<string, any>> {
     var options = {
-      Bucket : bucket,
+      Bucket: bucket,
       Key: content,
-    }
-    var jsonarr = [];    
+    };
+    var jsonarr = [];
     const excelmap = new Map<string, any>();
-    excelmap.set('filename', content)
+    excelmap.set('filename', content);
 
-    return await this.s3.getObject(options).promise().then((file) => {
-      var buffers = [];
-      const contentmap = new Map<string, any>();
-      buffers.push(file.Body)
-      var buffer = Buffer.concat(buffers);
-      var workbook = XLSX.read(buffer, {type: 'buffer'});
-      for (const sheetname of workbook.SheetNames) {
-        const sheet = workbook.Sheets[sheetname];
-        const rows = XLSX.utils.sheet_to_json(sheet, {
-          defval: '',
-          raw: false,
-        });
-        contentmap.set(sheetname, rows)
-      }
+    return await this.s3
+      .getObject(options)
+      .promise()
+      .then((file) => {
+        var buffers = [];
+        const contentmap = new Map<string, any>();
+        buffers.push(file.Body);
+        var buffer = Buffer.concat(buffers);
+        var workbook = XLSX.read(buffer, { type: 'buffer' });
+        for (const sheetname of workbook.SheetNames) {
+          const sheet = workbook.Sheets[sheetname];
+          const rows = XLSX.utils.sheet_to_json(sheet, {
+            defval: '',
+            raw: false,
+          });
+          contentmap.set(sheetname, rows);
+        }
 
-      excelmap.set('contents', contentmap)
+        excelmap.set('contents', contentmap);
 
-      return excelmap
-    });
+        return excelmap;
+      });
   }
 
   async filesListFromBucket(path: string, bucket: string): Promise<string[]> {
     var options = {
-      Bucket : bucket,
+      Bucket: bucket,
       Prefix: path,
     };
     var filelist: string[] = [];
-    return await this.s3.listObjects(options).promise().then((data) => {
-      for (const content of data.Contents) {
-        if (content.Key == path) {
-        } else {
-          filelist.push(content.Key);
+    return await this.s3
+      .listObjects(options)
+      .promise()
+      .then((data) => {
+        for (const content of data.Contents) {
+          if (content.Key == path) {
+          } else {
+            filelist.push(content.Key);
+          }
         }
-      }
-      return filelist
-    });
+        return filelist;
+      });
   }
 
   async sendEmail(params: SendEmailDto): Promise<string> {
