@@ -24,13 +24,14 @@ export class SubscriptionsService {
     });
 
     let verifiedResult: any;
-    if (dto.os === AppOS.Android) {
+    /*if (dto.os === AppOS.Android) {
       verifiedResult = await this.googleVerifierService.verifySubscription(
         dto.token,
       );
     } else if (dto.os === AppOS.Ios) {
-    }
+    }*/
 
+    verifiedResult = {};
     verifiedResult = JSON.stringify(verifiedResult);
 
     if (existSubscription) {
