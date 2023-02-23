@@ -45,6 +45,12 @@ export class RecentArticle {
 
     @ApiProperty({})
     title: string;
+
+    @ApiProperty({})
+    current: number;
+
+    @ApiProperty({})
+    total: number;
 }
 
 export class Statics {
@@ -63,20 +69,20 @@ export class Statics {
     words: number;
 }
 
-class CompleteRate {
+class Completed {
     @ApiProperty({})
-    article: number;
+    article: string[];
 
     @ApiProperty({})
-    story: number;
+    story: string[];
 }
 
-export class LevelCompleteRate {
+export class LevelCompleted {
   @ApiProperty({})
   level: string;
 
   @ApiProperty({})
-  completeRate: CompleteRate;
+  completed: Completed;
 }
 
 export class EduStatusDto {
@@ -105,9 +111,9 @@ export class EduStatusDto {
     statics: Statics;
 
     @ApiProperty({
-    description: '레벨별 완료율',
+    description: '레벨별 완료 한 serialnum array',
     })
-    levelCompleteRate: LevelCompleteRate[];
+    levelCompleted: LevelCompleted[];
 
     @ApiProperty({})
     userId: string;

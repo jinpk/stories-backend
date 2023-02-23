@@ -1,31 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class Libraries{
-  @ApiProperty({})
-  contentsSerialNum: string;
-
-  @ApiProperty({})
-  contentsId: string;
-
-  @ApiProperty({})
-  title: string;
-
-  @ApiProperty({})
-  current: number;
-
-  @ApiProperty({})
-  total: number;
-
-  @ApiProperty({})
-  isBookmarked: boolean;
-
-  @ApiProperty({})
-  isCompleted: boolean;
-
-  @ApiProperty({})
-  highestLevel: string;
-}
-
 class CompleteCount {
   @ApiProperty({})
   complete: number;
@@ -34,16 +8,30 @@ class CompleteCount {
   total: number;    
 }
 
-export class ListLibraryDto {
-    @ApiProperty({})
-    level: string;
-    
-    @ApiProperty({})
-    series: CompleteCount;
-  
-    @ApiProperty({})
-    article: CompleteCount;
+export class LibraryDto {
+  @ApiProperty({})
+  id: string;
 
-    @ApiProperty({})
-    libraries: Libraries[];
+  @ApiProperty({})
+  contentsSerialNum: string;
+  
+  @ApiProperty({})
+  level: string;
+  
+  @ApiProperty({})
+  title: string;
+
+  @ApiProperty({default: false})
+  isCompleted: boolean;
+}
+
+export class ListLevelLibraryDto {
+  @ApiProperty({})
+  level: string;
+  
+  @ApiProperty({})
+  series: CompleteCount;
+
+  @ApiProperty({})
+  article: CompleteCount;
 }

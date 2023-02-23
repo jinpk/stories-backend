@@ -95,7 +95,7 @@ export class EducontentsController {
 
   @Get('')
   @ApiOperation({
-    summary: '(ADMIN) 학습 컨텐츠 조회',
+    summary: '학습 컨텐츠 조회',
   })
   @ApiOkResponsePaginated(EduContentsDto)
   async listEduContents(@Query() query: GetListEduContentsDto, @Request() req) {

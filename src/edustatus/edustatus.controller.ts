@@ -19,7 +19,7 @@ import {
     ApiTags,
 } from '@nestjs/swagger'
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
-import { EduStatusDto, Statics, LevelCompleteRate, LevelTestResultDto } from './dto/edustatus.dto';
+import { EduStatusDto, Statics, LevelCompleted, LevelTestResultDto } from './dto/edustatus.dto';
 import { EdustatusService } from './edustatus.service';
   
 @Controller('edustatus')
@@ -72,7 +72,7 @@ export class EdustatusController {
         summary: '사용자 레벨별 진행현황 업데이트',
     })
     @ApiBody({
-        type:[LevelCompleteRate],
+        type:[LevelCompleted],
     })
     @ApiOkResponse({
         status: 200,
@@ -132,6 +132,19 @@ export class EdustatusController {
             throw new NotFoundException('NotFound Edustatus');
         }
         return await this.edustatusService.getEduStatusById(req.user.id);
+        
+    }
+
+    @Get('certificates/me')
+    @ApiOperation({
+        summary: '사용자 레벨별 수료현황-마이페이지',
+    })
+    @ApiOkResponse({
+        status: 200,
+        type: EduStatusDto,
+    })
+    async getUserCretificate(@Request() req) {
+        return await this.edustatusService.getUserCertificates(req.user.id);
         
     }
 }
