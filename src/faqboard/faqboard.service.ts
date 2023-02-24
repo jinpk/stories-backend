@@ -74,7 +74,7 @@ export class FaqboardService {
   ): Promise<PagingResDto<FaqBoardDto> | Buffer> {
     var filter: FilterQuery<FaqBoardDocument> = {}
     if (query.categoryId != undefined) {
-      filter.categoryId = { $regex: new Types.ObjectId(query.categoryId) };
+      filter.categoryId = { $eq: query.categoryId };
     }
 
     const projection: ProjectionFields<FaqBoardDto> = {
