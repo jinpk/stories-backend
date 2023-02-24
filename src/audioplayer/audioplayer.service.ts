@@ -11,7 +11,7 @@ import {
 import { PagingResDto } from 'src/common/dto/response.dto';
 import { AudioPlayerDto } from './dto/audioplayer.dto';
 import { GetListAudioPlayerDto } from './dto/get-audioplayer.dto';
-import { AudioPlayer, AudioPlayerDocument } from './schemas/audioplayer.schema';
+import { ReadStory, ReadStoryDocument } from '../edustatus/schemas/readstory.schema';
 import { EduStatus, EduStatusDocument } from '../edustatus/schemas/edustatus.schema';
 import { Bookmark, BookmarkDocument } from '../educontents/schemas/bookmark.schema';
 import { EduContents, EduContentsDocument } from '../educontents/schemas/educontents.schema';
@@ -21,10 +21,9 @@ import { UtilsService } from 'src/common/providers';
 export class AudioplayerService {
     constructor(
         private utilsService: UtilsService,
-        @InjectModel(AudioPlayer.name) private audioplayerModel: Model<AudioPlayerDocument>,
         @InjectModel(EduContents.name) private educontentsModel: Model<EduContentsDocument>,
         @InjectModel(Bookmark.name) private bookmarkModel: Model<BookmarkDocument>,
-        @InjectModel(EduStatus.name) private edustatusModel: Model<EduStatusDocument>
+        @InjectModel(ReadStory.name) private readstoryModel: Model<ReadStoryDocument>,
       ) {}
 
     async GetAudioPlayerBySerialNum(contents_serial_num: string): Promise<AudioPlayerDto> {
@@ -34,26 +33,17 @@ export class AudioplayerService {
 
         var audioplayer: AudioPlayerDto = new AudioPlayerDto();
         audioplayer = {
+            id: educontents[0]._id.toString(),
             contentsSerialNum: educontents[0].contentsSerialNum,
             level: educontents[0].level,
             title: educontents[0].title,
             content: educontents[0].content,
+            imagePath: educontents[0].imagePath,
             audioFilePath: educontents[0].audioFilePath
         }
         return audioplayer;
     }
     
-    // async createFaq(body: AudioPlayerDto): Promise<string> {
-    //     var faqboard: AudioPlayer = new AudioPlayer();
-    //     faqboard = {
-    //         category: body.category,
-    //         question: body.question,
-    //         answer: body.answer
-    //     }
-    //     const result = await new this.audioplayerModel(faqboard).save();
-    //     return result._id.toString(); 
-    // }
-
     async existBycontentsSerialNum(contents_serial_num: string): Promise<boolean> {
         const educontents = await this.educontentsModel.find({
             contentsSerialNum: { $eq: contents_serial_num }
@@ -64,87 +54,76 @@ export class AudioplayerService {
         return true;
     }
 
-    // async updateFaq(audioplayer_id: string, body: UpdateAudioPlayerDto): Promise<string> {
-    //     const result = await this.audioplayerModel.findByIdAndUpdate(audioplayer_id, { 
-    //         $set: {
-    //         category: body.category,
-    //         question: body.question,
-    //         answer: body.answer,
-    //         updatedAt: now()}
-    //     });
-
-    //     return result._id.toString();
-    // }
-
-    // async deleteFaq(audioplayer_id: string): Promise<string> {
-    //     await this.audioplayerModel.findByIdAndDelete(audioplayer_id);
-    //     return audioplayer_id
-    // }
-
     async getPagingAudioPlayers(
     query: GetListAudioPlayerDto,
     user_id: string,
     ): Promise<PagingResDto<AudioPlayerDto> | Buffer> {
-        var filter: FilterQuery<AudioPlayerDocument> = {}
+        var bookmarked: any[] = [];
+        var stories: any[] = [];
+
+        var filter: FilterQuery<EduContentsDocument> = {}
+        if (query.level == "0")  {
+        } else {
+          filter.level = query.level;
+        }
 
         // 북마크 or Not
         if (query.bookmarked) {
-            const bookmarked = await this.bookmarkModel.find({
+            var bookmarks = await this.bookmarkModel.find({
                 userId: { $eq: user_id }
             });
-            console.log(bookmarked)
-        } else {
-
-        }
+            if (bookmarks.length != 0) {
+                bookmarks.forEach((content, _) => {
+                  bookmarked.push(content.eduContentsId)
+                })
+            }
+        } else {}
 
         if (query.filterType == "ARTICLE") {
-            
+            filter.contentsSerialNum = { $regex: 'A' || 'a' };
         } else if (query.filterType == "SERIES") {
-
-        } else {
-
-        }
-
-        // 레벨별 진행률
-
-        const lookups: PipelineStage[] = [
-            {
-              $lookup: {
-                from: 'educontents',
-                localField: 'contentsSerialNum',
-                foreignField: 'contentsSerialNum',
-                as: 'educontents',
-              },
-            },
-            {
-              $unwind: {
-                path: '$educontents',
-                preserveNullAndEmptyArrays: false,
-              },
-            },
-        ];
+            filter.contentsSerialNum = { $regex: 'S' || 's' };
+        } else {}
 
         const projection: ProjectionFields<AudioPlayerDto> = {
             _id: 1,
-            category: 1,
-            question: 1,
-            answer: 1,
+            level: 1,
+            title: 1,
+            contentsSerialNum: 1,
+            audioFilePath: 1,
+            imagePath: 1,
             createdAt: 1,
         };
 
-        const cursor = await this.audioplayerModel.aggregate([
+        const cursor = await this.educontentsModel.aggregate([
             { $match: filter },
             { $project: projection },
-            { $sort: { createdAt: -1 } },
-            this.utilsService.getCommonMongooseFacet(query),
         ]);
 
-        const metdata = cursor[0].metadata;
-        const data = cursor[0].data;
+        if (query.filterType == "COMPLETE") {
+            const readstory = await this.readstoryModel.find({
+                userId: { $eq: user_id }
+            });
+    
+          if (readstory.length != 0) {
+            readstory.forEach((content, _) => {
+              stories.push(content.contentsSerialNum)
+            })
+          }
+
+          cursor.forEach((content, _) => {
+            if (stories.includes(content.contentsSerialNum)) {
+            } else {
+              cursor.splice(content, 1)
+            }
+          });
+        }
+        const metdata = cursor.length;
+        const data = cursor;
 
         return {
-            total: metdata[0]?.total || 0,
-            data: data,
-        };
+        total: metdata || 0,
+        data: data,
+        }
     }
 }

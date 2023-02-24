@@ -1,7 +1,7 @@
 import { ApiProperty, IntersectionType } from '@nestjs/swagger';
 import { PagingReqDto } from 'src/common/dto/request.dto';
 
-export class GetListAudioPlayerDto extends PagingReqDto {
+export class GetListAudioPlayerDto {
   @ApiProperty({})
   readonly level: string;
 
