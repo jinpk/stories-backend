@@ -5,7 +5,10 @@ class CompleteCount {
     complete: number;
 
     @ApiProperty({})
-    total: number;    
+    total: number;
+
+    @ApiProperty({})
+    updatedAt: Date;
 }
 
 export class LevelProgress {
@@ -111,7 +114,7 @@ export class EduStatusDto {
     statics: Statics;
 
     @ApiProperty({
-    description: '레벨별 완료 한 serialnum array',
+    description: '레벨별 완료 한 array',
     })
     levelCompleted: LevelCompleted[];
 
@@ -122,5 +125,8 @@ export class EduStatusDto {
 
 export class LevelTestResultDto{
     @ApiProperty({})
-    level: string
+    level: string;
+
+    @ApiProperty({})
+    updatedAt: Date;
   }

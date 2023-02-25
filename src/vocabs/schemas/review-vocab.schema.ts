@@ -16,6 +16,9 @@ export class ReviewVocab {
 
   @Prop({default: now()})
   createdAt?: Date;
+
+  @Prop({default: now()})
+  updatedAt?: Date;
 }
 
 export const ReviewVocabSchema = SchemaFactory.createForClass(ReviewVocab);

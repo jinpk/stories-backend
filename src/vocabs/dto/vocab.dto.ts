@@ -125,4 +125,10 @@ export class ReviewVocabDto{
   @ApiProperty({})
   @IsString()
   meaningEn: string;
+
+  @ApiProperty({})
+  createdAt?: Date;
+
+  @ApiProperty({})
+  updatedAt?: Date;
 }

@@ -23,7 +23,6 @@ import { VocabDto, CoreVocabDto, ReviewVocabDto } from './dto/vocab.dto';
 import { UpdateVocabDto } from './dto/update-vocab.dto';
 import { GetVocabsDto, GetReviewVocabDto, GetCoreVocabDto } from './dto/get-vocab.dto';
 import { VocabsService } from './vocabs.service';
-import { StaticsVocabDto } from './dto/vocab-statics.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Public } from 'src/auth/decorator/auth.decorator';
 

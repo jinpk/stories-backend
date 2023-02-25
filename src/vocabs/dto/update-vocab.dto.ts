@@ -9,3 +9,12 @@ export class UpdateVocabDto extends OmitType(VocabDto, [
   'updatedAt',
   'id'
 ] as const) {}
+
+export class UpdateReviewVocabDto extends OmitType(VocabDto, [
+  'level',
+  'title',
+  'connStory',
+  'createdAt',
+  'updatedAt',
+  'id'
+] as const) {}

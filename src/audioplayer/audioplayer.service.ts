@@ -12,7 +12,6 @@ import { PagingResDto } from 'src/common/dto/response.dto';
 import { AudioPlayerDto } from './dto/audioplayer.dto';
 import { GetListAudioPlayerDto } from './dto/get-audioplayer.dto';
 import { ReadStory, ReadStoryDocument } from '../edustatus/schemas/readstory.schema';
-import { EduStatus, EduStatusDocument } from '../edustatus/schemas/edustatus.schema';
 import { Bookmark, BookmarkDocument } from '../educontents/schemas/bookmark.schema';
 import { EduContents, EduContentsDocument } from '../educontents/schemas/educontents.schema';
 import { UtilsService } from 'src/common/providers';
