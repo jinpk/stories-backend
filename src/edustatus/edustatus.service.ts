@@ -75,7 +75,7 @@ export class EdustatusService {
     edustatus = {
       firstLevel: body.level,
       levelProgress: [],
-      highestLevel: body.level,
+      currentLevel: {level: body.level, total:0, completed:0},
       selectedLevel: body.level,
       levelCompleted: [],
       statics: {total: 0, read: 0, correctRate:0, words:0},

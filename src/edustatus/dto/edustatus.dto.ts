@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { now } from 'mongoose';
 
 class CompleteCount {
     @ApiProperty({})
@@ -88,12 +89,26 @@ export class LevelCompleted {
   completed: Completed;
 }
 
+export class CurrentLevel {
+    @ApiProperty({})
+    level: string;
+
+    @ApiProperty({})
+    total: number;
+
+    @ApiProperty({})
+    completed: number;
+
+    @ApiProperty({default: now()})
+    updatedAt?: Date;
+}
+
 export class EduStatusDto {
     @ApiProperty({})
     firstLevel: string;
 
     @ApiProperty({})
-    highestLevel: string;
+    currentLevel: CurrentLevel;
 
     @ApiProperty({})
     selectedLevel: string;

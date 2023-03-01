@@ -4,12 +4,6 @@ import { IsString } from 'class-validator';
 
 export class StaticsVocabDto {
     @ApiProperty({
-      description: '레벨',
-      required: false,
-    })
-    readonly level: string;
-  
-    @ApiProperty({
       description: '추가 단어 수',
       required: false,
     })

@@ -56,11 +56,12 @@ export class VocabsService {
     return true;
   }
 
-  async createReviewVocab(id: string, vocab_id: string) {
+  async createReviewVocab(id, vocab_id, level: string) {
     var reviewVocab: ReviewVocab = new ReviewVocab()
     var objVocabId = new Types.ObjectId(vocab_id)
     reviewVocab = {
       userId: id,
+      level: level,
       vocabId: objVocabId,
       complete: false,
     }

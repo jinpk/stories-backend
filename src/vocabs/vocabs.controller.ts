@@ -106,11 +106,14 @@ export class VocabsController {
       status: 200,
       type: String,
     })
-    async saveUserReviewVocab(@Request() req, @Param('vocabId') vocabId: string) {
+    async saveUserReviewVocab(
+      @Request() req, 
+      @Param('vocabId') vocabId: string,
+      @Param('level') level: string) {
       if (!(await this.vocabsService.existVocabById(vocabId))) {
         throw new NotFoundException('NotFound Vocab');
       }
-      return await this.vocabsService.createReviewVocab(req.user.id, vocabId)
+      return await this.vocabsService.createReviewVocab(req.user.id, vocabId, level)
     }
 
     @Put('reviewquiz/:reviewvocabId')

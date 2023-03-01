@@ -11,6 +11,9 @@ export class ReviewVocab {
   @Prop()
   vocabId: Types.ObjectId;
 
+  @Prop()
+  level: string;
+
   @Prop({default: false})
   complete: boolean;
 
