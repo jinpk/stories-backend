@@ -8,6 +8,8 @@ phases:
       - IMAGE_TAG=latest
       - IMAGE_REPO_NAME=stories
       - REPOSITORY_URI=844548817563.dkr.ecr.us-east-1.amazonaws.com
+      # nodeimage fetch
+      - docker pull 844548817563.dkr.ecr.us-east-1.amazonaws.com/stories-backend-nodejs:latest
   build:
     commands:
       - echo Build started on `date`
@@ -20,7 +22,7 @@ phases:
       - echo Pushing the Docker images...
       - docker push $REPOSITORY_URI/$IMAGE_REPO_NAME:$IMAGE_TAG
       - printf '[{"name":"stories","imageUri":"%s"}]' $REPOSITORY_URI/$IMAGE_REPO_NAME:$IMAGE_TAG > imagedefinitions.json
-      
+
 artifacts:
-    files: 
-      - imagedefinitions.json
+  files:
+    - imagedefinitions.json
