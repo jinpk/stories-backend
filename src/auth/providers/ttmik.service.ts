@@ -1,8 +1,8 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import {
-  TTMIK_API_PATH_CHANGE_PASSWORD,
   TTMIK_API_PATH_RESET_PASSWORD,
+  TTMIK_API_PATH_VALIDATE_PASSWORD,
   TTMIK_API_URL,
 } from '../auth.constant';
 
@@ -23,7 +23,7 @@ export class TTMIKService {
       },
       {
         headers: {
-          Authorization: adminToken,
+          Authorization: 'Bearer ' + adminToken,
         },
       },
     );
@@ -39,32 +39,28 @@ export class TTMIKService {
     }
   }
 
-  async changePassword(
-    userToken: string,
-    password: string,
-    newPassword: string,
-  ) {
+  async validatePassword(adminToken: string, email: string, password: string) {
     const res = await this.httpService.axiosRef.post(
-      `${TTMIK_API_URL}/${TTMIK_API_PATH_CHANGE_PASSWORD}`,
+      `${TTMIK_API_URL}/${TTMIK_API_PATH_VALIDATE_PASSWORD}`,
       {
+        email,
         password,
-        new_password: newPassword,
       },
       {
         headers: {
-          Authorization: userToken,
+          Authorization: 'Bearer ' + adminToken,
         },
       },
     );
 
-    if (res.status !== 200 && res.status !== 201) {
+    if (res.status !== 200) {
       console.error(
-        'failed to chnage password to ttmik system.: ',
+        'failed to validate password to ttmik system.: ',
         res.status,
         res.statusText,
         res.data,
       );
-      throw new Error('TTMIK System 비밀번호 변경 요청 실패 하였습니다.');
+      throw new Error('TTMIK System 비밀번호 검증 요청 실패 하였습니다.');
     }
   }
 }

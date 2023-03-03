@@ -24,6 +24,7 @@ import {
   AdminLoginDto,
   PasswordResetDto,
   PasswordResetQueryDto,
+  ChangePasswordDto,
 } from './dto';
 import { LocalAuthAdminGuard } from './guard/local-auth.guard';
 import { AdminService } from 'src/admin/admin.service';
@@ -102,17 +103,28 @@ export class AuthController {
       throw new UnauthorizedException('Invalid TTMIK Jwt Token.');
     }
 
-    const user = await this.usersService.findOneByEmailAll(payload.email);
+    //const user = await this.usersService.findOneByEmailAll(payload.email);
+    const user = await this.usersService.findOneByEmail(payload.email);
 
     if (!user) {
       return await this.authService.signUp(payload, countryCode);
     }
 
-    if (user.deleted) {
+    /*if (user.deleted) {
       throw new UnauthorizedException('User Already deleted.');
-    }
+    }*/
 
     return await this.authService.login(user._id.toHexString(), false);
+  }
+
+  @Post('passwordchange')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '사용자 비밀번호 변경',
+    description: '로그인된 회원이 비밀번호 변경 요청한 경우',
+  })
+  async changePassword(@Request() req, @Body() body: ChangePasswordDto) {
+    await this.authService.changePassword(req.user.id, body);
   }
 
   @Post('passwordreset/exec')
