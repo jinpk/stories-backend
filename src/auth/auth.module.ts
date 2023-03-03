@@ -7,10 +7,15 @@ import { UsersModule } from 'src/users/users.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategy/jwt.strategy';
-import { LocalAdminStrategy, LocalStrategy } from './strategy/local.strategy';
+import { LocalAdminStrategy } from './strategy/local.strategy';
+import { HttpModule } from '@nestjs/axios';
+import { AwsModule } from 'src/aws/aws.module';
+import { TTMIKService } from './providers/ttmik.service';
 
 @Module({
   imports: [
+    HttpModule,
+    AwsModule,
     UsersModule,
     AdminModule,
     PassportModule,
@@ -23,7 +28,7 @@ import { LocalAdminStrategy, LocalStrategy } from './strategy/local.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy, LocalAdminStrategy],
+  providers: [AuthService, JwtStrategy, TTMIKService, LocalAdminStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}

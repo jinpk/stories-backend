@@ -10,10 +10,30 @@ import { AdminModule } from './admin/admin.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guard/jwt-auth.guard';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CouponsModule } from './coupons/coupons.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { FilesModule } from './files/files.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { EventModule } from './event/event.module';
+import { SchedulerModule } from './scheduler/scheduler.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { FaqboardModule } from './faqboard/faqboard.module';
+import { PopupModule } from './popup/popup.module';
+import { BannerModule } from './banner/banner.module';
+import { LibraryModule } from './library/library.module';
+import { CommonModule } from './common/common.module';
+import { EdustatusModule } from './edustatus/edustatus.module';
+import { AudioplayerModule } from './audioplayer/audioplayer.module';
+import { StaticController } from './static/static.controller';
+import { StaticModule } from './static/static.module';
 
 @Module({
   imports: [
     AppConfigModule,
+    CommonModule,
+    EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot(),
     MongooseModule.forRootAsync({
       useFactory: async (configService: AppConfigService) => ({
         uri: configService.mongoURI,
@@ -26,8 +46,21 @@ import { MongooseModule } from '@nestjs/mongoose';
     LeveltestModule,
     VocabsModule,
     AdminModule,
+    CouponsModule,
+    NotificationsModule,
+    SubscriptionsModule,
+    FilesModule,
+    EventModule,
+    SchedulerModule,
+    FaqboardModule,
+    PopupModule,
+    BannerModule,
+    LibraryModule,
+    EdustatusModule,
+    AudioplayerModule,
+    StaticModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, StaticController],
   providers: [
     AppConfigService,
     {

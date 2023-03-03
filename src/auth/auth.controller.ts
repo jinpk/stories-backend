@@ -1,12 +1,12 @@
 import {
   Body,
-  ConflictException,
   Controller,
   Get,
   NotFoundException,
   Post,
   Request,
   UseGuards,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -20,13 +20,20 @@ import { Public } from './decorator/auth.decorator';
 import { AuthService } from './auth.service';
 import {
   AccountDto,
-  LoginDto,
   TokenDto,
-  SignUpDto,
   AdminLoginDto,
+  PasswordResetDto,
+  PasswordResetQueryDto,
+  ChangePasswordDto,
 } from './dto';
-import { LocalAuthGuard, LocalAuthAdminGuard } from './guard/local-auth.guard';
+import { LocalAuthAdminGuard } from './guard/local-auth.guard';
 import { AdminService } from 'src/admin/admin.service';
+import { TTMIKJwtPayload } from './interfaces';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import {
+  PasswordResetedEvent,
+  PasswordResetEvent,
+} from './events/password-reset.event';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -35,6 +42,7 @@ export class AuthController {
     private authService: AuthService,
     private usersService: UsersService,
     private adminService: AdminService,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   @Post('admin/login')
@@ -53,39 +61,131 @@ export class AuthController {
     return this.authService.login(req.user, true);
   }
 
-  @Post('login')
-  @Public()
-  @UseGuards(LocalAuthGuard)
+  @Post('logout')
+  @ApiBearerAuth()
   @ApiOperation({
-    summary: '사용자 로그인',
+    summary: '사용자 로그아웃',
+    description: `로그아웃시 Client에서 accessToken 삭제
+    \n서버에서는 FcmToken 초기화`,
   })
-  @ApiBody({
-    type: LoginDto,
-  })
-  @ApiOkResponse({
-    type: TokenDto,
-  })
-  async login(@Request() req) {
-    return this.authService.login(req.user);
+  async logout(@Request() req) {
+    await this.usersService.updateById(req.user.id, { fcmToken: '' });
   }
 
-  @Post('signup')
+  @Post('login')
   @Public()
   @ApiOperation({
-    summary: '회원가입 (계정생성)',
-  })
-  @ApiBody({
-    type: SignUpDto,
+    summary: 'TTMIK 로그인',
+    description: `**본 서비스는 TTMIK 회원과 미러링 됨.**
+    \n\nTTMIK 로그인 시스템에서 발급 받은 JWT_TOKEN으로 요청.
+    \n* 스토리즈앱에 가입한적 있다면 로그인후 스토리즈앱 로그인 JWT_TOKEN 발급
+    \n* 가입한적 없다면 자동 가입 처리후 로그인 JWT_TOKEN 발급
+    \n* countryCode는 Device에서 받아와 항상 요청 필요`,
   })
   @ApiOkResponse({
     type: TokenDto,
   })
-  async signUp(@Body() body: SignUpDto) {
-    if (await this.usersService.findOneByEmail(body.email)) {
-      throw new ConflictException('Already exist email.');
+  @ApiBody({
+    schema: {
+      description: 'token: TTMIK_JWT_TOKEN',
+      required: ['token', 'countryCode'],
+      properties: {
+        token: { type: 'string' },
+        countryCode: { type: 'string', description: 'Device CountryCode' },
+      },
+    },
+  })
+  async ttmkiLogin(@Body('token') token, @Body('countryCode') countryCode) {
+    let payload: TTMIKJwtPayload;
+    try {
+      payload = await this.authService.parseTTMIKToken(token);
+    } catch (error) {
+      throw new UnauthorizedException('Invalid TTMIK Jwt Token.');
     }
 
-    return this.authService.signUp(body);
+    //const user = await this.usersService.findOneByEmailAll(payload.email);
+    const user = await this.usersService.findOneByEmail(payload.email);
+
+    if (!user) {
+      return await this.authService.signUp(payload, countryCode);
+    }
+
+    /*if (user.deleted) {
+      throw new UnauthorizedException('User Already deleted.');
+    }*/
+
+    return await this.authService.login(user._id.toHexString(), false);
+  }
+
+  @Post('passwordchange')
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: '사용자 비밀번호 변경',
+    description: '로그인된 회원이 비밀번호 변경 요청한 경우',
+  })
+  async changePassword(@Request() req, @Body() body: ChangePasswordDto) {
+    await this.authService.changePassword(req.user.id, body);
+  }
+
+  @Post('passwordreset/exec')
+  @Public()
+  @ApiOperation({
+    summary: '비밀번호 재설정',
+    description:
+      '이메일 링크의 FirebaseDynamicLink의 query.payload에 담긴 JWT와 재설정할 비밀번호로 요청\nToken 만료기한: 30분',
+  })
+  @ApiOkResponse({
+    description: '비밀번호 재설정 완료',
+  })
+  async passwordResetExecute(@Body() body: PasswordResetDto) {
+    const email = await this.authService.parsePasswordResetToken(body.token);
+    if (!email) {
+      throw new UnauthorizedException('유효하지 않거나 만료된 토큰입니다.');
+    }
+
+    const user = await this.usersService.findOneByEmail(email);
+    if (!user) {
+      throw new NotFoundException('Not found email.');
+    }
+
+    await this.authService.resetTTMIKPassword(email, body.password);
+
+    this.authService.genResetPasswordLink(email).then((link) => {
+      this.eventEmitter.emit(
+        PasswordResetedEvent.event,
+        new PasswordResetedEvent(email, user.nickname, link),
+      );
+    });
+  }
+
+  @Post('passwordreset')
+  @Public()
+  @ApiOperation({
+    summary: '비밀번호 재설정 링크 이메일 요청',
+    description:
+      '이메일의 링크 클릭시 Firebase InApp DeepLinking 처리\nDeepLink의 Query Spec은 Response 확인필요',
+  })
+  @ApiBody({
+    schema: {
+      properties: { email: { type: 'string' } },
+    },
+  })
+  @ApiOkResponse({
+    description: 'Firebase Dynamic Link의 URL Query Spec',
+    type: PasswordResetQueryDto,
+  })
+  async passwordReset(@Body('email') email: string) {
+    const user = await this.usersService.findOneByEmail(email);
+    if (!user) {
+      throw new NotFoundException('Not found email.');
+    }
+
+    const link = await this.authService.genResetPasswordLink(email);
+
+    this.eventEmitter.emit(
+      PasswordResetEvent.event,
+      new PasswordResetEvent(email, user.nickname, link),
+    );
   }
 
   @Get('me')

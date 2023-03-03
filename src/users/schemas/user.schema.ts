@@ -1,67 +1,41 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
-import { compareSync, genSalt, hash } from 'bcrypt';
+import { ApiProperty } from '@nestjs/swagger';
+import { HydratedDocument, SchemaTypes, Types } from 'mongoose';
 
-export type UserDocument = HydratedDocument<User & UserMethods>;
+export type UserDocument = HydratedDocument<User>;
 
 @Schema({ timestamps: true })
 export class User {
   @Prop()
-  name: string;
-
-  @Prop()
-  nickname: string;
-
-  @Prop()
+  @ApiProperty({ description: 'TTMIK user email 미러링' })
   email: string;
 
   @Prop()
-  password: string;
-
-  @Prop({ default: false })
-  subNewsletter: boolean;
+  @ApiProperty({ description: 'Stories 고유 닉네임' })
+  nickname: string;
 
   @Prop({ uppercase: true })
+  @ApiProperty({ description: 'Stories 마지막 로그인 국가' })
   countryCode: string;
 
-  @Prop({ default: false })
-  ttmik: boolean;
+  @Prop({})
+  @ApiProperty({ description: 'Firebase Messaging Token' })
+  fcmToken?: string;
 
   @Prop({ default: false })
-  deleted: boolean;
+  @ApiProperty({ description: 'Stories 회원 탈퇴' })
+  deleted?: boolean;
 
   @Prop({ default: null })
+  @ApiProperty({ description: '탈퇴일' })
   deletedAt?: Date;
+
+  @Prop({ default: null })
+  @ApiProperty({ description: '가입일' })
   createdAt?: Date;
+
+  @Prop({ default: null })
   updatedAt?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
-
-UserSchema.pre('save', function (next) {
-  if (!this.isModified('password')) return next();
-  genSalt()
-    .then((salt) => {
-      hash(this.password, salt)
-        .then((hashed) => {
-          this.password = hashed;
-          next();
-        })
-        .catch((err) => {
-          console.error('hash user password (2): ', err);
-          next(new Error('암호화 오류'));
-        });
-    })
-    .catch((err) => {
-      console.error('hash user password (1): ', err);
-      next(new Error('암호화 오류'));
-    });
-});
-
-interface UserMethods {
-  comparePassword?: (password: string) => Promise<boolean>;
-}
-
-UserSchema.methods.comparePassword = async function (password) {
-  return compareSync(password, this.password);
-};

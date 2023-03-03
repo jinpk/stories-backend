@@ -8,10 +8,39 @@ export class AppConfigService {
   get mongoURI(): string {
     return this.configService.get<string>('app.mongoURI');
   }
-  get port(): number {
-    return Number(this.configService.get<number>('app.port'));
-  }
   get jwtSecret(): string {
     return this.configService.get<string>('app.jwtSecret');
   }
+  get awsAccessKey(): string {
+    return this.configService.get<string>('app.awsAccessKey');
+  }
+  get awsSecret(): string {
+    return this.configService.get<string>('app.awsSecret');
+  }
+  get host(): string {
+    return this.configService.get<string>('app.host');
+  }
+  get firebaseProjectId(): string {
+    return this.configService.get('app.firebaseProjectId');
+  }
+  get firebasePrivateKeyId(): string {
+    return this.configService.get('app.firebasePrivateKeyId');
+  }
+  get firebasePrivateKey(): string {
+    return this.configService.get('app.firebasePrivateKey');
+  }
+  get firebaseClientId(): string {
+    return this.configService.get('app.firebaseClientId');
+  }
+  get firebaseClientEmail(): string {
+    return this.configService.get('app.firebaseClientEmail');
+  }
+
+  get googleAPIKey(): string {
+    return this.configService.get('app.googleAPIKey');
+  }
+
+
+  
+
 }
