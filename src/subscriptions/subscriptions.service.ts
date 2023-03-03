@@ -19,10 +19,12 @@ export class SubscriptionsService {
   ) {}
 
   async verify(dto: VerifySubscriptionDto) {
+    // 구독이 갱신 결제인지 첫 구독 결제인지 고유 값이 transactionId가 맞는지는 확인 필요.
     const existSubscription = await this.subscriptionModel.findOne({
       transactionId: dto.transactionId,
     });
 
+    // 앱스토어, 플레이스토어 인앱결제 검증 return data
     let verifiedResult: any;
     /*if (dto.os === AppOS.Android) {
       verifiedResult = await this.googleVerifierService.verifySubscription(
@@ -32,12 +34,16 @@ export class SubscriptionsService {
     }*/
 
     verifiedResult = {};
+
+    // 스트링으로 변환후 디비에 저장
     verifiedResult = JSON.stringify(verifiedResult);
 
     if (existSubscription) {
+      // 해당 구독 결제가 2회 > 갱신 결제인 경우 push
       existSubscription.verifiedResults.push({ data: verifiedResult });
       await existSubscription.save();
     } else {
+      // 첫 구독 결제하는거면 새로 생성
       await new this.subscriptionModel({
         userId: dto.userId,
         transactionId: dto.transactionId,
