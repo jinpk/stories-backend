@@ -43,8 +43,7 @@ export class StaticService {
     async getVocabQuizStatic(
       query: GetVocabQuizDto,
     ){
-      var rates: {[key: string]: StaticsVocabDto} = {}
-      var total: number = 0
+      var rates: {[key: string]: any} = {}
 
       const start_date = new Date(query.start).toString()
       const end_date = new Date(query.end).toString()
@@ -55,10 +54,32 @@ export class StaticService {
           $lte: new Date(end_date)
         }
       });
-      console.log(reviewvocab)
-      for (let i = 1; i < 11; i++) {
-        rates[i.toString()] = new StaticsVocabDto()
+
+      var staticvocab: StaticsVocabDto = new StaticsVocabDto();
+      staticvocab = {
+        addedVocabCount: 0,
+        studiedVocabCount: 0,
+        completeRate: 0,
       }
+
+      for (let i = 1; i < 11; i++) {
+        rates[i.toString()] = staticvocab
+      }
+
+      reviewvocab.forEach((content, _) => {
+        rates[content.level].addedVocabCount += 1
+        if (content.complete) {
+          rates[content.level].studiedVocabCount += 1
+        }
+      });
+
+      Object.keys(rates).forEach(key => {
+        if (rates[key].addedVocabCount != 0) {
+          rates[key].completeRate = (rates[key].studiedVocabCount / rates[key].addedVocabCount) * 100.0;
+        } else {}
+      });
+
+      return rates
     }
 
     async getLevelTestStatic(
