@@ -7,7 +7,8 @@ export const GOOGLE_VERIFY_URL_PREFIX =
 
 @Injectable()
 export class GoogleVerifierService {
-  private access_token = '';
+  // oauth2Token은 해당 서비스 초기화마다 생성자 함수 혹은 func verifySubscription 호출전 갱신 필요.
+  private oauth2Token = '';
 
   constructor(private httpService: HttpService) {}
 
@@ -16,8 +17,8 @@ export class GoogleVerifierService {
     const res = await this.httpService.axiosRef.get(
       `${GOOGLE_VERIFY_URL_PREFIX}/${ANDROID_PACKAGE_NAME}/purchases/subscriptionsv2/tokens/${token}`,
       {
-        params: {
-          access_token: this.access_token,
+        headers: {
+          Authorization: 'Bearer ' + this.oauth2Token,
         },
       },
     );
