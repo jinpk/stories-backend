@@ -4,20 +4,20 @@ import { IsString } from 'class-validator';
 
 export class StaticsVocabDto {
     @ApiProperty({
+        default: 0,
       description: '추가 단어 수',
-      required: false,
     })
-    readonly added_vocab_count: number;
+    addedVocabCount: number;
   
     @ApiProperty({
+        default: 0,
       description: '익힌 단어 수',
-      required: false,
     })
-    readonly studied_vocab_count: number;
+    studiedVocabCount: number;
   
     @ApiProperty({
+        default: 0,
       description: '완료율(익힌단어수/추가단어수) %',
-      required: false,
     })
-    readonly complete_rate: string;
+    completeRate: number;
   }
