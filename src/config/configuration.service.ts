@@ -40,7 +40,11 @@ export class AppConfigService {
     return this.configService.get('app.googleAPIKey');
   }
 
+  get playConsoleClientEmail(): string {
+    return this.configService.get('app.playConsoleClientEmail');
+  }
 
-  
-
+  get playConsolePrivateKey(): string {
+    return this.configService.get('app.playConsolePrivateKey');
+  }
 }

@@ -13,4 +13,7 @@ export default registerAs('app', () => ({
   firebaseClientId: process.env.FIREBASE_CLIENT_ID,
   firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL,
   googleAPIKey: process.env.GOOGLE_API_KEY,
+
+  playConsoleClientEmail: process.env.PLAYCONSOLE_CLIENT_EMAIL,
+  playConsolePrivateKey: process.env.PLAYCONSOLE_PRIVATE_KEY,
 }));

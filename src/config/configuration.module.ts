@@ -21,7 +21,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         FIREBASE_CLIENT_ID: Joi.string().required(),
         FIREBASE_CLIENT_EMAIL: Joi.string().required(),
         GOOGLE_API_KEY: Joi.string().required(),
-        
+        PLAYCONSOLE_PRIVATE_KEY: Joi.string().required(),
+        PLAYCONSOLE_CLIENT_EMAIL: Joi.string().required(),
       }),
     }),
   ],
