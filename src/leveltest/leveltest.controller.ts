@@ -4,6 +4,7 @@ import {
   Param,
   Delete,
   Put,
+  Patch,
   Post,
   Query,
   NotFoundException,
@@ -81,13 +82,6 @@ export class LeveltestController {
     }
     return await this.leveltestService.deleteLevelTest(leveltestId)
   }
-
-  @Get('statics')
-  @ApiOperation({
-    summary: '(ADMIN) leveltest 이용 통계',
-  })
-  @ApiOkResponsePaginated(StaticsLevelTestDto)
-  async getStaticsLevelTest(@Query() qeury: GetStaticsLevelTestDto) {}
 
   @Get(':leveltestId')
   @ApiOperation({

@@ -26,8 +26,14 @@ export class LeveltestService {
   }
 
   async updateLevelTestById(id: string, body: UpdateLevelTestDto) {
+    console.log(body)
     const leveltest = await this.leveltestModel.findByIdAndUpdate(id, { 
-      $set: {body, updatedAt: now()}
+      $set: {
+        level: body.level,
+        text: body.text,
+        answers: body.answers,
+        correct_answer: body.correct_answer,
+        updatedAt: now()}
     });
 
     return leveltest._id.toString()

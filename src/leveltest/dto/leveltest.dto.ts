@@ -15,4 +15,10 @@ export class LevelTestDto{
 
   @ApiProperty({})
   correct_answer: number;
+
+  @ApiProperty({})
+  createdAt?: Date;
+
+  @ApiProperty({})
+  updatedAt?: Date;
 }
