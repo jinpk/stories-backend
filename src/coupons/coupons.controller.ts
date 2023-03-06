@@ -41,7 +41,8 @@ export class CouponsController {
   @Get('sent')
   @ApiOperation({
     summary: '쿠폰 발송 내역',
-    description: 'userId 입력시 회원 쿠폰 내역 조회 (앱에서 조회시 used = 1 고정으로 요청 필요)',
+    description:
+      'userId 입력시 회원 쿠폰 내역 조회 (앱에서 조회시 used = 1 고정으로 요청 필요)',
   })
   @ApiOkResponsePaginated(UserCouponDto)
   async listCouponSent(@Query() query: GetCouponsSentDto) {

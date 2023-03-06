@@ -11,6 +11,7 @@ export class UserCouponDto extends PickType(
     'description',
     'type',
     'start',
+    'storeId',
     'value',
     'end',
     'userId',

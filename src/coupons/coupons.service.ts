@@ -9,7 +9,6 @@ import {
 } from 'mongoose';
 import { PagingResDto } from 'src/common/dto/response.dto';
 import { CommonExcelService, UtilsService } from 'src/common/providers';
-import { SubscriptionStates } from 'src/subscriptions/enums';
 import { EXCEL_COLUMN_LIST, EXCEL_COLUMN_LIST_SENT } from './coupons.constant';
 import { CouponDto } from './dto/coupon.dto';
 import { CreateCouponDto } from './dto/create-coupon.dto';
@@ -122,6 +121,7 @@ export class CouponsService {
       type: '$coupons.type',
       start: '$coupons.start',
       end: '$coupons.end',
+      storeId: '$coupons.storeId',
       value: '$coupons.value',
       userId: 1,
       createdAt: 1,
@@ -203,6 +203,7 @@ export class CouponsService {
       value: 1,
       start: 1,
       end: 1,
+      storeId: 1,
       usedCount: { $size: '$subscriptions' },
     };
 
@@ -238,6 +239,7 @@ export class CouponsService {
       value: body.value,
       start: body.start,
       end: body.end,
+      storeId: body.storeId,
       deleted: false,
     }).save();
     return doc._id.toString();
@@ -253,6 +255,7 @@ export class CouponsService {
     dto.start = doc.start;
     dto.end = doc.end;
     dto.createdAt = doc.createdAt;
+    dto.storeId = doc.storeId;
 
     return dto;
   }
