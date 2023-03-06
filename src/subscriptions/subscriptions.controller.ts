@@ -14,7 +14,8 @@ export class SubscriptionsController {
 
   @Post('verify')
   @ApiOperation({
-    summary: '구독 첫 결졔(검증) | 갱신 | 다운그레이드 | 취소 | 업그레이드',
+    summary:
+      '(사용 불가능) 구독 첫 결졔(검증) | 갱신 | 다운그레이드 | 취소 | 업그레이드',
     description: `신규 구독은 검증후 구독 데이터 생성
     \n구독 갱신은 body.transactionId를 체크후 업데이트
     \n사용자가 앱 시작하는 시점에 각 OS에서 스토어 연결된 API로 구독 상태 가져와서 갱신되었다면 서버에 요청

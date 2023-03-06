@@ -48,7 +48,7 @@ import { StaticModule } from './static/static.module';
     AdminModule,
     CouponsModule,
     NotificationsModule,
-    SubscriptionsModule,
+    //SubscriptionsModule,
     FilesModule,
     EventModule,
     SchedulerModule,

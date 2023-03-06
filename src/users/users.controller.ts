@@ -61,14 +61,21 @@ export class UsersController {
   @ApiOkResponse({
     type: UpdateUserDto,
   })
-  async updateUser(@Body() body: UpdateUserDto) {
-    console.log(body)
-    // const user = await this.usersService.findById(id);
-    // if (!user) {
-    //   throw new NotFoundException();
-    // }
+  async updateUser(
+    @Req() req,
+    @Param('id') id: string,
+    @Body() body: UpdateUserDto,
+  ) {
+    if (req.user.id !== id && !req.user.isAdmin) {
+      throw new UnauthorizedException();
+    }
 
-    // return await this.usersService.updateById(id, body);
+    const user = await this.usersService.findById(req.user.id);
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    return await this.usersService.updateById(id, body);
   }
 
   @Get(':id')

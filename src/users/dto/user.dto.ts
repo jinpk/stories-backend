@@ -32,10 +32,10 @@ export class UserEnumDto {
   subscriptionType: SubscriptionTypes;
 }
 
-export class UserDto extends UserEnumDto {
+//export class UserDto extends UserEnumDto {
+export class UserDto {
   @ApiProperty({ description: 'userId' })
   id: string;
-
 
   @ApiProperty({ description: 'nickname' })
   nickname: string;
