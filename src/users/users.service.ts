@@ -43,13 +43,13 @@ export class UsersService {
       filter.createdAt = { $lte: new Date(query.end) };
     }
 
-    if (query.ttmik) {
+    /*if (query.ttmik) {
       filter.ttmik = { $eq: query.ttmik === '1' };
     }
 
     if (query.newsletter) {
       filter.newsletter = { $eq: query.newsletter === '1' };
-    }
+    }*/
 
     if (query.countryCode) {
       filter.countryCode = { $eq: query.countryCode.toUpperCase() };
