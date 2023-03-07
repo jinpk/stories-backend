@@ -22,6 +22,10 @@ export class User {
   @ApiProperty({ description: 'Firebase Messaging Token' })
   fcmToken?: string;
 
+  @Prop({ default: true })
+  @ApiProperty({ description: '뉴스레터 구독 여부' })
+  newsletter: boolean;
+
   @Prop({ default: false })
   @ApiProperty({ description: 'Stories 회원 탈퇴' })
   deleted?: boolean;

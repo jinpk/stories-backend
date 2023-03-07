@@ -8,7 +8,15 @@ export class GetUserDto {
   })
   readonly id: string;
 }
+
 export class GetUsersDto extends ListReqDto {
+  @ApiProperty({
+    description: '뉴스레터 구독',
+    required: false,
+    enum: ['', '0', '1'],
+  })
+  readonly newsletter: string;
+
   @ApiProperty({
     description: '국가코드',
     required: false,

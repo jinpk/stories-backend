@@ -117,6 +117,7 @@ export class AuthService {
       email: payload.email,
       countryCode,
       nickname: payload.name,
+      newsletter: true,
     };
     const sub = await this.usersService.create(user);
     return this.login(sub);

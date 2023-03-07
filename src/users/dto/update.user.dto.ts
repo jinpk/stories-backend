@@ -11,4 +11,11 @@ export class UpdateUserDto {
   @IsString()
   @IsNotEmpty()
   nickname?: string;
+
+  @ApiProperty({
+    description: '뉴스레터 구독',
+    required: false,
+  })
+  @IsOptional()
+  newsletter?: boolean;
 }

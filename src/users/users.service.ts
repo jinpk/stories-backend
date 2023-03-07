@@ -45,11 +45,11 @@ export class UsersService {
 
     /*if (query.ttmik) {
       filter.ttmik = { $eq: query.ttmik === '1' };
-    }
+    }*/
 
     if (query.newsletter) {
       filter.newsletter = { $eq: query.newsletter === '1' };
-    }*/
+    }
 
     if (query.countryCode) {
       filter.countryCode = { $eq: query.countryCode.toUpperCase() };
@@ -82,12 +82,11 @@ export class UsersService {
       set.nickname = body.nickname;
     }
 
-    await this.userModel.findByIdAndUpdate(userId, { $set: set });
-  }
+    if (body.newsletter !== undefined) {
+      set.newsletter = Boolean(body.newsletter);
+    }
 
-  async updatePasswordByEmail(email: string, password: string) {
-    throw 'ttmik method not supported yet.';
-    // TTMIK로 비밀번호 재설정 요청
+    await this.userModel.findByIdAndUpdate(userId, { $set: set });
   }
 
   async findOneByEmail(email: string): Promise<UserDocument> {
@@ -140,6 +139,7 @@ export class UsersService {
     user.nickname = doc.nickname;
     user.countryCode = doc.countryCode;
     user.createdAt = doc.createdAt;
+    user.newsletter = doc.newsletter;
     return user;
   }
 }

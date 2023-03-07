@@ -52,4 +52,9 @@ export class UserDto {
     description: '가입 날짜',
   })
   createdAt: Date;
+
+  @ApiProperty({
+    description: '뉴스레터 구독',
+  })
+  newsletter: boolean;
 }
