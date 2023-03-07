@@ -59,6 +59,16 @@ export class VocabsService {
   async createReviewVocab(id, vocab_id, level: string) {
     var reviewVocab: ReviewVocab = new ReviewVocab()
     var objVocabId = new Types.ObjectId(vocab_id)
+
+    const exist = await this.reviewvocabModel.findOne({
+      userId: id,
+      vocabId: objVocabId 
+    });
+
+    if (exist) {
+      return "Already Registered."
+    }
+
     reviewVocab = {
       userId: id,
       level: level,
