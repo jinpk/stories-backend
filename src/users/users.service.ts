@@ -5,16 +5,37 @@ import { UserDto } from './dto/user.dto';
 import { User, UserDocument } from './schemas/user.schema';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserCreatedEvent } from './events/create-user.event';
-import { UpdateUserDto } from './dto/update.user.dto';
+import { UpdateUserDto, UpdateUserTTMIKDto } from './dto/update.user.dto';
 import { GetUsersDto } from './dto/get-user.dto';
 import { PagingResDto } from 'src/common/dto/response.dto';
+import { JwtService } from '@nestjs/jwt';
+import { AwsService } from 'src/aws/aws.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private eventEmitter: EventEmitter2,
+    private jwtService: JwtService,
+    private awsService: AwsService,
   ) {}
+
+  async __testGenTTMIKJWT() {
+    return await this.jwtService.signAsync(
+      { sub: -1 },
+      { secret: this.awsService.getParentJwtSecretKey },
+    );
+  }
+
+  async verifyTTMIKJWT(token: string) {
+    const payload = await this.jwtService.verifyAsync(token, {
+      secret: this.awsService.getParentJwtSecretKey,
+    });
+    if (payload.sub === -1) {
+      return true;
+    }
+    return false;
+  }
 
   async getActiveFCMUsers(): Promise<string[]> {
     const docs = await this.userModel
@@ -43,9 +64,9 @@ export class UsersService {
       filter.createdAt = { $lte: new Date(query.end) };
     }
 
-    /*if (query.ttmik) {
+    if (query.ttmik) {
       filter.ttmik = { $eq: query.ttmik === '1' };
-    }*/
+    }
 
     if (query.newsletter) {
       filter.newsletter = { $eq: query.newsletter === '1' };
@@ -72,6 +93,19 @@ export class UsersService {
     };
   }
 
+  async updateTTMIKByEmail(email: string, body: UpdateUserTTMIKDto) {
+    const set: AnyKeys<UserDocument> = {};
+    if (body.nickname !== undefined) {
+      set.nickname = body.nickname;
+    }
+
+    if (body.ttmik !== undefined) {
+      set.ttmik = body.ttmik;
+    }
+
+    await this.userModel.findOneAndUpdate({ email }, { $set: set });
+  }
+
   async updateById(userId: string, body: UpdateUserDto) {
     const set: AnyKeys<UserDocument> = {};
     if (body.fcmToken !== undefined) {
@@ -80,6 +114,10 @@ export class UsersService {
 
     if (body.nickname !== undefined) {
       set.nickname = body.nickname;
+    }
+
+    if (body.ttmik !== undefined) {
+      set.ttmik = body.ttmik;
     }
 
     if (body.newsletter !== undefined) {
@@ -140,6 +178,7 @@ export class UsersService {
     user.countryCode = doc.countryCode;
     user.createdAt = doc.createdAt;
     user.newsletter = doc.newsletter;
+    user.ttmik = doc.ttmik;
     return user;
   }
 }

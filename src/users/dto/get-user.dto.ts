@@ -11,6 +11,13 @@ export class GetUserDto {
 
 export class GetUsersDto extends ListReqDto {
   @ApiProperty({
+    description: 'ttmik 멤버쉽 여부',
+    enum: ['', '0', '1'],
+    required: false,
+  })
+  readonly ttmik: string;
+
+  @ApiProperty({
     description: '뉴스레터 구독',
     required: false,
     enum: ['', '0', '1'],

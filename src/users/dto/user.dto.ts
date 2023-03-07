@@ -57,4 +57,9 @@ export class UserDto {
     description: '뉴스레터 구독',
   })
   newsletter: boolean;
+
+  @ApiProperty({
+    description: 'TTMIK WEB 결제 회원인지',
+  })
+  ttmik: boolean;
 }
