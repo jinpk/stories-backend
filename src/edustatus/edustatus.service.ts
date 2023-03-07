@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Body } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   now,
@@ -9,10 +9,13 @@ import {
   Types,
 } from 'mongoose';
 import { PagingResDto } from 'src/common/dto/response.dto';
+import { EduContents, EduContentsDocument } from '../educontents/schemas/educontents.schema';
 import { EduStatus, EduStatusDocument } from './schemas/edustatus.schema';
 import { QuizResult, QuizResultDocument } from './schemas/quizresult.schema';
 import { ReadStory, ReadStoryDocument } from './schemas/readstory.schema';
-import { EduStatusDto, Statics, LevelCompleted, LevelTestResultDto } from './dto/edustatus.dto';
+import { EduStatusDto, Statics, Completed, LevelTestResultDto, LevelProgressDetail, LevelProgress, CertificateDto } from './dto/edustatus.dto';
+import { GetReadStoryDto } from './dto/get-readstory.dto';
+import { UpdateEduStatusDto } from './dto/update-edustatus.dto';
 
 @Injectable()
 export class EdustatusService {
@@ -20,24 +23,12 @@ export class EdustatusService {
     @InjectModel(EduStatus.name) private edustatusModel: Model<EduStatusDocument>,
     @InjectModel(QuizResult.name) private quizresultModel: Model<QuizResultDocument>,
     @InjectModel(ReadStory.name) private readstoryModel: Model<ReadStoryDocument>,
+    @InjectModel(EduContents.name) private educontentsModel: Model<EduContentsDocument>,
   ) {}
 
   async getEduStatusById(user_id: string): Promise<EduStatusDto> {
     var edustatus =  await this.edustatusModel.findOne({user_id});
     return edustatus
-  }
-
-  async updateEduStatus(user_id: string, body: EduStatusDto): Promise<string> {
-    const eduprogress = await this.edustatusModel.findOne({user_id});
-    if (!eduprogress) {
-    } else {
-      const id = eduprogress._id.toString();
-      await this.edustatusModel.findByIdAndUpdate(id, { 
-        $set: {body, updatedAt: now()}
-      });
-
-      return id
-    }
   }
 
   async existEdustatus(user_id: string): Promise<boolean> {
@@ -50,40 +41,137 @@ export class EdustatusService {
 
   async updateUserHighestLevel(user_id: string, level: string): Promise<string> {
     const result = await this.edustatusModel.findOneAndUpdate({user_id}, { 
-        $set: {highestLevel: level, updatedAt: now()}
+      $set: {highestLevel: level, updatedAt: now()}
     });
     return result._id.toString();
   }
 
-  async updateUserEduLevel(user_id: string, body: LevelCompleted[]): Promise<string> {
+  async updateUserEduLevel(user_id: string, body: Completed): Promise<string> {
+    const status = await this.edustatusModel.findOne({user_id});
+
     const result = await this.edustatusModel.findOneAndUpdate({user_id}, { 
-        $set: {levelCompleteRate: body, updatedAt: now()}
+      $set: {levelCompleted: body, updatedAt: now()}
     });
+
+    this.createReadStory(user_id, "", "")
+
     return result._id.toString();
   }
 
   async updateUserEduStatic(user_id: string, body: Statics): Promise<string> {
     const result = await this.edustatusModel.findOneAndUpdate({user_id}, { 
-    $set: {static: body, updatedAt: now()}
+      $set: {static: body, updatedAt: now()}
     });
 
     return result._id.toString();
     }
 
   async createEduStatus(user_id: string, body: LevelTestResultDto): Promise<string> {
+    if (!(await this.existEdustatus(user_id))) {
+
+    }else{}
+
+    const article_count = await this.educontentsModel.find({
+      level: { $eq: body.level },
+      contentsSerialNum: { $regex: 'a' || 'A' },
+    }).count();
+
+    const series_count = await this.educontentsModel.find({
+      level: { $eq: body.level },
+      contentsSerialNum: { $regex: 's' || 'S' },
+    }).count();
+
+    var cur_progress: LevelProgressDetail = new LevelProgressDetail();
+    cur_progress = {
+      articleTotal: article_count,
+      seriesComplete: 0,
+      seriesTotal: series_count,
+      articleComplete: 0,
+      quizResult: {correct: 0, total: 0},
+      updatedAt: now(),
+    }
+
+    var lvl_progress = {}
+    lvl_progress[body.level] = cur_progress
+
+    var cur_completed: Completed = new Completed();
+    cur_completed = {
+      articleCompleted: [],
+      seriesCompleted: []
+    }
+
+    var lvl_completed = {}
+    lvl_completed[body.level] = cur_completed
+
     var edustatus: EduStatus = new EduStatus();
     edustatus = {
       firstLevel: body.level,
-      levelProgress: [],
-      currentLevel: {level: body.level, total:0, completed:0},
-      selectedLevel: body.level,
-      levelCompleted: [],
+      levelProgress: lvl_progress,
+      currentLevel: {level: body.level, total:article_count + series_count, completed:0},
+      levelCompleted: lvl_completed,
       statics: {total: 0, read: 0, correctRate:0, words:0},
-      recentArticle: {contentsId:'',contentsSerialNum:'',title:'', current:0, total: 0},
+      recentArticle: {contentsId:'',contentsSerialNum:'',title:'', current:0, total:0},
       recentSeries: {contentsId:'',contentsSerialNum:'',title:'', current:0, total:0},
       userId: user_id,
     }
+
     const result = await new this.edustatusModel(edustatus).save();
+    return result._id.toString(); 
+  }
+
+  async updateEduStatus(user_id: string, body: LevelTestResultDto): Promise<string> {
+    if (await this.existEdustatus(user_id)) {
+    }else{
+      return await this.createEduStatus(user_id, body);
+    }
+
+    const article_count = await this.educontentsModel.find({
+      level: { $eq: body.level },
+      contentsSerialNum: { $regex: 'a' || 'A' },
+    }).count();
+
+    const series_count = await this.educontentsModel.find({
+      level: { $eq: body.level },
+      contentsSerialNum: { $regex: 's' || 'S' },
+    }).count();
+
+    var user_status = await this.edustatusModel.findOne({ user_id });
+
+    if (user_status.levelProgress[body.level]) {
+      user_status.levelProgress[body.level].quizResult.correct = body.correct
+      user_status.levelProgress[body.level].quizResult.total = body.total
+    } else {
+      var progress: LevelProgressDetail = new LevelProgressDetail();
+      progress = {
+        articleTotal: article_count,
+        seriesComplete: article_count,
+        seriesTotal: series_count,
+        articleComplete: series_count,
+        quizResult: {correct: body.correct, total: body.total},
+        updatedAt: now(),
+      }
+      user_status.levelProgress[body.level] = progress;
+    }
+
+    var lvl_progress: LevelProgress = user_status.levelProgress
+
+    var total_count = 0
+    var correct_count = 0
+    Object.keys(lvl_progress).forEach((content, _) => {
+      total_count += lvl_progress[content].quizResult.total
+      correct_count += lvl_progress[content].quizResult.correct
+    })
+
+    const statics: Statics = user_status.statics
+    statics.correctRate = (correct_count/total_count) * 100.0
+
+    const result = await this.edustatusModel.findOneAndUpdate({user_id}, { 
+      $set: {
+        levelProgress: user_status.levelProgress,
+        statics: statics,
+        updatedAt: now()
+      }
+    });
     return result._id.toString(); 
   }
 
@@ -120,7 +208,7 @@ export class EdustatusService {
   async getReadStories(user_id: string) {
     const readstory = await this.readstoryModel.find({
       userId: { $eq: user_id },
-    }).count();
+    });
 
     return readstory
   }
@@ -169,10 +257,33 @@ export class EdustatusService {
     return matered_quiz_result
   }
 
-  async getUserCertificates(user_id: string): Promise<EduStatusDto> {
-    return await this.edustatusModel.findOne({user_id});
+  async getUserCertificates(user_id: string): Promise<CertificateDto[]> {
+    const status = await this.edustatusModel.findOne({user_id});
+
+    var lvl_progress: LevelProgress = status.levelProgress
+    var certificates: CertificateDto[] = []
+
+    Object.keys(lvl_progress).forEach((content, _) => {
+      if ((lvl_progress[content].articleTotal == lvl_progress[content].articleComplete) && 
+      (lvl_progress[content].seriesTotal == lvl_progress[content].seriesComplete)) {
+        certificates.push({'level': content, completion: true})
+      }
+    })
+
+    return certificates
   }
 
-  async getStudiedDates(user_id, month: string) {
+  async getStudiedDates(user_id: string, query: GetReadStoryDto) {
+    const start_date = new Date(query.start).toString()
+    const end_date = new Date(query.end).toString()
+
+    const studied = await this.readstoryModel.find({
+      "updatedAt": {
+        $gte: new Date(start_date),
+        $lte: new Date(end_date)
+      }
+    });
+
+    return studied
   }
 }

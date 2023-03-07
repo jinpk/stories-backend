@@ -26,6 +26,10 @@ export class StaticService {
     async getContentsCompleteStatic(
       query: GetContentsCompleteDto
     ){
+      var completed: {[key: string]: any} = {}
+      var added: {[key: string]: any} = {}
+      var rates: {[key: string]: {'avgAdded':number, 'avgCompleted':number, 'rate':number}} = {}
+
       const start_date = new Date(query.start).toString()
       const end_date = new Date(query.end).toString()
 
@@ -36,8 +40,29 @@ export class StaticService {
         }
       });
 
+      const count = edustatus.length;
+
+      for (let i = 1; i < 11; i++) {
+        added[i.toString()] = 0
+        completed[i.toString()] = 0
+      }
+
       edustatus.forEach((content, _) => {
-      })
+        added[content.currentLevel.level] += content.currentLevel.total;
+        completed[content.currentLevel.level] += content.currentLevel.completed;
+      });
+
+      for (let i = 1; i < 11; i++) {
+        const avgAdded = added[i.toString()]/count;
+        const avgCompleted = completed[i.toString()]/count;
+        const rate = (avgCompleted/avgAdded)*100.0;
+        rates[i.toString()] = {
+          'avgAdded': avgAdded,
+          'avgCompleted': avgCompleted,
+          'rate': rate}
+      }
+
+      return rates
     }
 
     async getVocabQuizStatic(

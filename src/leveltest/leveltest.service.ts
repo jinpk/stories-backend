@@ -26,7 +26,6 @@ export class LeveltestService {
   }
 
   async updateLevelTestById(id: string, body: UpdateLevelTestDto) {
-    console.log(body)
     const leveltest = await this.leveltestModel.findByIdAndUpdate(id, { 
       $set: {
         level: body.level,

@@ -314,7 +314,7 @@ export class EducontentsService {
       educontentsId: { $eq: educontents_id },
     });
 
-    if (!bookmarked) {
+    if (bookmarked) {
       return "Already bookmarked."
     } else {}
 
@@ -329,9 +329,14 @@ export class EducontentsService {
   }
 
   async deleteBookmark(user_id, bookmark_id: string): Promise<string> {
-    await this.bookmarkModel.findByIdAndDelete(
+    const result = await this.bookmarkModel.findByIdAndDelete(
       {_id: new Types.ObjectId(bookmark_id), userId: user_id}
     );
+
+    if (!result) {
+      return "일치하는 bookmark_id가 없습니다."
+    }
+    
     return bookmark_id
   }
 
