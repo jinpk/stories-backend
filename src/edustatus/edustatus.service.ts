@@ -268,7 +268,7 @@ export class EdustatusService {
       (lvl_progress[content].seriesTotal == lvl_progress[content].seriesComplete)) {
         certificates.push({'level': content, completion: true})
       }
-    })
+    });
 
     return certificates
   }

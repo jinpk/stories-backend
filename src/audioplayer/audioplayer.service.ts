@@ -79,11 +79,11 @@ export class AudioplayerService {
         } else {}
 
         if (query.filterType == "ARTICLE") {
-            filter.contentsSerialNum = { $regex: 'A' || 'a' };
+            filter.contentsSerialNum = { $regex: 'A', $options: 'i' };
         } else if (query.filterType == "SERIES") {
-            filter.contentsSerialNum = { $regex: 'S' || 's' };
+            filter.contentsSerialNum = { $regex: 'S', $options: 'i' };
         } else {}
-
+        
         const projection: ProjectionFields<AudioPlayerDto> = {
             _id: 1,
             level: 1,
@@ -98,6 +98,8 @@ export class AudioplayerService {
             { $match: filter },
             { $project: projection },
         ]);
+
+        console.log(cursor)
 
         if (query.filterType == "COMPLETE") {
             const readstory = await this.readstoryModel.find({
