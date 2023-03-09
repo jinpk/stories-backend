@@ -16,7 +16,9 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('Stories API')
     .setDescription(
-      'The stories API description\n모든 리스트 조회에서 excel: 1 요청시 response에 excel buffer로 내려감.',
+      `The stories API description\n
+      모든 리스트 조회에서 excel: 1 요청시 response에 excel buffer로 내려감.\n
+      excel: 1 요청시 page와 limit은 그냥 1로 보내면 됨. (엑셀다운로드는 페이징 값 무시)`,
     )
     .setVersion('0.1')
     .addTag('auth', '서비스 인증')

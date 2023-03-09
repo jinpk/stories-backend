@@ -7,6 +7,7 @@ const utilsService = new UtilsService();
 export const EXCEL_COLUMN_LIST: ExcelColumnList[] = [
   { label: '쿠폰명', key: 'name' },
   { label: '쿠폰설명', key: 'description' },
+  { label: '할인ID', key: 'storeId' },
   {
     label: '할인방식',
     key: '',
