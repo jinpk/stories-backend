@@ -27,12 +27,12 @@ export class EdustatusService {
   ) {}
 
   async getEduStatusById(user_id: string): Promise<EduStatusDto> {
-    var edustatus =  await this.edustatusModel.findOne({user_id});
+    var edustatus =  await this.edustatusModel.findOne({ userId: user_id});
     return edustatus
   }
 
   async existEdustatus(user_id: string): Promise<boolean> {
-    const edustatus = await this.edustatusModel.findOne({user_id});
+    const edustatus = await this.edustatusModel.findOne({ userId: user_id});
     if (!edustatus) {
         return false
     }
@@ -47,7 +47,7 @@ export class EdustatusService {
   }
 
   async updateUserEduLevel(user_id: string, body: Completed): Promise<string> {
-    const status = await this.edustatusModel.findOne({user_id});
+    const status = await this.edustatusModel.findOne({ userId: user_id });
 
     const result = await this.edustatusModel.findOneAndUpdate({user_id}, { 
       $set: {levelCompleted: body, updatedAt: now()}
@@ -135,7 +135,7 @@ export class EdustatusService {
       contentsSerialNum: { $regex: 's' || 'S' },
     }).count();
 
-    var user_status = await this.edustatusModel.findOne({ user_id });
+    var user_status = await this.edustatusModel.findOne({ userId: user_id });
 
     if (user_status.levelProgress[body.level]) {
       user_status.levelProgress[body.level].quizResult.correct = body.correct
@@ -258,7 +258,7 @@ export class EdustatusService {
   }
 
   async getUserCertificates(user_id: string): Promise<CertificateDto[]> {
-    const status = await this.edustatusModel.findOne({user_id});
+    const status = await this.edustatusModel.findOne({ userId: user_id });
 
     var lvl_progress: LevelProgress = status.levelProgress
     var certificates: CertificateDto[] = []

@@ -309,11 +309,11 @@ export class EducontentsService {
 
   // EduContents Bookmark Services
   async createBookmark(user_id, educontents_id: string): Promise<string> {
-    const bookmarked = await this.bookmarkModel.find({
+    const bookmarked = await this.bookmarkModel.findOne({
       userId: { $eq: user_id },
       educontentsId: { $eq: educontents_id },
     });
-
+    
     if (bookmarked) {
       return "Already bookmarked."
     } else {}

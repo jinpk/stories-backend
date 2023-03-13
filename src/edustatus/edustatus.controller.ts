@@ -115,6 +115,7 @@ export class EdustatusController {
         if (!(await this.edustatusService.existEdustatus(req.user.id))) {
             throw new NotFoundException('NotFound Edustatus');
         }
+        console.log(req.user.id)
         return await this.edustatusService.getEduStatusById(req.user.id);
         
     }
