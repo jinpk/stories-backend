@@ -125,6 +125,11 @@ export class EdustatusService {
       return await this.createEduStatus(user_id, body);
     }
 
+    var user_status = await this.edustatusModel.findOne({ userId: user_id });
+
+    const comLevel: number = +user_status.currentLevel.level;
+    const upgrade_level = (comLevel + 1).toString()
+
     const article_count = await this.educontentsModel.find({
       level: { $eq: body.level },
       contentsSerialNum: { $regex: 'a' || 'A' },
@@ -134,8 +139,6 @@ export class EdustatusService {
       level: { $eq: body.level },
       contentsSerialNum: { $regex: 's' || 'S' },
     }).count();
-
-    var user_status = await this.edustatusModel.findOne({ userId: user_id });
 
     if (user_status.levelProgress[body.level]) {
       user_status.levelProgress[body.level].quizResult.correct = body.correct
@@ -147,10 +150,10 @@ export class EdustatusService {
         seriesComplete: article_count,
         seriesTotal: series_count,
         articleComplete: series_count,
-        quizResult: {correct: body.correct, total: body.total},
+        quizResult: {correct: 0, total: 0},
         updatedAt: now(),
       }
-      user_status.levelProgress[body.level] = progress;
+      user_status.levelProgress[upgrade_level] = progress;
     }
 
     var lvl_progress: LevelProgress = user_status.levelProgress
@@ -164,9 +167,6 @@ export class EdustatusService {
 
     const statics: Statics = user_status.statics
     statics.correctRate = (correct_count/total_count) * 100.0
-
-    var comLevel: number = +user_status.currentLevel.level;
-    var upgrade_level = (comLevel + 1).toString()
 
     const result = await this.edustatusModel.findOneAndUpdate({userId: user_id}, { 
       $set: {
