@@ -40,7 +40,7 @@ export class EdustatusService {
   }
 
   async updateUserHighestLevel(user_id: string, level: string): Promise<string> {
-    const result = await this.edustatusModel.findOneAndUpdate({user_id}, { 
+    const result = await this.edustatusModel.findOneAndUpdate({userId: user_id}, { 
       $set: {highestLevel: level, updatedAt: now()}
     });
     return result._id.toString();
@@ -49,7 +49,7 @@ export class EdustatusService {
   async updateUserEduLevel(user_id: string, body: Completed): Promise<string> {
     const status = await this.edustatusModel.findOne({ userId: user_id });
 
-    const result = await this.edustatusModel.findOneAndUpdate({user_id}, { 
+    const result = await this.edustatusModel.findOneAndUpdate({userId: user_id}, { 
       $set: {levelCompleted: body, updatedAt: now()}
     });
 
@@ -59,7 +59,7 @@ export class EdustatusService {
   }
 
   async updateUserEduStatic(user_id: string, body: Statics): Promise<string> {
-    const result = await this.edustatusModel.findOneAndUpdate({user_id}, { 
+    const result = await this.edustatusModel.findOneAndUpdate({userId: user_id}, { 
       $set: {static: body, updatedAt: now()}
     });
 
@@ -165,8 +165,9 @@ export class EdustatusService {
     const statics: Statics = user_status.statics
     statics.correctRate = (correct_count/total_count) * 100.0
 
-    const result = await this.edustatusModel.findOneAndUpdate({user_id}, { 
+    const result = await this.edustatusModel.findOneAndUpdate({userId: user_id}, { 
       $set: {
+        currentLevel: {level: body.level, total:article_count + series_count, completed:0},
         levelProgress: user_status.levelProgress,
         statics: statics,
         updatedAt: now()
