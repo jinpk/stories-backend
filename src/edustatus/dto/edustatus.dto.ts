@@ -41,12 +41,6 @@ export class RecentSeries {
 
     @ApiProperty({})
     title: string;
-
-    @ApiProperty({})
-    current: number;
-
-    @ApiProperty({})
-    total: number;
 }
 
 export class RecentArticle {
@@ -58,12 +52,6 @@ export class RecentArticle {
 
     @ApiProperty({})
     title: string;
-
-    @ApiProperty({})
-    current: number;
-
-    @ApiProperty({})
-    total: number;
 }
 
 export class Statics {

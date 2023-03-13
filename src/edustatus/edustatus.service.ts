@@ -102,7 +102,7 @@ export class EdustatusService {
 
     var lvl_completed = {}
     lvl_completed[body.level] = cur_completed
-
+    
     var edustatus: EduStatus = new EduStatus();
     edustatus = {
       firstLevel: body.level,
@@ -110,8 +110,8 @@ export class EdustatusService {
       currentLevel: {level: body.level, total:article_count + series_count, completed:0},
       levelCompleted: lvl_completed,
       statics: {total: 0, read: 0, correctRate:0, words:0},
-      recentArticle: {contentsId:'',contentsSerialNum:'',title:'', current:0, total:0},
-      recentSeries: {contentsId:'',contentsSerialNum:'',title:'', current:0, total:0},
+      recentArticle: {contentsId:'',contentsSerialNum:'',title:''},
+      recentSeries: {contentsId:'',contentsSerialNum:'',title:''},
       userId: user_id,
     }
 
@@ -165,9 +165,12 @@ export class EdustatusService {
     const statics: Statics = user_status.statics
     statics.correctRate = (correct_count/total_count) * 100.0
 
+    var comLevel: number = +user_status.currentLevel.level;
+    var upgrade_level = (comLevel + 1).toString()
+
     const result = await this.edustatusModel.findOneAndUpdate({userId: user_id}, { 
       $set: {
-        currentLevel: {level: body.level, total:article_count + series_count, completed:0},
+        currentLevel: {level: upgrade_level, total:article_count + series_count, completed:0},
         levelProgress: user_status.levelProgress,
         statics: statics,
         updatedAt: now()
