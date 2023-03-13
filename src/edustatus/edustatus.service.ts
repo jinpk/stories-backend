@@ -264,9 +264,12 @@ export class EdustatusService {
     var certificates: CertificateDto[] = []
 
     Object.keys(lvl_progress).forEach((content, _) => {
-      if ((lvl_progress[content].articleTotal == lvl_progress[content].articleComplete) && 
-      (lvl_progress[content].seriesTotal == lvl_progress[content].seriesComplete)) {
-        certificates.push({'level': content, completion: true})
+      if ((lvl_progress[content].articleTotal == 0) && (lvl_progress[content].seriesTotal == 0)) {
+      }else{
+        if ((lvl_progress[content].articleTotal == lvl_progress[content].articleComplete) && 
+        (lvl_progress[content].seriesTotal == lvl_progress[content].seriesComplete)) {
+          certificates.push({'level': content, completion: true})
+        }
       }
     });
 
