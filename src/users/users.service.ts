@@ -21,15 +21,7 @@ export class UsersService {
     private eventEmitter: EventEmitter2,
     private jwtService: JwtService,
     private awsService: AwsService,
-  ) {
-    this.create({
-      email: 'jinho39858@gmail.com',
-      nickname: 'hi',
-      countryCode: '',
-      newsletter: false,
-      ttmik: false,
-    });
-  }
+  ) {}
 
   async __testGenTTMIKJWT() {
     return await this.jwtService.signAsync(
