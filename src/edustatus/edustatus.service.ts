@@ -13,9 +13,11 @@ import { EduContents, EduContentsDocument } from '../educontents/schemas/educont
 import { EduStatus, EduStatusDocument } from './schemas/edustatus.schema';
 import { QuizResult, QuizResultDocument } from './schemas/quizresult.schema';
 import { ReadStory, ReadStoryDocument } from './schemas/readstory.schema';
-import { EduStatusDto, Statics, Completed, LevelTestResultDto, LevelProgressDetail, LevelProgress, CertificateDto } from './dto/edustatus.dto';
+import { EduStatusDto, Statics, Completed, LevelTestResultDto,
+  LevelProgressDetail, LevelProgress, CertificateDto,
+  RecentArticle, RecentSeries } from './dto/edustatus.dto';
 import { GetReadStoryDto } from './dto/get-readstory.dto';
-import { UpdateEduStatusDto } from './dto/update-edustatus.dto';
+import { UpdateEduStatusDto, UpdateEduCompleted } from './dto/update-edustatus.dto';
 
 @Injectable()
 export class EdustatusService {
@@ -39,21 +41,33 @@ export class EdustatusService {
       return true
   }
 
-  async updateUserHighestLevel(user_id: string, level: string): Promise<string> {
-    const result = await this.edustatusModel.findOneAndUpdate({userId: user_id}, { 
-      $set: {highestLevel: level, updatedAt: now()}
+  async updateUserCompleted(user_id: string, body: UpdateEduCompleted): Promise<string> {
+    var status = await this.edustatusModel.findOne({ userId: user_id });
+
+    var contentId: string = ""
+    if (body.articleCompleted.length != 0) {
+      status.levelCompleted[body.level].articleCompleted.push(body.articleCompleted)
+      contentId = body.articleCompleted[0]
+    }
+
+    if (body.seriesCompleted.length != 0) {
+      status.levelCompleted[body.level].seriesCompleted.push(body.seriesCompleted)
+      contentId = body.seriesCompleted[0]
+    }
+
+    const content = await this.educontentsModel.findOne({
+      _id: new Types.ObjectId(contentId),
     });
-    return result._id.toString();
-  }
 
-  async updateUserEduLevel(user_id: string, body: Completed): Promise<string> {
-    const status = await this.edustatusModel.findOne({ userId: user_id });
+    await this.createReadStory(user_id, content.contentsSerialNum, contentId)
+
+    await this.updateRecentContent(status.currentLevel.level, content.contentsSerialNum, status.recentSeries, status.recentArticle);
 
     const result = await this.edustatusModel.findOneAndUpdate({userId: user_id}, { 
-      $set: {levelCompleted: body, updatedAt: now()}
+      $set: {
+        levelCompleted: status.levelCompleted[body.level],
+        updatedAt: now()}
     });
-
-    this.createReadStory(user_id, "", "")
 
     return result._id.toString();
   }
@@ -73,12 +87,12 @@ export class EdustatusService {
 
     const article_count = await this.educontentsModel.find({
       level: { $eq: body.level },
-      contentsSerialNum: { $regex: 'a' || 'A' },
+      contentsSerialNum: { $regex: 'A', $options: 'i' },
     }).count();
 
     const series_count = await this.educontentsModel.find({
       level: { $eq: body.level },
-      contentsSerialNum: { $regex: 's' || 'S' },
+      contentsSerialNum: { $regex: 'S', $options: 'i' },
     }).count();
 
     var cur_progress: LevelProgressDetail = new LevelProgressDetail();
@@ -102,6 +116,8 @@ export class EdustatusService {
 
     var lvl_completed = {}
     lvl_completed[body.level] = cur_completed
+
+    const [reSeries, reArticle] = await this.genRecentContents(body.level)
     
     var edustatus: EduStatus = new EduStatus();
     edustatus = {
@@ -110,8 +126,8 @@ export class EdustatusService {
       currentLevel: {level: body.level, total:article_count + series_count, completed:0},
       levelCompleted: lvl_completed,
       statics: {total: 0, read: 0, correctRate:0, words:0},
-      recentArticle: {contentsId:'',contentsSerialNum:'',title:''},
-      recentSeries: {contentsId:'',contentsSerialNum:'',title:''},
+      recentArticle: reArticle,
+      recentSeries: reSeries,
       userId: user_id,
     }
 
@@ -127,23 +143,31 @@ export class EdustatusService {
 
     var user_status = await this.edustatusModel.findOne({ userId: user_id });
 
-    const comLevel: number = +user_status.currentLevel.level;
-    const upgrade_level = (comLevel + 1).toString()
+    const curLevel: number = +user_status.currentLevel.level;
+    const upgrade_level = (curLevel + 1).toString()
 
     const article_count = await this.educontentsModel.find({
-      level: { $eq: body.level },
-      contentsSerialNum: { $regex: 'a' || 'A' },
+      level: { $eq: upgrade_level },
+      contentsSerialNum: { $regex: 'A', $options: 'i' },
     }).count();
 
     const series_count = await this.educontentsModel.find({
-      level: { $eq: body.level },
-      contentsSerialNum: { $regex: 's' || 'S' },
+      level: { $eq: upgrade_level },
+      contentsSerialNum: { $regex: 'S', $options: 'i' },
     }).count();
 
-    if (user_status.levelProgress[body.level]) {
-      user_status.levelProgress[body.level].quizResult.correct = body.correct
-      user_status.levelProgress[body.level].quizResult.total = body.total
-    } else {
+    // 현재 레벨 테스트 결과 저장
+    user_status.levelProgress[body.level].quizResult.correct = body.correct
+    user_status.levelProgress[body.level].quizResult.total = body.total
+
+    // if 레벨 통과인 경우
+    if ((body.correct/body.total)*100 > 1) {
+      // recentcontent 다음 레벨 첫 컨텐츠로 설정
+      const [reSeries, reArticle] = await this.genRecentContents(upgrade_level)
+      user_status.recentSeries = reSeries;
+      user_status.recentArticle = reArticle;
+
+      // 다음 lvl progress 생성
       var progress: LevelProgressDetail = new LevelProgressDetail();
       progress = {
         articleTotal: article_count,
@@ -154,6 +178,14 @@ export class EdustatusService {
         updatedAt: now(),
       }
       user_status.levelProgress[upgrade_level] = progress;
+
+      // 다음 level completed 생성
+      var completed: Completed = new Completed();
+      completed = {
+        articleCompleted: [],
+        seriesCompleted: []
+      }
+      user_status.levelCompleted[upgrade_level] = completed;
     }
 
     var lvl_progress: LevelProgress = user_status.levelProgress
@@ -172,20 +204,23 @@ export class EdustatusService {
       $set: {
         currentLevel: {level: upgrade_level, total:article_count + series_count, completed:0},
         levelProgress: user_status.levelProgress,
-        statics: statics,
+        levelCompleted: user_status.levelCompleted,
+        recentSeries: user_status.recentSeries,
+        recentArticle: user_status.recentArticle,
         updatedAt: now()
       }
     });
+
     return result._id.toString(); 
   }
 
   async createReadStory(user_id, serial_num, contents_id: string) {
-    const readstory = await this.readstoryModel.find({
+    const readstory = await this.readstoryModel.findOne({
       userId: { $eq: user_id },
       contentsSerialNum: { $eq: serial_num}
     });
 
-    if (!readstory) {
+    if (readstory) {
       return "Already in Document."
     } else {}
 
@@ -227,7 +262,7 @@ export class EdustatusService {
       return "Already in Document."
     } else {}
 
-    var quizresult: QuizResult = new QuizResult()
+    var quizresult: QuizResult = new QuizResult();
     quizresult = {
       userId: user_id,
       quizId: quiz_id,
@@ -292,5 +327,120 @@ export class EdustatusService {
     });
 
     return studied
+  }
+
+  async updateRecentContent(level, serial_number: string, recent_series: RecentSeries, recent_article: RecentArticle){
+    var recSeries: RecentSeries = new RecentSeries();
+    var recArticle: RecentArticle = new RecentArticle();
+
+    recSeries = recent_series
+    recArticle = recent_article
+
+    if (serial_number.includes('S') || serial_number.includes('s')) {
+      var seriesNum = +serial_number.substr(3, 3)
+      var storyIndex = +serial_number.slice(-4)
+
+      if (recSeries.seriesTotal == storyIndex) {
+        const serieses = await this.educontentsModel.find({
+          level: { $eq: level },
+          seriesNum: { $eq: seriesNum + 1 },
+        });
+
+        if (serieses.length != 0) {
+          const seriesTemp = serieses.sort((a, b) => a.seriesNum > b.seriesNum ? -1 : 1);
+          const sortedSeries = seriesTemp.sort((a, b) => a.storyIndex > b.storyIndex ? -1 : 1);
+
+          const series_sorted_len = sortedSeries.length;
+      
+          var series_count = 0;
+          sortedSeries.forEach((content, _) => {
+            if (content.seriesNum == sortedSeries[series_sorted_len-1].seriesNum) {
+              series_count += 1;
+            }
+          });
+
+          recSeries.contentsId = sortedSeries[series_sorted_len -1]._id.toString();
+          recSeries.contentsSerialNum = sortedSeries[series_sorted_len-1].contentsSerialNum;
+          recSeries.seriesTotal = series_count;
+          recSeries.title = sortedSeries[series_sorted_len-1].title;
+        }
+      } else {
+        const series = await this.educontentsModel.findOne({
+          level: { $eq: level },
+          seriesNum: { $eq: seriesNum },
+          storyIndex: { $eq: storyIndex+1 },
+        });
+        
+        if (series) {
+          recSeries.contentsId = series._id.toString();
+          recSeries.contentsSerialNum = series.contentsSerialNum;
+          recSeries.title = series.title;
+        }
+      }
+    }
+
+    if (serial_number.includes('A') || serial_number.includes('a')) {
+      var storyIndex = +serial_number.slice(-6)
+
+      const article = await this.educontentsModel.findOne({
+        level: { $eq: level },
+        seriesNum: { $eq: 0 },
+        storyIndex: { $eq: storyIndex+1 },
+      });
+
+      if (article) {
+        recArticle.contentsId = article._id.toString();
+        recArticle.contentsSerialNum = article.contentsSerialNum;
+        recArticle.title = article.title;
+      }
+    }
+
+    return [recSeries, recArticle]
+  }
+
+  async genRecentContents(level: string): Promise<[RecentSeries, RecentArticle]> {
+    var recSeries: RecentSeries = new RecentSeries();
+    var recArticle: RecentArticle = new RecentArticle();
+
+    recSeries = {contentsId:'',contentsSerialNum:'', seriesTotal: 0, title:''}
+    recArticle = {contentsId:'',contentsSerialNum:'',title:''}
+
+    const articles = await this.educontentsModel.find({
+      level: { $eq: level },
+      contentsSerialNum: { $regex: 'A', $options: 'i' },
+    });
+
+    const serieses = await this.educontentsModel.find({
+      level: { $eq: level },
+      contentsSerialNum: { $regex: 'S', $options: 'i' },
+    });
+
+    const sortedArticle = articles.sort((a, b) => a.storyIndex > b.storyIndex ? -1 : 1);
+    const seriesTemp = serieses.sort((a, b) => a.seriesNum > b.seriesNum ? -1 : 1);
+    const sortedSeries = seriesTemp.sort((a, b) => a.storyIndex > b.storyIndex ? -1 : 1);
+
+    const series_sorted_len = sortedSeries.length
+    const article_sorted_len = sortedArticle.length
+
+    var series_count = 0;
+    sortedSeries.forEach((content, _) => {
+      if (content.seriesNum == sortedSeries[series_sorted_len-1].seriesNum) {
+        series_count += 1;
+      }
+    });
+
+    if (serieses.length != 0) {
+      recSeries.contentsId = sortedSeries[series_sorted_len -1]._id.toString();
+      recSeries.contentsSerialNum = sortedSeries[series_sorted_len-1].contentsSerialNum;
+      recSeries.seriesTotal = series_count;
+      recSeries.title = sortedSeries[series_sorted_len-1].title;
+    }
+
+    if (articles.length != 0 ) {
+      recArticle.contentsId = sortedArticle[article_sorted_len-1]._id.toString();
+      recArticle.contentsSerialNum = sortedArticle[article_sorted_len-1].contentsSerialNum;
+      recArticle.title = sortedArticle[article_sorted_len-1].title;
+    }
+    return [recSeries, recArticle]
   }
 }

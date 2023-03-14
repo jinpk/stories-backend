@@ -22,6 +22,7 @@ import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator
 import { EduStatusDto, Statics, Completed, LevelTestResultDto, CertificateDto } from './dto/edustatus.dto';
 import { ReadStoryDto } from './dto/readstory.dto';
 import { GetReadStoryDto } from './dto/get-readstory.dto';
+import { UpdateEduStatusDto, UpdateEduCompleted } from './dto/update-edustatus.dto';
 import { EdustatusService } from './edustatus.service';
 import { query } from 'express';
   
@@ -73,9 +74,10 @@ export class EdustatusController {
     @Put('level')
     @ApiOperation({
         summary: '사용자 레벨별 진행현황 업데이트',
+        description: 'When user read one content, put one contentId in array'
     })
     @ApiBody({
-        type:[Completed],
+        type:UpdateEduCompleted,
     })
     @ApiOkResponse({
         status: 200,
@@ -87,7 +89,7 @@ export class EdustatusController {
             if (!(await this.edustatusService.existEdustatus(req.user.id))) {
                 throw new NotFoundException('NotFound Edustatus');
             }
-            return await this.edustatusService.updateUserEduLevel(req.user.id, body);
+            return await this.edustatusService.updateUserCompleted(req.user.id, body);
     }
 
     @Post('leveltest')

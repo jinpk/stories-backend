@@ -40,6 +40,9 @@ export class RecentSeries {
     contentsSerialNum: string;
 
     @ApiProperty({})
+    seriesTotal: number;
+
+    @ApiProperty({})
     title: string;
 }
 

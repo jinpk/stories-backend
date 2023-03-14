@@ -101,6 +101,17 @@ export class EducontentsService {
     for (const data of exceldata) {
       const serial_number = data.get('contents').get('0-스토리')[0].serialNum;
 
+      var seriesNum = 0
+      var storyIndex = 0
+
+      if (serial_number.includes('S') || serial_number.includes('s')) {
+        var seriesNum = +serial_number.substr(3, 3)
+        var storyIndex = +serial_number.slice(-4)
+      }
+      if (serial_number.includes('A') || serial_number.includes('a')) {
+        var storyIndex = +serial_number.slice(-6)
+      }
+
       // 컨텐츠, 타임라인
       const educontent: EduContents = {
         contentsSerialNum: serial_number,
@@ -108,6 +119,8 @@ export class EducontentsService {
         title: data.get('contents').get('0-스토리')[0].title,
         imagePath: data.get('contents').get('0-스토리')[0].imagePath,
         audioFilePath: data.get('contents').get('0-스토리')[0].audioFilePath,
+        seriesNum: seriesNum,
+        storyIndex: storyIndex,
         vocabCount: data.get('contents').get('3-단어').length,
         questionCount: data.get('contents').get('2-퀴즈').length,
         content: data.get('contents').get('0-스토리')[0].content,
@@ -194,6 +207,8 @@ export class EducontentsService {
       level: 1,
       title: 1,
       content: 1,
+      seriesNum: 1,
+      storyIndex: 1,
       vocabCount: 1,
       questionCount: 1,
       imagePath: 1,
@@ -229,6 +244,8 @@ export class EducontentsService {
     dto.contentsSerialNum = doc.contentsSerialNum;
     dto.level = doc.level;
     dto.title = doc.title;
+    dto.seriesNum = doc.seriesNum;
+    dto.storyIndex = doc.storyIndex;
     dto.vocabCount = doc.vocabCount;
     dto.questionCount = doc.questionCount;
     dto.imagePath = doc.imagePath;
@@ -313,7 +330,7 @@ export class EducontentsService {
       userId: { $eq: user_id },
       educontentsId: { $eq: educontents_id },
     });
-    
+
     if (bookmarked) {
       return "Already bookmarked."
     } else {}
