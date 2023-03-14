@@ -46,13 +46,25 @@ export class EdustatusService {
 
     var contentId: string = ""
     if (body.articleCompleted.length != 0) {
-      status.levelCompleted[body.level].articleCompleted.push(body.articleCompleted)
       contentId = body.articleCompleted[0]
+      if (!status.levelCompleted[body.level].articleCompleted.includes(contentId)) {
+        const articleArr = status.levelCompleted[body.level].articleCompleted.concat(body.articleCompleted);
+        status.levelCompleted[body.level].articleCompleted = articleArr;
+      }
+      // level progress articleCompleted update
+      status.levelProgress[body.level].articleComplete = status.levelCompleted[body.level].articleCompleted.length;
+      status.levelProgress[body.level].updatedAt = now();
     }
 
     if (body.seriesCompleted.length != 0) {
-      status.levelCompleted[body.level].seriesCompleted.push(body.seriesCompleted)
       contentId = body.seriesCompleted[0]
+      if (!status.levelCompleted[body.level].seriesCompleted.includes(contentId)) {
+        const seriesArr = status.levelCompleted[body.level].seriesCompleted.concat(body.seriesCompleted);
+        status.levelCompleted[body.level].seriesCompleted = seriesArr;
+      }
+      // level progress seriesCompleted update
+      status.levelProgress[body.level].seriesComplete = status.levelCompleted[body.level].seriesCompleted.length;
+      status.levelProgress[body.level].updatedAt = now();
     }
 
     const content = await this.educontentsModel.findOne({
@@ -61,11 +73,27 @@ export class EdustatusService {
 
     await this.createReadStory(user_id, content.contentsSerialNum, contentId)
 
-    await this.updateRecentContent(status.currentLevel.level, content.contentsSerialNum, status.recentSeries, status.recentArticle);
+    const [recSeries, recArticle] = await this.updateRecentContent(status.currentLevel.level, content.contentsSerialNum, status.recentSeries, status.recentArticle);
+
+    // currenLevel completed update
+    status.currentLevel.completed = status.levelProgress[body.level].articleComplete + status.levelProgress[body.level].seriesComplete;
+
+    // static read update
+    var count = 0
+    Object.keys(status.levelProgress).forEach((content, _) => {
+      count += (status.levelProgress[content].seriesComplete + status.levelProgress[content].articleComplete);
+    });
+
+    status.statics.read = count;
 
     const result = await this.edustatusModel.findOneAndUpdate({userId: user_id}, { 
       $set: {
-        levelCompleted: status.levelCompleted[body.level],
+        currentLevel: status.currentLevel,
+        levelProgress: status.levelProgress,
+        recentSeries: recSeries,
+        recentArticle: recArticle,
+        statics: status.statics,
+        levelCompleted: status.levelCompleted,
         updatedAt: now()}
     });
 
@@ -124,10 +152,10 @@ export class EdustatusService {
       firstLevel: body.level,
       levelProgress: lvl_progress,
       currentLevel: {level: body.level, total:article_count + series_count, completed:0},
-      levelCompleted: lvl_completed,
       statics: {total: 0, read: 0, correctRate:0, words:0},
       recentArticle: reArticle,
       recentSeries: reSeries,
+      levelCompleted: lvl_completed,
       userId: user_id,
     }
 
