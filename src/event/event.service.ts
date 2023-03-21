@@ -17,7 +17,7 @@ export class EventService {
     private readonly emailService: EmailService,
   ) {}
 
-  // 회원가입 이벤트
+  // 인증요청 이벤트
   @OnEvent(VerifyEmailEvent.event)
   handleVerifyEmailEvent(payload: VerifyEmailEvent) {
     this.logger.debug(

@@ -83,7 +83,7 @@ export class AuthController {
     summary: '이메일 인증 확인',
     description: '사용자 이메일 인증버튼 클릭시 호출되는 GET API',
   })
-  async verifyEmailCheck(@Query('token') token) {
+  async verifyEmailCheck(@Query('token') token: string) {
     let email = '';
     try {
       email = await this.authService.parseToken(token);
@@ -130,7 +130,7 @@ export class AuthController {
     const link = await this.authService.genEmailAuthLink(payload.email);
 
     this.eventEmitter.emit(
-      VerifyEmailEvent.name,
+      VerifyEmailEvent.event,
       new VerifyEmailEvent(payload.email, link),
     );
   }
