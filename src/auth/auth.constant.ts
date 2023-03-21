@@ -1,4 +1,5 @@
-export const TTMIK_API_URL = 'https://talktomeinkorean.com';
+export const TTMIK_API_URL =
+  'https://stage.talktomeinkorean.com' || 'https://talktomeinkorean.com';
 
 export const TTMIK_API_PATH_VERIFY =
   '/wp-json/TTMIKRestAuth/v1/force-authorization-email';
