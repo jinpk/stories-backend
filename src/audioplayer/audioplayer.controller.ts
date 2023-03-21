@@ -2,9 +2,6 @@ import {
     Controller,
     Get,
     Param,
-    Delete,
-    Put,
-    Post,
     Query,
     NotFoundException,
     UnauthorizedException,
@@ -49,7 +46,9 @@ export class AudioplayerController {
       summary: 'AudioPlayer 리스트 조회',
     })
     @ApiOkResponsePaginated(AudioPlayerDto)
-    async listFaq(@Query() query: GetListAudioPlayerDto, @Request() req) {
+    async listAudioplayer(
+      @Query() query: GetListAudioPlayerDto,
+      @Request() req) {
       return await this.audioplayerService.getPagingAudioPlayers(query, req.user.id);
     }
 }

@@ -9,16 +9,18 @@ import {
   Types,
 } from 'mongoose';
 import { PagingResDto } from 'src/common/dto/response.dto';
+import { CommonExcelService, UtilsService } from 'src/common/providers';
+import { EXCEL_COLUMN_LIST } from './static.constant';
 import { EduStatus, EduStatusDocument } from '../edustatus/schemas/edustatus.schema';
 import { ReviewVocab, ReviewVocabDocument } from '../vocabs/schemas/review-vocab.schema';
 import { StaticsVocabDto } from './dto/static.dto';
 import { GetContentsCompleteDto, GetVocabQuizDto, GetLevelTestResultDto } from './dto/get-static.dto';
-import { UtilsService } from 'src/common/providers';
 
 @Injectable()
 export class StaticService {
     constructor(
-        utilsService: UtilsService,
+        private utilsService: UtilsService,
+        private commonExcelService: CommonExcelService,
         @InjectModel(EduStatus.name) private edustatusModel: Model<EduStatusDocument>,
         @InjectModel(ReviewVocab.name) private reviewvocabModel: Model<ReviewVocabDocument>,
     ) {}
@@ -26,6 +28,10 @@ export class StaticService {
     async getContentsCompleteStatic(
       query: GetContentsCompleteDto
     ){
+      var completed: {[key: string]: any} = {}
+      var added: {[key: string]: any} = {}
+      var rates: {[key: string]: {'avgAdded':number, 'avgCompleted':number, 'rate':number}} = {}
+
       const start_date = new Date(query.start).toString()
       const end_date = new Date(query.end).toString()
 
@@ -36,14 +42,45 @@ export class StaticService {
         }
       });
 
+      const count = edustatus.length;
+
+      for (let i = 1; i < 11; i++) {
+        added[i.toString()] = 0
+        completed[i.toString()] = 0
+      }
+
       edustatus.forEach((content, _) => {
-      })
+        added[content.currentLevel.level] += content.currentLevel.total;
+        completed[content.currentLevel.level] += content.currentLevel.completed;
+      });
+
+      for (let i = 1; i < 11; i++) {
+        const avgAdded = added[i.toString()]/count;
+        const avgCompleted = completed[i.toString()]/count;
+
+        var rate = 0
+        if ((avgAdded == 0) || (avgCompleted == 0)) {
+        } else {
+          rate = (avgCompleted/avgAdded)*100.0;
+        }
+
+        rates[i.toString()] = {
+          'avgAdded': avgAdded,
+          'avgCompleted': avgCompleted,
+          'rate': rate}
+      }
+
+      if (query.excel === '1') {
+        return await this.staticdataToExcel(rates)
+      }
+
+      return rates
     }
 
     async getVocabQuizStatic(
       query: GetVocabQuizDto,
     ){
-      var rates: {[key: string]: any} = {}
+      var rates = {}
 
       const start_date = new Date(query.start).toString()
       const end_date = new Date(query.end).toString()
@@ -55,8 +92,7 @@ export class StaticService {
         }
       });
 
-      var staticvocab: StaticsVocabDto = new StaticsVocabDto();
-      staticvocab = {
+      const staticvocab: StaticsVocabDto = {
         addedVocabCount: 0,
         studiedVocabCount: 0,
         completeRate: 0,
@@ -67,10 +103,15 @@ export class StaticService {
       }
 
       reviewvocab.forEach((content, _) => {
-        rates[content.level].addedVocabCount += 1
-        if (content.complete) {
-          rates[content.level].studiedVocabCount += 1
+        var tempData: StaticsVocabDto = {
+          addedVocabCount: rates[content.level]['addedVocabCount'] + 1,
+          studiedVocabCount: rates[content.level]['studiedVocabCount'],
+          completeRate: 0,
         }
+        if (content.complete) {
+          tempData.studiedVocabCount += 1
+        }
+        rates[content.level] = tempData;
       });
 
       Object.keys(rates).forEach(key => {
@@ -78,6 +119,10 @@ export class StaticService {
           rates[key].completeRate = (rates[key].studiedVocabCount / rates[key].addedVocabCount) * 100.0;
         } else {}
       });
+
+      if (query.excel === '1') {
+        return await this.staticdataToExcel(rates)
+      }
 
       return rates
     }
@@ -113,6 +158,30 @@ export class StaticService {
         } else {}
       });
 
+      if (query.excel === '1') {
+        return await this.staticdataToExcel(rates)
+      }
+
       return rates
+    }
+
+    async staticdataToExcel(data: Object) {
+      console.log(data)
+
+      var excelData = []
+      var rows = Object.keys(data['1'])
+      for (const row of rows) {
+        var temp = {'LV.1': 0, 'LV.2': 0,'LV.3': 0,'LV.4': 0, 'LV.5': 0, 'LV.6': 0, 'LV.7': 0, 'LV.8': 0, 'LV.9': 0, 'LV.10': 0}
+        Object.keys(data).forEach(key => {
+          var keyStr = "LV." + key
+          temp[keyStr] = data[key][row]
+        });
+        excelData.push(temp);
+      };
+
+      return await this.commonExcelService.listToExcelBuffer(
+        EXCEL_COLUMN_LIST,
+        excelData,
+      );
     }
 }

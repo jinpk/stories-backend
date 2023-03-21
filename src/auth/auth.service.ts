@@ -145,8 +145,11 @@ export class AuthService {
   async signUp(payload: TTMIKJwtPayload, countryCode: string) {
     const user: User = {
       email: payload.email,
-      countryCode,
       nickname: payload.name,
+      ttmik: payload.isPremium,
+
+      countryCode,
+      newsletter: true,
     };
     const sub = await this.usersService.create(user);
     return this.login(sub);

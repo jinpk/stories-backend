@@ -19,8 +19,12 @@ import {
     ApiTags,
 } from '@nestjs/swagger'
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
-import { EduStatusDto, Statics, LevelCompleted, LevelTestResultDto } from './dto/edustatus.dto';
+import { EduStatusDto, Statics, Completed, LevelTestResultDto, CertificateDto } from './dto/edustatus.dto';
+import { ReadStoryDto } from './dto/readstory.dto';
+import { GetReadStoryDto } from './dto/get-readstory.dto';
+import { UpdateEduStatusDto, UpdateEduCompleted } from './dto/update-edustatus.dto';
 import { EdustatusService } from './edustatus.service';
+import { query } from 'express';
   
 @Controller('edustatus')
 @ApiTags('edustatus')
@@ -70,9 +74,10 @@ export class EdustatusController {
     @Put('level')
     @ApiOperation({
         summary: '사용자 레벨별 진행현황 업데이트',
+        description: 'When user read one content, put one contentId in array'
     })
     @ApiBody({
-        type:[LevelCompleted],
+        type:UpdateEduCompleted,
     })
     @ApiOkResponse({
         status: 200,
@@ -84,12 +89,12 @@ export class EdustatusController {
             if (!(await this.edustatusService.existEdustatus(req.user.id))) {
                 throw new NotFoundException('NotFound Edustatus');
             }
-            return await this.edustatusService.updateUserEduLevel(req.user.id, body);
+            return await this.edustatusService.updateUserCompleted(req.user.id, body);
     }
 
     @Post('leveltest')
     @ApiOperation({
-      summary: '사용자 최초 레벨 테스트 결과 제출',
+      summary: '사용자 레벨 테스트 결과 제출',
     })
     @ApiBody({ type: LevelTestResultDto })
     @ApiOkResponse({
@@ -97,27 +102,8 @@ export class EdustatusController {
         type: String,
     })
     async saveLevelTestResult(@Request() req,@Body() body) {
-        if (!(await this.edustatusService.existEdustatus(req.user.id))) {
-            return await this.edustatusService.createEduStatus(req.user.id, body)
-        } else {
-            return '이미 존재하는 user_id 입니다.'
-        }
+        return await this.edustatusService.updateEduStatus(req.user.id, body)
     }
-
-    // @Post('result')
-    // @ApiOperation({
-    //   summary: '사용자 학습컨텐츠 퀴즈 결과 제출',
-    // })
-    // @ApiBody({ type: GetContentsQuizResultDto })
-    // @ApiOkResponse({
-    //   type:    ContentsQuizResultDto,
-    // })
-    // async saveContentsQuizResult(
-    //   @Param('userId') userId: string,
-    //   @Body() body,
-    //   @Request() req) {
-    //     return await this.edustatusService.updateEduStatus(userId, body)
-    // }
 
     @Get('me')
     @ApiOperation({
@@ -131,6 +117,7 @@ export class EdustatusController {
         if (!(await this.edustatusService.existEdustatus(req.user.id))) {
             throw new NotFoundException('NotFound Edustatus');
         }
+        console.log(req.user.id)
         return await this.edustatusService.getEduStatusById(req.user.id);
         
     }
@@ -141,10 +128,21 @@ export class EdustatusController {
     })
     @ApiOkResponse({
         status: 200,
-        type: EduStatusDto,
+        type: [CertificateDto],
     })
     async getUserCretificate(@Request() req) {
         return await this.edustatusService.getUserCertificates(req.user.id);
-        
+    }
+
+    @Get('studied/me')
+    @ApiOperation({
+        summary: '사용자별 학습날짜-마이페이지',
+    })
+    @ApiOkResponse({
+        status: 200,
+        type: [ReadStoryDto],
+    })
+    async getUserStudied(@Request() req, @Query() query: GetReadStoryDto) {
+        return await this.edustatusService.getStudiedDates(req.user.id, query);
     }
 }

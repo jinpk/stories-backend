@@ -32,10 +32,10 @@ export class UserEnumDto {
   subscriptionType: SubscriptionTypes;
 }
 
-export class UserDto extends UserEnumDto {
+//export class UserDto extends UserEnumDto {
+export class UserDto {
   @ApiProperty({ description: 'userId' })
   id: string;
-
 
   @ApiProperty({ description: 'nickname' })
   nickname: string;
@@ -52,4 +52,14 @@ export class UserDto extends UserEnumDto {
     description: '가입 날짜',
   })
   createdAt: Date;
+
+  @ApiProperty({
+    description: '뉴스레터 구독',
+  })
+  newsletter: boolean;
+
+  @ApiProperty({
+    description: 'TTMIK WEB 결제 회원인지',
+  })
+  ttmik: boolean;
 }

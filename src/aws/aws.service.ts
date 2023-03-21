@@ -108,7 +108,7 @@ export class AwsService {
 
   async sendEmail(params: SendEmailDto): Promise<string> {
     const payload: SendEmailRequest = {
-      Source: '<no-reply>@ttmikstories.app',
+      Source: 'TTMIK Stories <no-reply@mail.ttmikstories.app>',
       Destination: {
         ToAddresses: params.addrs,
       },

@@ -20,6 +20,12 @@ export class EduContents {
   content: string;
 
   @Prop()
+  seriesNum: number;
+
+  @Prop()
+  storyIndex: number;
+
+  @Prop()
   vocabCount: number;
 
   @Prop()

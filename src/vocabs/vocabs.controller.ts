@@ -98,7 +98,7 @@ export class VocabsController {
       return await this.vocabsService.getPagingCoreVocabsBySerialNum(query)
     }
 
-    @Post('reviewquiz/:vocabId')
+    @Post('reviewquiz/:vocabId&:level')
     @ApiOperation({
       summary: '사용자 review quiz단어 등록',
     })
@@ -113,6 +113,7 @@ export class VocabsController {
       if (!(await this.vocabsService.existVocabById(vocabId))) {
         throw new NotFoundException('NotFound Vocab');
       }
+      
       return await this.vocabsService.createReviewVocab(req.user.id, vocabId, level)
     }
 

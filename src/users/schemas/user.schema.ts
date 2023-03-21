@@ -11,7 +11,7 @@ export class User {
   email: string;
 
   @Prop()
-  @ApiProperty({ description: 'Stories 고유 닉네임' })
+  @ApiProperty({ description: '닉네임' })
   nickname: string;
 
   @Prop({ uppercase: true })
@@ -21,6 +21,14 @@ export class User {
   @Prop({})
   @ApiProperty({ description: 'Firebase Messaging Token' })
   fcmToken?: string;
+
+  @Prop({ default: true })
+  @ApiProperty({ description: '뉴스레터 구독 여부' })
+  newsletter: boolean;
+
+  @Prop({ default: false })
+  @ApiProperty({ description: 'TTMIK WEB 결제 회원인지' })
+  ttmik: boolean;
 
   @Prop({ default: false })
   @ApiProperty({ description: 'Stories 회원 탈퇴' })

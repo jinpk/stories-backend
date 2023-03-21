@@ -6,7 +6,7 @@ import {
     LevelProgress,
     Statics,
     LevelCompleted,
-    CurrentLevel
+    CurrentLevel,
 } from '../dto/edustatus.dto'
 
 export type EduStatusDocument = HydratedDocument<EduStatus>;
@@ -20,10 +20,7 @@ export class EduStatus {
     currentLevel: CurrentLevel;
 
     @Prop()
-    selectedLevel: string;
-
-    @Prop()
-    levelProgress: LevelProgress[];
+    levelProgress: LevelProgress;
 
     @Prop()
     recentSeries: RecentSeries;
@@ -35,7 +32,7 @@ export class EduStatus {
     statics: Statics;
 
     @Prop()
-    levelCompleted: LevelCompleted[];
+    levelCompleted: LevelCompleted;
 
     @Prop()
     userId: string;

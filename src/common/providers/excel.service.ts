@@ -16,8 +16,8 @@ export class CommonExcelService {
       data.map((x) => {
         const obj = {};
         columns.forEach((z) => {
-          let nKey = z.label;
-          let val = x[z.key];
+          const nKey = z.label;
+          const val = x[z.key];
 
           switch (z.format) {
             case 'render':
@@ -29,6 +29,9 @@ export class CommonExcelService {
             case 'date':
             case 'date-time':
               obj[nKey] = this.utilsService.formatDate(val, z.format);
+              break;
+            case 'boolean':
+              obj[nKey] = val ? 'O' : 'X';
               break;
             default:
               obj[nKey] = val;
@@ -58,6 +61,4 @@ export class CommonExcelService {
 
     return xlsxBuffer;
   }
-
- 
 }

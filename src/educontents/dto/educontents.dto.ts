@@ -28,6 +28,12 @@ export class EduContentsDto{
   content: string;
 
   @ApiProperty({})
+  seriesNum: number;
+
+  @ApiProperty({})
+  storyIndex: number;
+
+  @ApiProperty({})
   vocabCount: number;
 
   @ApiProperty({})

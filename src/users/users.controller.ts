@@ -21,8 +21,9 @@ import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator
 import { UserDto } from './dto/user.dto';
 import { GetUsersDto } from './dto/get-user.dto';
 import { UsersService } from './users.service';
-import { UpdateUserDto } from './dto/update.user.dto';
+import { UpdateUserByEmail, UpdateUserDto } from './dto/update.user.dto';
 import { DeleteUserDto } from './dto/delete-user.dto';
+import { Public } from 'src/auth/decorator/auth.decorator';
 
 @Controller('users')
 @ApiTags('users')
@@ -49,8 +50,38 @@ export class UsersController {
     }
 
     // ttmik 시스템에 기존 비밀번호 확인하는 로직 필요.
-
     await this.usersService.deleteUser(id);
+  }
+
+  @Patch('emails/:email')
+  @Public()
+  @ApiOperation({
+    summary: '회원 수정 by Email',
+    description: `body에 property가 있는 항목만 업데이트됨
+    \ntoken 필수 값 - (ttmik master pri key로 서명된 토큰 payload에 sub가 -1인지 검증합니다.)`,
+  })
+  @ApiOkResponse({
+    type: UpdateUserByEmail,
+  })
+  async updateUserTTMIK(
+    @Param('email') email: string,
+    @Body() body: UpdateUserByEmail,
+  ) {
+    try {
+      const verified = await this.usersService.verifyTTMIKJWT(body.token);
+      if (!verified) {
+        throw new Error('payload의 sub가 -1이 아닙니다.');
+      }
+    } catch (error) {
+      throw new UnauthorizedException(error.message || '');
+    }
+
+    const user = await this.usersService.findOneByEmail(email);
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    return await this.usersService.updateTTMIKByEmail(email, body);
   }
 
   @Put(':id')
@@ -61,14 +92,21 @@ export class UsersController {
   @ApiOkResponse({
     type: UpdateUserDto,
   })
-  async updateUser(@Body() body: UpdateUserDto) {
-    console.log(body)
-    // const user = await this.usersService.findById(id);
-    // if (!user) {
-    //   throw new NotFoundException();
-    // }
+  async updateUser(
+    @Req() req,
+    @Param('id') id: string,
+    @Body() body: UpdateUserDto,
+  ) {
+    if (req.user.id !== id && !req.user.isAdmin) {
+      throw new UnauthorizedException();
+    }
 
-    // return await this.usersService.updateById(id, body);
+    const user = await this.usersService.findById(req.user.id);
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    return await this.usersService.updateById(id, body);
   }
 
   @Get(':id')
@@ -87,12 +125,12 @@ export class UsersController {
     return this.usersService._userDocToDto(user);
   }
 
-  /*@Get('')
+  @Get('')
   @ApiOperation({
-    summary: '회원 조회',
+    summary: '회원 리스트 조회',
   })
   @ApiOkResponsePaginated(UserDto)
   async getUserList(@Query() query: GetUsersDto) {
     return await this.usersService.getPagingUsers(query);
-  }*/
+  }
 }

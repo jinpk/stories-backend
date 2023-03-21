@@ -1,4 +1,4 @@
-FROM node:16.19.0-alpine 
+FROM 844548817563.dkr.ecr.us-east-1.amazonaws.com/stories-backend-nodejs:latest
 
 RUN npm install -g pnpm
 

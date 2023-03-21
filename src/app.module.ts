@@ -12,7 +12,6 @@ import { JwtAuthGuard } from './auth/guard/jwt-auth.guard';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CouponsModule } from './coupons/coupons.module';
 import { NotificationsModule } from './notifications/notifications.module';
-import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { FilesModule } from './files/files.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { EventModule } from './event/event.module';
@@ -48,7 +47,7 @@ import { StaticModule } from './static/static.module';
     AdminModule,
     CouponsModule,
     NotificationsModule,
-    SubscriptionsModule,
+    //SubscriptionsModule,
     FilesModule,
     EventModule,
     SchedulerModule,

@@ -9,6 +9,29 @@ export class GetUserDto {
   readonly id: string;
 }
 
+export class GetUsersDto extends ListReqDto {
+  @ApiProperty({
+    description: 'ttmik 멤버쉽 여부',
+    enum: ['', '0', '1'],
+    required: false,
+  })
+  readonly ttmik: string;
+
+  @ApiProperty({
+    description: '뉴스레터 구독',
+    required: false,
+    enum: ['', '0', '1'],
+  })
+  readonly newsletter: string;
+
+  @ApiProperty({
+    description: '국가코드',
+    required: false,
+  })
+  readonly countryCode: string;
+}
+
+/*
 export class GetUsersDto extends IntersectionType(UserEnumDto, ListReqDto) {
   @ApiProperty({
     description: '뉴스레터 구독',
@@ -30,3 +53,4 @@ export class GetUsersDto extends IntersectionType(UserEnumDto, ListReqDto) {
   })
   readonly ttmik: string;
 }
+*/

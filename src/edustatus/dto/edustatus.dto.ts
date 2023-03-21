@@ -1,26 +1,35 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { now } from 'mongoose';
 
-class CompleteCount {
+export class QuizResult {
     @ApiProperty({})
-    complete: number;
+    correct: number;
 
     @ApiProperty({})
     total: number;
+}
+
+export class LevelProgressDetail {
+    @ApiProperty({})
+    seriesTotal: number;
+
+    @ApiProperty({})
+    seriesComplete: number;
+
+    @ApiProperty({})
+    articleTotal: number;
+
+    @ApiProperty({})
+    articleComplete: number;
+
+    @ApiProperty({})
+    quizResult: QuizResult;
 
     @ApiProperty({})
     updatedAt: Date;
 }
 
-export class LevelProgress {
-    @ApiProperty({})
-    level: string;
-
-    @ApiProperty({})
-    series: CompleteCount;
-
-    @ApiProperty({})
-    article: CompleteCount;
+export class LevelProgress { 
 }
 
 export class RecentSeries {
@@ -31,13 +40,10 @@ export class RecentSeries {
     contentsSerialNum: string;
 
     @ApiProperty({})
+    seriesTotal: number;
+
+    @ApiProperty({})
     title: string;
-
-    @ApiProperty({})
-    current: number;
-
-    @ApiProperty({})
-    total: number;
 }
 
 export class RecentArticle {
@@ -49,12 +55,6 @@ export class RecentArticle {
 
     @ApiProperty({})
     title: string;
-
-    @ApiProperty({})
-    current: number;
-
-    @ApiProperty({})
-    total: number;
 }
 
 export class Statics {
@@ -73,20 +73,15 @@ export class Statics {
     words: number;
 }
 
-class Completed {
+export class Completed {
     @ApiProperty({})
-    article: string[];
-
+    articleCompleted: string[];
+  
     @ApiProperty({})
-    story: string[];
+    seriesCompleted: string[];
 }
 
 export class LevelCompleted {
-  @ApiProperty({})
-  level: string;
-
-  @ApiProperty({})
-  completed: Completed;
 }
 
 export class CurrentLevel {
@@ -111,10 +106,7 @@ export class EduStatusDto {
     currentLevel: CurrentLevel;
 
     @ApiProperty({})
-    selectedLevel: string;
-
-    @ApiProperty({})
-    levelProgress: LevelProgress[];
+    levelProgress: LevelProgress;
 
     @ApiProperty({})
     recentSeries: RecentSeries;
@@ -131,11 +123,13 @@ export class EduStatusDto {
     @ApiProperty({
     description: '레벨별 완료 한 array',
     })
-    levelCompleted: LevelCompleted[];
+    levelCompleted: LevelCompleted;
 
     @ApiProperty({})
     userId: string;
 
+    @ApiProperty({})
+    updateAt?: Date;
 }
 
 export class LevelTestResultDto{
@@ -143,5 +137,19 @@ export class LevelTestResultDto{
     level: string;
 
     @ApiProperty({})
+    correct: number;
+
+    @ApiProperty({})
+    total: number;
+
+    @ApiProperty({})
     updatedAt: Date;
   }
+
+export class CertificateDto {
+    @ApiProperty({})
+    level: string;
+
+    @ApiProperty({})
+    completion: boolean;
+}

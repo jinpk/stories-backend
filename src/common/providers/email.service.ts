@@ -160,13 +160,18 @@ export class EmailService {
 
   async _convertEJSToHtml(params: EmailTemplateParams): Promise<string> {
     return new Promise((resolve, reject) => {
-      ejs.renderFile('emails/template.ejs', params, {}, function (err, html) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(html);
-        }
-      });
+      ejs.renderFile(
+        'views/emails/template.ejs',
+        params,
+        {},
+        function (err, html) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(html);
+          }
+        },
+      );
     });
   }
 }

@@ -5,16 +5,40 @@ import { UserDto } from './dto/user.dto';
 import { User, UserDocument } from './schemas/user.schema';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserCreatedEvent } from './events/create-user.event';
-import { UpdateUserDto } from './dto/update.user.dto';
+import { UpdateUserDto, UpdateUserTTMIKDto } from './dto/update.user.dto';
 import { GetUsersDto } from './dto/get-user.dto';
 import { PagingResDto } from 'src/common/dto/response.dto';
+import { JwtService } from '@nestjs/jwt';
+import { AwsService } from 'src/aws/aws.service';
+import { CommonExcelService } from 'src/common/providers';
+import { EXCEL_COLUMN_LIST } from './users.constant';
 
 @Injectable()
 export class UsersService {
   constructor(
+    private commonExcelService: CommonExcelService,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private eventEmitter: EventEmitter2,
+    private jwtService: JwtService,
+    private awsService: AwsService,
   ) {}
+
+  async __testGenTTMIKJWT() {
+    return await this.jwtService.signAsync(
+      { sub: -1 },
+      { secret: this.awsService.getParentJwtSecretKey },
+    );
+  }
+
+  async verifyTTMIKJWT(token: string) {
+    const payload = await this.jwtService.verifyAsync(token, {
+      secret: this.awsService.getParentJwtSecretKey,
+    });
+    if (payload.sub === -1) {
+      return true;
+    }
+    return false;
+  }
 
   async getActiveFCMUsers(): Promise<string[]> {
     const docs = await this.userModel
@@ -28,7 +52,9 @@ export class UsersService {
     return docs.map((doc) => doc.fcmToken);
   }
 
-  async getPagingUsers(query: GetUsersDto): Promise<PagingResDto<UserDto>> {
+  async getPagingUsers(
+    query: GetUsersDto,
+  ): Promise<PagingResDto<UserDto> | Buffer> {
     const filter: FilterQuery<UserDocument> = {};
 
     if (query.target) {
@@ -55,8 +81,13 @@ export class UsersService {
       filter.countryCode = { $eq: query.countryCode.toUpperCase() };
     }
 
-    /*query.subscriptionType
-      query.userState*/
+    if (query.excel === '1') {
+      const docs = await this.userModel.find(filter).sort({ createdAt: -1 });
+      return await this.commonExcelService.listToExcelBuffer(
+        EXCEL_COLUMN_LIST,
+        docs,
+      );
+    }
 
     const docs = await this.userModel
       .find(filter)
@@ -72,6 +103,19 @@ export class UsersService {
     };
   }
 
+  async updateTTMIKByEmail(email: string, body: UpdateUserTTMIKDto) {
+    const set: AnyKeys<UserDocument> = {};
+    if (body.nickname !== undefined) {
+      set.nickname = body.nickname;
+    }
+
+    if (body.ttmik !== undefined) {
+      set.ttmik = body.ttmik;
+    }
+
+    await this.userModel.findOneAndUpdate({ email }, { $set: set });
+  }
+
   async updateById(userId: string, body: UpdateUserDto) {
     const set: AnyKeys<UserDocument> = {};
     if (body.fcmToken !== undefined) {
@@ -82,12 +126,15 @@ export class UsersService {
       set.nickname = body.nickname;
     }
 
-    await this.userModel.findByIdAndUpdate(userId, { $set: set });
-  }
+    if (body.ttmik !== undefined) {
+      set.ttmik = body.ttmik;
+    }
 
-  async updatePasswordByEmail(email: string, password: string) {
-    throw 'ttmik method not supported yet.';
-    // TTMIK로 비밀번호 재설정 요청
+    if (body.newsletter !== undefined) {
+      set.newsletter = Boolean(body.newsletter);
+    }
+
+    await this.userModel.findByIdAndUpdate(userId, { $set: set });
   }
 
   async findOneByEmail(email: string): Promise<UserDocument> {
@@ -140,6 +187,8 @@ export class UsersService {
     user.nickname = doc.nickname;
     user.countryCode = doc.countryCode;
     user.createdAt = doc.createdAt;
+    user.newsletter = doc.newsletter;
+    user.ttmik = doc.ttmik;
     return user;
   }
 }

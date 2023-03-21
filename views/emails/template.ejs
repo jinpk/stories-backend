@@ -88,7 +88,9 @@
 
         <!-- button -->
         <% if (button) { %>
-        <button onclick="buttonClick()" class="button"><%- button %></button>
+        <a target="_blank" href="<%= link %>" style="text-decoration: none">
+          <div class="button"><%- button %></div>
+        </a>
         <% } %>
 
         <!-- caption -->
@@ -101,10 +103,5 @@
       </div>
       <div class="built"><span>TTMIK Team</span></div>
     </div>
-    <script type="text/javascript">
-      function buttonClick() {
-        window.open('<%= link %>');
-      }
-    </script>
   </body>
 </html>
