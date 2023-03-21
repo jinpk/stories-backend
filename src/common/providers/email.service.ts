@@ -57,6 +57,28 @@ export class EmailService {
     });
   }
 
+  async sendVerifyEmail(email: string, link: string) {
+    const params: EmailTemplateParams = {
+      host: this.configService.host,
+      title: 'Please verify your email for TTMIK Stories.',
+      logoImageUri: this.emailLogoImageUri,
+      intro: `Thank you for signing up for TTMIK Stories.< br/>
+      Please click on the button below to finish the sign-ip process`,
+      button: 'Verify Your Email Address',
+      link,
+      caption: '',
+    };
+
+    const html = await this._convertEJSToHtml(params);
+
+    await this.awsService.sendEmail({
+      addrs: [email],
+      subject: params.title,
+      data: html,
+      dataType: 'html',
+    });
+  }
+
   async sendPaymendtedEmail(email: string, nickname: string) {
     const params: EmailTemplateParams = {
       host: this.configService.host,

@@ -37,6 +37,11 @@ export class TokenDto {
   accessToken: string;
 }
 
+export class LoginResponseDto extends TokenDto {
+  @ApiProperty({ description: '이메일 인증 여부' })
+  verification: boolean;
+}
+
 export class AdminLoginDto {
   @ApiProperty({
     description: '로그인 아이디',

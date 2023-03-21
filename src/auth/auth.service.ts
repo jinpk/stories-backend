@@ -7,8 +7,10 @@ import { JwtService } from '@nestjs/jwt';
 import { AwsService } from 'src/aws/aws.service';
 import { DynamicLinkActions } from 'src/common/enums';
 import { FirebaseService } from 'src/common/providers';
+import { AppConfigService } from 'src/config';
 import { User } from 'src/users/schemas/user.schema';
 import { UsersService } from 'src/users/users.service';
+import { VERIFY_EMAIL_CHECK_PATH } from './auth.constant';
 import { ChangePasswordDto, PasswordResetQueryDto } from './dto';
 import { TTMIKJwtPayload } from './interfaces';
 import { TTMIKService } from './providers/ttmik.service';
@@ -21,7 +23,30 @@ export class AuthService {
     private awsService: AwsService,
     private firebaseService: FirebaseService,
     private ttmikService: TTMIKService,
+    private configService: AppConfigService,
   ) {}
+
+  async forceVerifyEmail(email: string) {
+    // admin token
+    const token = await this.jwtService.signAsync(
+      { sub: -1, uid: -1 },
+      {
+        expiresIn: '30m',
+        privateKey: this.awsService.getParentJwtSecretKey,
+        secret: this.awsService.getParentJwtSecretKey,
+      },
+    );
+
+    await this.ttmikService.verifyEmail(token, email);
+  }
+
+  async genEmailAuthLink(email: string): Promise<string> {
+    const token = await this.jwtService.signAsync(
+      { email },
+      { expiresIn: '30m' },
+    );
+    return `${this.configService.host}${VERIFY_EMAIL_CHECK_PATH}?token=${token}`;
+  }
 
   async parseTTMIKToken(token: string): Promise<TTMIKJwtPayload> {
     const payload = await this.jwtService.verifyAsync(token, {
@@ -45,6 +70,11 @@ export class AuthService {
     // DynamicLink 생성
     const link = await this.firebaseService.generateDynamicLink(rq);
     return link;
+  }
+
+  async parseToken(token: string): Promise<string> {
+    const payload = await this.jwtService.verifyAsync(token);
+    return payload.email;
   }
 
   async parsePasswordResetToken(token: string): Promise<string> {
