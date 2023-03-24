@@ -7,6 +7,9 @@ import {
   Request,
   UseGuards,
   UnauthorizedException,
+  BadRequestException,
+  NotAcceptableException,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -25,6 +28,7 @@ import {
   PasswordResetDto,
   PasswordResetQueryDto,
   ChangePasswordDto,
+  LoginResponseDto,
 } from './dto';
 import { LocalAuthAdminGuard } from './guard/local-auth.guard';
 import { AdminService } from 'src/admin/admin.service';
@@ -34,6 +38,7 @@ import {
   PasswordResetedEvent,
   PasswordResetEvent,
 } from './events/password-reset.event';
+import { VerifyEmailEvent } from './events/verify-email.event';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -72,6 +77,64 @@ export class AuthController {
     await this.usersService.updateById(req.user.id, { fcmToken: '' });
   }
 
+  @Get('email/verification')
+  @Public()
+  @ApiOperation({
+    summary: '이메일 인증 확인',
+    description: '사용자 이메일 인증버튼 클릭시 호출되는 GET API',
+  })
+  async verifyEmailCheck(@Query('token') token: string) {
+    let email = '';
+    try {
+      email = await this.authService.parseToken(token);
+    } catch (error) {
+      throw new UnauthorizedException('invalid token');
+    }
+
+    await this.authService.forceVerifyEmail(email);
+
+    return `<h1>Succefuly verified. please login again!</h1>`;
+  }
+
+  @Post('email/verification')
+  @Public()
+  @ApiOperation({
+    summary: '이메일 인증 요청',
+    description: `로그인에서 verification: false회원만 API 요청 가능 body.token은 TTMIK API에서 로그인후 발급받은 JWT입니다.\n사용자가 30분 이내 이메일의 인증 버튼을 클릭하면 자동으로 처리됩니다.`,
+  })
+  @ApiBody({
+    schema: {
+      description: 'token: TTMIK_JWT_TOKEN',
+      required: ['token'],
+      properties: {
+        token: { type: 'string' },
+      },
+    },
+  })
+  async verifyEmail(@Body('token') token) {
+    let payload: TTMIKJwtPayload;
+    try {
+      payload = await this.authService.parseTTMIKToken(token);
+    } catch (error) {
+      throw new UnauthorizedException('Invalid TTMIK Jwt Token.');
+    }
+
+    if (!payload.email) {
+      throw new BadRequestException('TTMIK JWT에 email이 없습니다.');
+    } else if (payload.referer !== 'ttmik-stories') {
+      throw new BadRequestException('referer "ttmik-stories" 회원이 아닙니다.');
+    } else if (payload.isVerify) {
+      throw new NotAcceptableException('이미 인증된 회원입니다.');
+    }
+
+    const link = await this.authService.genEmailAuthLink(payload.email);
+
+    this.eventEmitter.emit(
+      VerifyEmailEvent.event,
+      new VerifyEmailEvent(payload.email, link),
+    );
+  }
+
   @Post('login')
   @Public()
   @ApiOperation({
@@ -80,7 +143,11 @@ export class AuthController {
     \n\nTTMIK 로그인 시스템에서 발급 받은 JWT_TOKEN으로 요청.
     \n* 스토리즈앱에 가입한적 있다면 로그인후 스토리즈앱 로그인 JWT_TOKEN 발급
     \n* 가입한적 없다면 자동 가입 처리후 로그인 JWT_TOKEN 발급
-    \n* countryCode는 Device에서 받아와 항상 요청 필요`,
+    \n* countryCode는 Device에서 받아와 항상 요청 필요
+    \n
+    \n
+    이메일 인증하지 않은 회원은 verification: false로 내려가니 체크하여 이메일 인증 전송 API 호출하여 이메일 인증하고 다시 로그인 필요
+    `,
   })
   @ApiOkResponse({
     type: TokenDto,
@@ -95,7 +162,10 @@ export class AuthController {
       },
     },
   })
-  async ttmkiLogin(@Body('token') token, @Body('countryCode') countryCode) {
+  async ttmkiLogin(
+    @Body('token') token,
+    @Body('countryCode') countryCode,
+  ): Promise<LoginResponseDto> {
     let payload: TTMIKJwtPayload;
     try {
       payload = await this.authService.parseTTMIKToken(token);
@@ -103,18 +173,30 @@ export class AuthController {
       throw new UnauthorizedException('Invalid TTMIK Jwt Token.');
     }
 
-    //const user = await this.usersService.findOneByEmailAll(payload.email);
-    const user = await this.usersService.findOneByEmail(payload.email);
-
-    if (!user) {
-      return await this.authService.signUp(payload, countryCode);
+    if (!payload.email) {
+      throw new BadRequestException('TTMIK JWT에 email이 없습니다.');
     }
 
-    /*if (user.deleted) {
-      throw new UnauthorizedException('User Already deleted.');
-    }*/
+    if (payload.referer === 'ttmik-stories' && !payload.isVerify) {
+      return { verification: false, accessToken: '' };
+    }
 
-    return await this.authService.login(user._id.toHexString(), false);
+    const user = await this.usersService.findOneByEmail(payload.email);
+
+    let tokenResponse: TokenDto = { accessToken: '' };
+    if (!user) {
+      tokenResponse = await this.authService.signUp(payload, countryCode);
+    } else {
+      tokenResponse = await this.authService.login(
+        user._id.toHexString(),
+        false,
+      );
+    }
+
+    return {
+      accessToken: tokenResponse.accessToken,
+      verification: true,
+    };
   }
 
   @Post('passwordchange')

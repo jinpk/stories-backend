@@ -4,6 +4,7 @@ import {
   PasswordResetedEvent,
   PasswordResetEvent,
 } from 'src/auth/events/password-reset.event';
+import { VerifyEmailEvent } from 'src/auth/events/verify-email.event';
 import { EmailService } from 'src/common/providers';
 import { NotificationsService } from 'src/notifications/notifications.service';
 import { UserCreatedEvent } from 'src/users/events/create-user.event';
@@ -15,6 +16,16 @@ export class EventService {
     private readonly notificationsService: NotificationsService,
     private readonly emailService: EmailService,
   ) {}
+
+  // 인증요청 이벤트
+  @OnEvent(VerifyEmailEvent.event)
+  handleVerifyEmailEvent(payload: VerifyEmailEvent) {
+    this.logger.debug(
+      `event detected: ${VerifyEmailEvent.event}, ${payload.email}`,
+    );
+
+    this.emailService.sendVerifyEmail(payload.email, payload.link);
+  }
 
   // 회원가입 이벤트
   @OnEvent(UserCreatedEvent.event)
