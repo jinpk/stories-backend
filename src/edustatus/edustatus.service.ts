@@ -13,11 +13,12 @@ import { EduContents, EduContentsDocument } from '../educontents/schemas/educont
 import { EduStatus, EduStatusDocument } from './schemas/edustatus.schema';
 import { QuizResult, QuizResultDocument } from './schemas/quizresult.schema';
 import { ReadStory, ReadStoryDocument } from './schemas/readstory.schema';
-import { EduStatusDto, Statics, Completed, LevelTestResultDto,
+import { EduStatusDto, Statics, Completed,
   LevelProgressDetail, LevelProgress, CertificateDto,
   RecentArticle, RecentSeries } from './dto/edustatus.dto';
 import { GetReadStoryDto } from './dto/get-readstory.dto';
 import { UpdateEduStatusDto, UpdateEduCompleted } from './dto/update-edustatus.dto';
+import { LevelTestResultDto } from 'src/leveltest/dto/leveltest.dto';
 
 @Injectable()
 export class EdustatusService {
@@ -106,20 +107,67 @@ export class EdustatusService {
     });
 
     return result._id.toString();
-    }
+  }
+
+  async calculateLevel(step: string, correct: number): Promise<string> {
+    const step_num: number = +step;
+
+    var calculatedlevel = '1'
+    const uncorrect = step_num*4 - correct;
+
+    switch ( step ) {
+      case "2":
+        if (uncorrect >= 2) {
+          calculatedlevel = '2'
+        } else {
+          calculatedlevel = '3'
+        }
+        break;
+      case "3":
+        if (uncorrect >= 2) {
+          calculatedlevel = '4'
+        } else {
+          calculatedlevel = '5'
+        }
+        break;
+      case "4":
+        if (uncorrect >= 2) {
+          calculatedlevel = '6'
+        } else {
+          calculatedlevel = '7'
+        }
+        break;
+      case "5":
+        if (uncorrect == 0) {
+          calculatedlevel = '10'
+        } else if (uncorrect == 1) {
+          calculatedlevel = '9'
+        } else if (uncorrect >= 2){
+          calculatedlevel = '8'
+        }
+        break;
+      default:
+        break;
+   }
+
+    return calculatedlevel
+  }
 
   async createEduStatus(user_id: string, body: LevelTestResultDto): Promise<string> {
-    if (!(await this.existEdustatus(user_id))) {
+    var calculatedLevel = '1'
 
+    if (!(await this.existEdustatus(user_id))) {
     }else{}
 
+    calculatedLevel = await this.calculateLevel(body.step, body.correct)
+
     const article_count = await this.educontentsModel.find({
-      level: { $eq: body.level },
+      level: { $eq: calculatedLevel },
       contentsSerialNum: { $regex: 'A', $options: 'i' },
     }).count();
 
     const series_count = await this.educontentsModel.find({
-      level: { $eq: body.level },
+      level: { $eq: calculatedLevel },
       contentsSerialNum: { $regex: 'S', $options: 'i' },
     }).count();
 
@@ -134,7 +182,7 @@ export class EdustatusService {
     }
 
     var lvl_progress = {}
-    lvl_progress[body.level] = cur_progress
+    lvl_progress[calculatedLevel] = cur_progress
 
     var cur_completed: Completed = new Completed();
     cur_completed = {
@@ -143,15 +191,15 @@ export class EdustatusService {
     }
 
     var lvl_completed = {}
-    lvl_completed[body.level] = cur_completed
+    lvl_completed[calculatedLevel] = cur_completed
 
-    const [reSeries, reArticle] = await this.genRecentContents(body.level)
+    const [reSeries, reArticle] = await this.genRecentContents(calculatedLevel)
     
     var edustatus: EduStatus = new EduStatus();
     edustatus = {
-      firstLevel: body.level,
+      firstLevel: calculatedLevel,
       levelProgress: lvl_progress,
-      currentLevel: {level: body.level, total:article_count + series_count, completed:0},
+      currentLevel: {level: calculatedLevel, total:article_count + series_count, completed:0},
       statics: {total: 0, read: 0, correctRate:0, words:0},
       recentArticle: reArticle,
       recentSeries: reSeries,
@@ -169,6 +217,8 @@ export class EdustatusService {
       return await this.createEduStatus(user_id, body);
     }
 
+    const calculatedLevel = await this.calculateLevel(body.step, body.correct)
+
     var user_status = await this.edustatusModel.findOne({ userId: user_id });
 
     const curLevel: number = +user_status.currentLevel.level;
@@ -185,8 +235,8 @@ export class EdustatusService {
     }).count();
 
     // 현재 레벨 테스트 결과 저장
-    user_status.levelProgress[body.level].quizResult.correct = body.correct
-    user_status.levelProgress[body.level].quizResult.total = body.total
+    user_status.levelProgress[calculatedLevel].quizResult.correct = body.correct
+    user_status.levelProgress[calculatedLevel].quizResult.total = body.total
 
     // if 레벨 통과인 경우
     if ((body.correct/body.total)*100 > 1) {

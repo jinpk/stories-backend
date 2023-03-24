@@ -4,7 +4,11 @@ import { IsString } from 'class-validator';
 export class LevelTestDto{
   @ApiProperty({})
   @IsString()
-  level: string;
+  step: string;
+
+  @ApiProperty({})
+  @IsString()
+  sequence: string;
 
   @ApiProperty({})
   @IsString()
@@ -21,4 +25,18 @@ export class LevelTestDto{
 
   @ApiProperty({})
   updatedAt?: Date;
+}
+
+export class LevelTestResultDto{
+  @ApiProperty({})
+  step: string;
+
+  @ApiProperty({})
+  correct: number;
+
+  @ApiProperty({})
+  total: number;
+
+  @ApiProperty({})
+  updatedAt: Date;
 }

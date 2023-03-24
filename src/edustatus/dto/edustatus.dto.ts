@@ -132,20 +132,6 @@ export class EduStatusDto {
     updateAt?: Date;
 }
 
-export class LevelTestResultDto{
-    @ApiProperty({})
-    level: string;
-
-    @ApiProperty({})
-    correct: number;
-
-    @ApiProperty({})
-    total: number;
-
-    @ApiProperty({})
-    updatedAt: Date;
-  }
-
 export class CertificateDto {
     @ApiProperty({})
     level: string;
