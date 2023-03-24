@@ -19,7 +19,7 @@ import {
     ApiTags,
 } from '@nestjs/swagger'
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
-import { EduStatusDto, Statics, Completed, LevelTestResultDto, CertificateDto } from './dto/edustatus.dto';
+import { EduStatusDto, Statics, Completed, CertificateDto } from './dto/edustatus.dto';
 import { ReadStoryDto } from './dto/readstory.dto';
 import { GetReadStoryDto } from './dto/get-readstory.dto';
 import { UpdateEduStatusDto, UpdateEduCompleted } from './dto/update-edustatus.dto';
@@ -74,7 +74,7 @@ export class EdustatusController {
     @Put('level')
     @ApiOperation({
         summary: '사용자 레벨별 진행현황 업데이트',
-        description: 'When user read one content, put one contentId in array'
+        description: 'When user read one content, put one contentId in array. or send empty array.'
     })
     @ApiBody({
         type:UpdateEduCompleted,
@@ -90,19 +90,6 @@ export class EdustatusController {
                 throw new NotFoundException('NotFound Edustatus');
             }
             return await this.edustatusService.updateUserCompleted(req.user.id, body);
-    }
-
-    @Post('leveltest')
-    @ApiOperation({
-      summary: '사용자 레벨 테스트 결과 제출',
-    })
-    @ApiBody({ type: LevelTestResultDto })
-    @ApiOkResponse({
-        status: 200,
-        type: String,
-    })
-    async saveLevelTestResult(@Request() req,@Body() body) {
-        return await this.edustatusService.updateEduStatus(req.user.id, body)
     }
 
     @Get('me')

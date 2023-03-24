@@ -6,7 +6,10 @@ export type LevelTestDocument = HydratedDocument<LevelTest>;
 @Schema({ timestamps: true })
 export class LevelTest {
   @Prop()
-  level: string;
+  step: string;
+
+  @Prop()
+  sequence: string;
 
   @Prop()
   text: string;
