@@ -7,7 +7,7 @@ export class GetPagingLevelTestDto extends PagingReqDto {
   @ApiProperty({
     required: false,
   })
-  readonly level: string;
+  readonly step: string;
 }
   
 export class GetStaticsLevelTestDto {

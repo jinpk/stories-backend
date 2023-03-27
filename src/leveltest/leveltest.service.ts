@@ -8,17 +8,23 @@ import {
 } from 'mongoose';
 import { PagingResDto } from 'src/common/dto/response.dto';
 import { LevelTest, LevelTestDocument } from './schemas/leveltest.schema';
-import { LevelTestDto } from './dto/leveltest.dto';
+import { LevelTestDto, LevelTestResultDto } from './dto/leveltest.dto';
 import { UpdateLevelTestDto } from './dto/update-leveltest.dto';
 import { GetPagingLevelTestDto } from './dto/get-leveltest.dto';
 import { UtilsService } from 'src/common/providers';
+import { EdustatusService } from '../edustatus/edustatus.service'
 
 @Injectable()
 export class LeveltestService {
   constructor(
     private utilsService: UtilsService,
+    private edustatusService: EdustatusService,
     @InjectModel(LevelTest.name) private leveltestModel: Model<LevelTestDocument>,
   ) {}
+
+  async postLevelTest(user_id: string, body: LevelTestResultDto) {
+    return await this.edustatusService.updateEduStatus(user_id, body)
+  }
 
   async deleteLevelTest(id: string) {
     await this.leveltestModel.findByIdAndDelete(id);
@@ -28,7 +34,8 @@ export class LeveltestService {
   async updateLevelTestById(id: string, body: UpdateLevelTestDto) {
     const leveltest = await this.leveltestModel.findByIdAndUpdate(id, { 
       $set: {
-        level: body.level,
+        step: body.step,
+        sequence: body.sequence,
         text: body.text,
         answers: body.answers,
         correct_answer: body.correct_answer,
@@ -49,7 +56,8 @@ export class LeveltestService {
   async createLevelTest(body: LevelTestDto): Promise<string> {
     var levelTest: LevelTest = new LevelTest()
     levelTest = {
-      level: body.level,
+      step: body.step,
+      sequence: body.sequence,
       text: body.text,
       answers: body.answers,
       correct_answer: body.correct_answer,
@@ -67,17 +75,17 @@ export class LeveltestService {
     query: GetPagingLevelTestDto,
   ): Promise<PagingResDto<LevelTestDto> | Buffer> {
     var filter: FilterQuery<LevelTestDocument> = {}
-    if (!query.level) {
+    if (!query.step) {
     } else {
       filter = {
-        level: { $eq: query.level },
+        step: { $eq: query.step },
       };
     }
 
     const projection: ProjectionFields<LevelTestDto> = {
       _id: 1,
-      contentsSerialNum: 1,
-      level: 1,
+      step: 1,
+      sequence: 1,
       text: 1,
       answers: 1,
       correct_answer: 1,
