@@ -115,7 +115,8 @@ export class AuthController {
   @Public()
   @ApiOperation({
     summary: '이메일 인증 확인',
-    description: '사용자 이메일 인증버튼 클릭시 호출되는 GET API',
+    description:
+      '사용자 이메일 인증버튼 클릭시 호출되는 GET API\n성공하면 TTMIK 회원가입 진행하고 Stories JWT 로그인 진행하면 됩니다.',
   })
   @ApiBody({ type: EmailVerificationConfirmReqeust })
   @ApiOkResponse({ description: '인증완료. 해당 이메일로 회원가입하면 됨.' })
@@ -132,11 +133,12 @@ export class AuthController {
     summary: 'TTMIK 로그인',
     description: `**본 서비스는 TTMIK 회원과 미러링 됨.**
     \n\n TTMIK 로그인 시스템에서 발급 받은 JWT_TOKEN으로 요청.
-    \n* 스토리즈앱에 가입한적 있다면 로그인후 스토리즈앱 로그인 JWT_TOKEN 발급
-    \n* 가입한적 없다면 자동 가입 처리후 로그인 JWT_TOKEN 발급
     \n* countryCode는 Device에서 받아와 항상 요청 필요
-    \n
-    이메일 인증을 꼭 미리하고 TTMIK 회원가입 > Stories 로그인 요청하여 Stories 회원가입 필요.
+    \n* 이메일 인증을 꼭 미리하고 TTMIK 회원가입 > Stories 로그인 요청하여 Stories 회원가입 필요.
+    \n* 스토리즈에서 미리 이메일 인증을하고 TTMIK에 가입하면
+    \n* TTMIK JWT Payload의 email을 읽어와서 자동으로 이메일 인증요청 API를 호출합니다.
+    \n* 처음 인증하는 경우 이메일 인증을하고 JWT응답을 바로해 주지만 
+    \n다음 로그인시 TTMIK 토큰을 새로 발급받아서 요청해야 TTMIK JWT.payload.isVerify가 업데이트 되어있습니다.
     `,
   })
   @ApiOkResponse({

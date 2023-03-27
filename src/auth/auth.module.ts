@@ -12,8 +12,7 @@ import { HttpModule } from '@nestjs/axios';
 import { AwsModule } from 'src/aws/aws.module';
 import { TTMIKService } from './providers/ttmik.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Auth } from 'firebase-admin/lib/auth/auth';
-import { AuthSchema } from './schema/auth.schema';
+import { AuthSchema, Auth } from './schema/auth.schema';
 
 @Module({
   imports: [

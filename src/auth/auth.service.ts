@@ -7,18 +7,16 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
-import { Auth } from 'firebase-admin/lib/auth/auth';
 import { Model } from 'mongoose';
 import { AwsService } from 'src/aws/aws.service';
 import { DynamicLinkActions } from 'src/common/enums';
 import { FirebaseService } from 'src/common/providers';
-import { AppConfigService } from 'src/config';
 import { User } from 'src/users/schemas/user.schema';
 import { UsersService } from 'src/users/users.service';
 import { ChangePasswordDto, PasswordResetQueryDto } from './dto';
 import { TTMIKJwtPayload } from './interfaces';
 import { TTMIKService } from './providers/ttmik.service';
-import { AuthDocument } from './schema/auth.schema';
+import { Auth, AuthDocument } from './schema/auth.schema';
 
 @Injectable()
 export class AuthService {
@@ -66,7 +64,7 @@ export class AuthService {
   async genEmailAuth(email: string): Promise<{ code: string; authId: string }> {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
-    const doc = await new this.authModel({ email, code });
+    const doc = await new this.authModel({ email, code }).save();
 
     return { authId: doc._id.toHexString(), code };
   }
