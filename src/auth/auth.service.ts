@@ -1,19 +1,24 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { InjectModel } from '@nestjs/mongoose';
+import { Auth } from 'firebase-admin/lib/auth/auth';
+import { Model } from 'mongoose';
 import { AwsService } from 'src/aws/aws.service';
 import { DynamicLinkActions } from 'src/common/enums';
 import { FirebaseService } from 'src/common/providers';
 import { AppConfigService } from 'src/config';
 import { User } from 'src/users/schemas/user.schema';
 import { UsersService } from 'src/users/users.service';
-import { VERIFY_EMAIL_CHECK_PATH } from './auth.constant';
 import { ChangePasswordDto, PasswordResetQueryDto } from './dto';
 import { TTMIKJwtPayload } from './interfaces';
 import { TTMIKService } from './providers/ttmik.service';
+import { AuthDocument } from './schema/auth.schema';
 
 @Injectable()
 export class AuthService {
@@ -23,10 +28,19 @@ export class AuthService {
     private awsService: AwsService,
     private firebaseService: FirebaseService,
     private ttmikService: TTMIKService,
-    private configService: AppConfigService,
+    @InjectModel(Auth.name) private authModel: Model<AuthDocument>,
   ) {}
 
   async forceVerifyEmail(email: string) {
+    const auth = await this.authModel.findOne({
+      used: false,
+      verified: true,
+      email,
+    });
+    if (!auth) {
+      throw new ForbiddenException();
+    }
+
     // admin token
     const token = await this.jwtService.signAsync(
       { sub: -1, uid: -1 },
@@ -37,15 +51,40 @@ export class AuthService {
       },
     );
 
-    await this.ttmikService.verifyEmail(token, email);
+    try {
+      await this.ttmikService.verifyEmail(token, email);
+    } catch (error) {
+      console.error('force verifiy email failed to ttmik');
+      throw new UnprocessableEntityException(error);
+    }
+
+    auth.used = true;
+    await auth.save();
   }
 
-  async genEmailAuthLink(email: string): Promise<string> {
-    const token = await this.jwtService.signAsync(
-      { email },
-      { expiresIn: '30m' },
-    );
-    return `${this.configService.host}${VERIFY_EMAIL_CHECK_PATH}?token=${token}`;
+  // return verification code
+  async genEmailAuth(email: string): Promise<{ code: string; authId: string }> {
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    const doc = await new this.authModel({ email, code });
+
+    return { authId: doc._id.toHexString(), code };
+  }
+
+  async verifyEmailAuth(authId: string, code: string) {
+    const auth = await this.authModel.findById(authId);
+    if (!auth) {
+      throw new NotFoundException();
+    }
+    if (auth.verified || auth.used) {
+      throw new ForbiddenException();
+    }
+    if (code !== auth.code) {
+      throw new UnprocessableEntityException();
+    }
+
+    auth.verified = true;
+    await auth.save();
   }
 
   async parseTTMIKToken(token: string): Promise<TTMIKJwtPayload> {

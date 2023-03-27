@@ -37,10 +37,13 @@ export class TokenDto {
   accessToken: string;
 }
 
-export class LoginResponseDto extends TokenDto {
-  @ApiProperty({ description: '이메일 인증 여부' })
-  verification: boolean;
+export class TTMIKLoginDto {
+  @ApiProperty({ description: 'TTMIK JWT' })
+  token: string;
+  @ApiProperty({ description: '디바이스 국가코드' })
+  countryCode: string;
 }
+
 
 export class AdminLoginDto {
   @ApiProperty({

@@ -40,6 +40,15 @@ export class UsersService {
     return false;
   }
 
+  async getActiveUserByEmail(email: string): Promise<User | null> {
+    const doc = await this.userModel.findOne({
+      deleted: { $ne: true },
+      email,
+    });
+
+    return doc;
+  }
+
   async getActiveFCMUsers(): Promise<string[]> {
     const docs = await this.userModel
       .find()

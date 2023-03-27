@@ -1,16 +1,10 @@
 export class VerifyEmailEvent {
   static event = 'verifiy.email';
 
-  private _email: string;
-  private _link: string;
+  constructor(private _email: string, private _code: string) {}
 
-  constructor(email: string, link: string) {
-    this._link = link;
-    this._email = email;
-  }
-
-  get link(): string {
-    return this._link;
+  get code(): string {
+    return this._code;
   }
 
   get email(): string {

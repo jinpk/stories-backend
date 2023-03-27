@@ -57,15 +57,15 @@ export class EmailService {
     });
   }
 
-  async sendVerifyEmail(email: string, link: string) {
+  async sendVerifyEmail(email: string, code: string) {
     const params: EmailTemplateParams = {
       host: this.configService.host,
       title: 'Please verify your email for TTMIK Stories.',
       logoImageUri: this.emailLogoImageUri,
       intro: `Thank you for signing up for TTMIK Stories.<br />
-      Please click on the button below to finish the sign-ip process`,
-      button: 'Verify Your Email Address',
-      link,
+      Please enter your verification code: <h3>${code}</h3>`,
+      button: '',
+      link: '',
       caption: `If you didn't sign up for TTMIK Stories through this email, please click here to delete your email address from out list. Thank you.`,
     };
 

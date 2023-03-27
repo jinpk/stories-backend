@@ -11,6 +11,9 @@ import { LocalAdminStrategy } from './strategy/local.strategy';
 import { HttpModule } from '@nestjs/axios';
 import { AwsModule } from 'src/aws/aws.module';
 import { TTMIKService } from './providers/ttmik.service';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Auth } from 'firebase-admin/lib/auth/auth';
+import { AuthSchema } from './schema/auth.schema';
 
 @Module({
   imports: [
@@ -19,6 +22,7 @@ import { TTMIKService } from './providers/ttmik.service';
     UsersModule,
     AdminModule,
     PassportModule,
+    MongooseModule.forFeature([{ name: Auth.name, schema: AuthSchema }]),
     JwtModule.registerAsync({
       useFactory: async (configService: AppConfigService) => ({
         secret: configService.jwtSecret,

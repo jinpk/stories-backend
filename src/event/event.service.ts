@@ -24,7 +24,7 @@ export class EventService {
       `event detected: ${VerifyEmailEvent.event}, ${payload.email}`,
     );
 
-    this.emailService.sendVerifyEmail(payload.email, payload.link);
+    this.emailService.sendVerifyEmail(payload.email, payload.code);
   }
 
   // 회원가입 이벤트
