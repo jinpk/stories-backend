@@ -141,11 +141,11 @@ export class AuthController {
     \n다음 로그인시 TTMIK 토큰을 새로 발급받아서 요청해야 TTMIK JWT.payload.isVerify가 업데이트 되어있습니다.
     `,
   })
-  @ApiOkResponse({
-    type: TokenDto,
-  })
   @ApiBody({
     type: TTMIKLoginDto,
+  })
+  @ApiOkResponse({
+    type: TokenDto,
   })
   @ApiForbiddenResponse({
     description: `- TTMIK JWT 검증하지 못한 경우\n
@@ -156,9 +156,8 @@ export class AuthController {
     description: `- TTMIK 시스템으로 이메일 인증 요청 실패한 경우`,
   })
   @ApiBadRequestResponse({ description: 'TTMIK token이 유효하지 않은 경우' })
-  async ttmkiLogin(
-    @Body() { token, countryCode }: TTMIKLoginDto,
-  ): Promise<TokenDto> {
+  async ttmkiLogin(@Body() body: TTMIKLoginDto): Promise<TokenDto> {
+    const { token, countryCode } = body;
     let payload: TTMIKJwtPayload;
     try {
       payload = await this.authService.parseTTMIKToken(token);
@@ -166,6 +165,7 @@ export class AuthController {
         throw new ForbiddenException('TTMIK JWT에 email이 없습니다.');
       }
     } catch (error) {
+      console.log(error);
       throw new ForbiddenException('Invalid TTMIK Jwt Token.');
     }
 
