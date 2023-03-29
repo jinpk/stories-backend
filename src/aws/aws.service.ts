@@ -58,7 +58,6 @@ export class AwsService {
       Bucket: bucket,
       Key: content,
     };
-    var jsonarr = [];
     const excelmap = new Map<string, any>();
     excelmap.set('filename', content);
 

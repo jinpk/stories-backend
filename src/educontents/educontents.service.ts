@@ -1,4 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   now,
@@ -17,22 +22,44 @@ import {
 import { PagingResDto } from 'src/common/dto/response.dto';
 import { Vocab, VocabDocument } from '../vocabs/schemas/vocab.schema';
 import { Bookmark, BookmarkDocument } from './schemas/bookmark.schema';
-import { EduContentsDto, UploadContentsDto, ContentsQuizDto, BookmarkDto } from './dto/educontents.dto';
-import { UpdateEduContentsDto, UpdateQuizsDto } from './dto/update-educontents.dto';
-import { GetListEduContentsDto, GetListQuizDto, GetListBookmarkDto } from './dto/get-educontents.dto';
+import {
+  EduContentsDto,
+  UploadContentsDto,
+  ContentsQuizDto,
+  BookmarkDto,
+} from './dto/educontents.dto';
+import {
+  UpdateEduContentsDto,
+  UpdateQuizsDto,
+} from './dto/update-educontents.dto';
+import {
+  GetListEduContentsDto,
+  GetListQuizDto,
+  GetListBookmarkDto,
+} from './dto/get-educontents.dto';
 import { AwsService } from '../aws/aws.service';
 import { EXCEL_COLUMN_LIST } from './educontents.constant';
 import { CommonExcelService, UtilsService } from 'src/common/providers';
+import {
+  Bulk,
+  BulkDocument,
+  BulkLog,
+  BulkLogDocument,
+} from './schemas/bulk.schema';
+import { EduContentUploadState } from './enums';
 
 @Injectable()
 export class EducontentsService {
   constructor(
     private utilsService: UtilsService,
     private commonExcelService: CommonExcelService,
-    @InjectModel(EduContents.name) private educontentsModel: Model<EduContentsDocument>,
+    @InjectModel(EduContents.name)
+    private educontentsModel: Model<EduContentsDocument>,
     @InjectModel(Quizs.name) private quizsModel: Model<QuizsDocument>,
     @InjectModel(Vocab.name) private vocabModel: Model<VocabDocument>,
     @InjectModel(Bookmark.name) private bookmarkModel: Model<BookmarkDocument>,
+    @InjectModel(Bulk.name) private bulkModel: Model<BulkDocument>,
+    @InjectModel(BulkLog.name) private bulkLogModel: Model<BulkLogDocument>,
     private awsService: AwsService,
   ) {}
 
@@ -48,12 +75,12 @@ export class EducontentsService {
 
   async deleteEduContents(id: string) {
     await this.educontentsModel.findByIdAndDelete(id);
-    return id
+    return id;
   }
 
   async updateEduContentsById(id: string, body: UpdateEduContentsDto) {
-    await this.educontentsModel.findByIdAndUpdate(id, { 
-      $set: {body, updatedAt: now()}
+    await this.educontentsModel.findByIdAndUpdate(id, {
+      $set: { body, updatedAt: now() },
     });
   }
 
@@ -78,111 +105,180 @@ export class EducontentsService {
     return educontent;
   }
 
-  async createContentsList(path: string): Promise<UploadContentsDto> {
-    const bucket: string = 'ttmikstories-data';
-    var total = 0;
-    var datas = [];
-
-    const filelist = await this.awsService.filesListFromBucket(path, bucket);
-    for (const file of filelist) {
-      const exceldata = await this.awsService.fileFromBucket(file, bucket);
-      datas.push(exceldata)
-    }    
-    await this.create(datas)
-    total = datas.length
-
-    const dto = new UploadContentsDto();
-    dto.total = total;
-
-    return dto;
+  async getBulk(bulkId: string): Promise<Bulk> {
+    const doc = await this.bulkModel.aggregate([
+      {
+        $match: {
+          _id: new Types.ObjectId(bulkId),
+        },
+      },
+      {
+        $lookup: {
+          from: 'bulk_logs',
+          localField: '_id',
+          foreignField: 'bulkId',
+          as: 'bulk_logs',
+        },
+      },
+    ]);
+    if (!doc) {
+      throw new NotFoundException();
+    }
+    return doc[0];
   }
 
-  async create(exceldata: any[]) {
-    for (const data of exceldata) {
-      const serial_number = data.get('contents').get('0-스토리')[0].serialNum;
-
-      var seriesNum = 0
-      var storyIndex = 0
-
-      if (serial_number.includes('S') || serial_number.includes('s')) {
-        var seriesNum = +serial_number.substr(3, 3)
-        var storyIndex = +serial_number.slice(-4)
-      }
-      if (serial_number.includes('A') || serial_number.includes('a')) {
-        var storyIndex = +serial_number.slice(-6)
-      }
-
-      // 컨텐츠, 타임라인
-      const educontent: EduContents = {
-        contentsSerialNum: serial_number,
-        level: data.get('contents').get('0-스토리')[0].level,
-        title: data.get('contents').get('0-스토리')[0].title,
-        imagePath: data.get('contents').get('0-스토리')[0].imagePath,
-        audioFilePath: data.get('contents').get('0-스토리')[0].audioFilePath,
-        seriesNum: seriesNum,
-        storyIndex: storyIndex,
-        vocabCount: data.get('contents').get('3-단어').length,
-        questionCount: data.get('contents').get('2-퀴즈').length,
-        content: data.get('contents').get('0-스토리')[0].content,
-        timeLine: data.get('contents').get('1-타임라인'),
-      };
-      // 퀴즈
-      var quizs: Quizs = new Quizs()
-      for (const quiz of data.get('contents').get('2-퀴즈')) {
-        quizs = {
-          contentsSerialNum: serial_number,
-          quizType: quiz.type,
-          question: quiz.question,
-          passage: quiz.passage,
-          answer: quiz.answer,
-          options: [],
-        }
-
-        Object.entries(quiz).forEach(([key, value]) => {
-          if (key.includes('option')) {
-            if (value != null) {
-              quizs.options.push(value.toString());
-            }
-          }
-        });
-        await new this.quizsModel(quizs).save();
-      }
-
-      // 단어
-      var vocabs: Vocab = new Vocab()
-      for (const vocab of data.get('contents').get('3-단어')) {
-        vocabs = {
-          contentsSerialNum: serial_number,
-          audioFilePath: vocab.audio_file_path,
-          vocab: vocab.vocab,
-          meaningEn: vocab.meaning_en,
-          value: vocab.value,
-          connSentence: vocab.conn_sentence,
-          previewVocabulary: 'N',
-        }
-        Object.entries(vocab).forEach(([key, value]) => {
-          if (key.includes('vocabulary')) {
-            if (value != null)  {
-              if (value == 'Y') {
-                vocabs.previewVocabulary = 'Y';
-              } else {
-                vocabs.previewVocabulary = 'N';
-              }
-            } else {
-              vocabs.previewVocabulary = 'N'
-            }
-          }
-        });
-        await new this.vocabModel(vocabs).save();
-      }
-      await new this.educontentsModel(educontent).save();
+  async createContentsList(path: string): Promise<string> {
+    const bucket: string = 'ttmikstories-data';
+    if (!path.endsWith('/')) {
+      path = path + '/';
     }
+
+    const pathOne = await this.bulkModel.findOne({
+      path,
+    });
+    if (pathOne && !pathOne.completeAt) {
+      throw new ConflictException({
+        message: '현재 처리중인 경로입니다.',
+        description:
+          '오류가 지속된다면 s3 내에서 폴더를 복사후 새로운 폴더로 진행해 주세요.',
+        bulkId: pathOne._id.toHexString(),
+      });
+    }
+
+    const allList = await this.awsService.filesListFromBucket(path, bucket);
+    const filelist = allList.filter((x) => x !== path);
+    if (!filelist.length) {
+      throw new UnprocessableEntityException(
+        '입력하신 경로에 xlsx 파일을 찾을 수 없습니다.',
+      );
+    }
+    const doc = await new this.bulkModel({
+      filesCount: filelist.length,
+      path,
+    }).save();
+
+    this.asyncBulkUpload(doc._id, filelist);
+
+    return doc._id.toHexString();
+  }
+
+  async asyncBulkUpload(bulkId: Types.ObjectId, excelPaths: string[]) {
+    const bucket: string = 'ttmikstories-data';
+
+    for await (const path of excelPaths) {
+      const log = new BulkLog();
+      log.bulkId = bulkId;
+      log.key = path;
+      log.state = EduContentUploadState.PENDING;
+
+      try {
+        const data = await this.awsService.fileFromBucket(path, bucket);
+        await this.createWithExcelData(data);
+        log.state = EduContentUploadState.SUCCEED;
+      } catch (err: any) {
+        const error =
+          typeof err === 'string' ? err : err.message || JSON.stringify(err);
+        log.error = error;
+        log.state = EduContentUploadState.FAILED;
+      }
+      await new this.bulkLogModel(log).save();
+    }
+
+    await this.bulkModel.findByIdAndUpdate(bulkId, {
+      $set: { completeAt: now() },
+    });
+  }
+
+  async createWithExcelData(data: any) {
+    const serial_number = data.get('contents').get('0-스토리')[0].serialNum;
+
+    if (
+      await this.educontentsModel.findOne({ contentsSerialNum: serial_number })
+    ) {
+      throw new Error('이미 등록된 serialNumber 입니다.');
+    }
+
+    var seriesNum = 0;
+    var storyIndex = 0;
+
+    if (serial_number.includes('S') || serial_number.includes('s')) {
+      var seriesNum = +serial_number.substr(3, 3);
+      var storyIndex = +serial_number.slice(-4);
+    }
+    if (serial_number.includes('A') || serial_number.includes('a')) {
+      var storyIndex = +serial_number.slice(-6);
+    }
+
+    // 컨텐츠, 타임라인
+    const educontent: EduContents = {
+      contentsSerialNum: serial_number,
+      level: data.get('contents').get('0-스토리')[0].level,
+      title: data.get('contents').get('0-스토리')[0].title,
+      imagePath: data.get('contents').get('0-스토리')[0].imagePath,
+      audioFilePath: data.get('contents').get('0-스토리')[0].audioFilePath,
+      seriesNum: seriesNum,
+      storyIndex: storyIndex,
+      vocabCount: data.get('contents').get('3-단어').length,
+      questionCount: data.get('contents').get('2-퀴즈').length,
+      content: data.get('contents').get('0-스토리')[0].content,
+      timeLine: data.get('contents').get('1-타임라인'),
+    };
+    // 퀴즈
+    var quizs: Quizs = new Quizs();
+    for (const quiz of data.get('contents').get('2-퀴즈')) {
+      quizs = {
+        contentsSerialNum: serial_number,
+        quizType: quiz.type,
+        question: quiz.question,
+        passage: quiz.passage,
+        answer: quiz.answer,
+        options: [],
+      };
+
+      Object.entries(quiz).forEach(([key, value]) => {
+        if (key.includes('option')) {
+          if (value != null) {
+            quizs.options.push(value.toString());
+          }
+        }
+      });
+      await new this.quizsModel(quizs).save();
+    }
+
+    // 단어
+    var vocabs: Vocab = new Vocab();
+    for (const vocab of data.get('contents').get('3-단어')) {
+      vocabs = {
+        contentsSerialNum: serial_number,
+        audioFilePath: vocab.audio_file_path,
+        vocab: vocab.vocab,
+        meaningEn: vocab.meaning_en,
+        value: vocab.value,
+        connSentence: vocab.conn_sentence,
+        previewVocabulary: 'N',
+      };
+      Object.entries(vocab).forEach(([key, value]) => {
+        if (key.includes('vocabulary')) {
+          if (value != null) {
+            if (value == 'Y') {
+              vocabs.previewVocabulary = 'Y';
+            } else {
+              vocabs.previewVocabulary = 'N';
+            }
+          } else {
+            vocabs.previewVocabulary = 'N';
+          }
+        }
+      });
+      await new this.vocabModel(vocabs).save();
+    }
+    await new this.educontentsModel(educontent).save();
   }
 
   async getPagingEduContents(
     query: GetListEduContentsDto,
   ): Promise<PagingResDto<EduContentsDto> | Buffer> {
-    var filter: FilterQuery<EduContentsDocument> = {}
+    var filter: FilterQuery<EduContentsDocument> = {};
     if (query.level != undefined) {
       filter.level = { $eq: query.level };
     }
@@ -190,15 +286,18 @@ export class EducontentsService {
       filter.title = { $regex: query.title, $options: 'i' };
     }
     if (query.contentType != undefined) {
-      if (query.contentType == 'SERIES'){
+      if (query.contentType == 'SERIES') {
         filter.contentsSerialNum = { $regex: 'S', $options: 'i' };
       }
-      if (query.contentType == 'ARTICLE'){
+      if (query.contentType == 'ARTICLE') {
         filter.contentsSerialNum = { $regex: 'A', $options: 'i' };
       }
     }
     if (query.contentsSerialNum != undefined) {
-      filter.contentsSerialNum = { $regex: query.contentsSerialNum, $options: 'i' };
+      filter.contentsSerialNum = {
+        $regex: query.contentsSerialNum,
+        $options: 'i',
+      };
     }
 
     const projection: ProjectionFields<EduContentsDto> = {
@@ -256,15 +355,15 @@ export class EducontentsService {
     return dto;
   }
 
-  // Educontents Quiz Services  
+  // Educontents Quiz Services
   async deleteQuizs(id: string) {
     await this.quizsModel.findByIdAndDelete(id);
-    return id
+    return id;
   }
 
   async updateQuizsById(id: string, body: UpdateQuizsDto) {
-    await this.quizsModel.findByIdAndUpdate(id, { 
-      $set: {body, updatedAt: now()}
+    await this.quizsModel.findByIdAndUpdate(id, {
+      $set: { body, updatedAt: now() },
     });
   }
 
@@ -277,7 +376,7 @@ export class EducontentsService {
   }
 
   async createQuiz(body: ContentsQuizDto): Promise<string> {
-    var quiz: Quizs = new Quizs()
+    var quiz: Quizs = new Quizs();
     quiz = {
       contentsSerialNum: body.contentsSerialNum,
       quizType: body.quizType,
@@ -285,17 +384,17 @@ export class EducontentsService {
       passage: body.passage,
       answer: body.answer,
       options: body.options,
-    }
+    };
     const result = await new this.quizsModel(quiz).save();
     return result._id.toString();
   }
 
   async getPagingQuizs(
-    contentsSerialNum: string, 
+    contentsSerialNum: string,
     query: GetListQuizDto,
   ): Promise<PagingResDto<ContentsQuizDto> | Buffer> {
     const filter: FilterQuery<VocabDocument> = {
-      contentsSerialNum: { $eq: contentsSerialNum }
+      contentsSerialNum: { $eq: contentsSerialNum },
     };
 
     const projection: ProjectionFields<ContentsQuizDto> = {
@@ -332,36 +431,39 @@ export class EducontentsService {
     });
 
     if (bookmarked) {
-      return "Already bookmarked."
-    } else {}
+      return 'Already bookmarked.';
+    } else {
+    }
 
-    var bookmark: Bookmark = new Bookmark()
+    var bookmark: Bookmark = new Bookmark();
     bookmark = {
       userId: user_id,
       eduContentsId: educontents_id,
-    }
+    };
 
     const result = await new this.bookmarkModel(bookmark).save();
     return result._id.toString();
   }
 
   async deleteBookmark(user_id, bookmark_id: string): Promise<string> {
-    const result = await this.bookmarkModel.findByIdAndDelete(
-      {_id: new Types.ObjectId(bookmark_id), userId: user_id}
-    );
+    const result = await this.bookmarkModel.findByIdAndDelete({
+      _id: new Types.ObjectId(bookmark_id),
+      userId: user_id,
+    });
 
     if (!result) {
-      return "일치하는 bookmark_id가 없습니다."
+      return '일치하는 bookmark_id가 없습니다.';
     }
-    
-    return bookmark_id
+
+    return bookmark_id;
   }
 
   async getPagingBookmark(
-    user_id, query: GetListBookmarkDto,
+    user_id,
+    query: GetListBookmarkDto,
   ): Promise<PagingResDto<BookmarkDto> | Buffer> {
     const filter: FilterQuery<VocabDocument> = {
-      userId: { $eq: user_id }
+      userId: { $eq: user_id },
     };
 
     const projection: ProjectionFields<BookmarkDto> = {

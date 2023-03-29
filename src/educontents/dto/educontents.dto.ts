@@ -1,26 +1,26 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export type QuizType = "MC" | "TN" | "OX"
-export type DetailType = "NORMAL" | "SEQUENCE"
+export type QuizType = 'MC' | 'TN' | 'OX';
+export type DetailType = 'NORMAL' | 'SEQUENCE';
 
 export class TimeLine {
-    @ApiProperty({})
-    time: string;
+  @ApiProperty({})
+  time: string;
 
-    @ApiProperty({})
-    sentence: string;
+  @ApiProperty({})
+  sentence: string;
 }
 
-export class EduContentsDto{
+export class EduContentsDto {
   @ApiProperty({})
   id: string;
 
   @ApiProperty({})
   contentsSerialNum: string;
-  
+
   @ApiProperty({})
   level: string;
-  
+
   @ApiProperty({})
   title: string;
 
@@ -41,17 +41,17 @@ export class EduContentsDto{
 
   @ApiProperty({})
   imagePath: string;
-  
+
   @ApiProperty({})
   audioFilePath: string;
 
   @ApiProperty({
-    description: "format: [{'time': '0:23', 'sentence': 'example'}]"
+    description: "format: [{'time': '0:23', 'sentence': 'example'}]",
   })
   timeLine: TimeLine[];
 }
 
-export class ContentsQuizDto{
+export class ContentsQuizDto {
   @ApiProperty({})
   contentsSerialNum: string;
 
@@ -71,7 +71,7 @@ export class ContentsQuizDto{
   options: string[];
 }
 
-export class ContentsQuizResultDto{
+export class ContentsQuizResultDto {
   @ApiProperty({})
   storyRead: string;
 
@@ -85,12 +85,12 @@ export class ContentsQuizResultDto{
   nextContentsId: string;
 }
 
-export class UploadContentsDto{
+export class UploadContentsDto {
   @ApiProperty({})
-  total: number;
+  bulkId: string;
 }
 
-export class BookmarkDto{
+export class BookmarkDto {
   @ApiProperty({})
   userId: string;
 
