@@ -11,9 +11,9 @@ export class ReadStoryDto {
     @ApiProperty()
     contentsSerialNum: string;
 
-    @ApiProperty({default: now()})
+    @ApiProperty({})
     createdAt?: Date;
 
-    @ApiProperty({default: now()})
+    @ApiProperty({})
     updatedAt?: Date;
 }

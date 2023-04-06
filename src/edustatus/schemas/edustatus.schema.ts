@@ -37,7 +37,7 @@ export class EduStatus {
     @Prop()
     userId: string;
 
-    @Prop({default: now()})
+    @Prop({})
     createdAt?: Date;
 }
 

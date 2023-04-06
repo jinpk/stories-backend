@@ -14,7 +14,7 @@ export class ReadStory {
     @Prop()
     contentsSerialNum: string;
 
-    @Prop({default: now()})
+    @Prop({})
     createdAt?: Date;
 }
 

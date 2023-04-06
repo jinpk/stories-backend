@@ -11,7 +11,7 @@ export class Bookmark {
   @Prop()
   eduContentsId: string;
   
-  @Prop({default: now()})
+  @Prop({})
   createdAt?: Date;
 }
 

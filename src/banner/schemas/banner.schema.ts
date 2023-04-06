@@ -23,7 +23,7 @@ export class Banner {
   @Prop()
   link: string;
 
-  @Prop({default: now()})
+  @Prop({})
   createdAt?: Date;
 }
 

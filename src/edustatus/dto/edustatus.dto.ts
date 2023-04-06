@@ -94,7 +94,7 @@ export class CurrentLevel {
     @ApiProperty({})
     completed: number;
 
-    @ApiProperty({default: now()})
+    @ApiProperty({})
     updatedAt?: Date;
 }
 

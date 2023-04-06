@@ -45,7 +45,7 @@ export class Bulk {
   @Prop({ default: null })
   completeAt: Date;
 
-  @Prop({ default: now() })
+  @Prop({  })
   createdAt?: Date;
 }
 
