@@ -128,3 +128,14 @@ export class CertificateDto {
     @ApiProperty({})
     completion: boolean;
 }
+
+export class CertificateDetailDto {
+    @ApiProperty({})
+    level: string;
+
+    @ApiProperty({})
+    completion: boolean;
+    
+    @ApiProperty({})
+    completedAt: Date;
+}

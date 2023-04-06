@@ -19,12 +19,13 @@ import {
     ApiTags,
 } from '@nestjs/swagger'
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
-import { EduStatusDto, CertificateDto, HomeInfoDto } from './dto/edustatus.dto';
+import { EduStatusDto, CertificateDto, HomeInfoDto, CertificateDetailDto } from './dto/edustatus.dto';
 import { ReadStoryDto } from './dto/readstory.dto';
 import { GetReadStoryDto } from './dto/get-readstory.dto';
 import { UpdateEduStatusDto, UpdateEduCompleted } from './dto/update-edustatus.dto';
 import { EdustatusService } from './edustatus.service';
 import { query } from 'express';
+import { GetCertificateDetailDto } from './dto/get-edustatus.dto';
   
 @Controller('edustatus')
 @ApiTags('edustatus')
@@ -113,14 +114,28 @@ export class EdustatusController {
 
     @Get('certificates/me')
     @ApiOperation({
-        summary: '사용자 레벨별 수료현황-마이페이지',
+        summary: 'user certification list',
     })
     @ApiOkResponse({
         status: 200,
         type: [CertificateDto],
     })
-    async getUserCretificate(@Request() req) {
+    async getUserCertificate(@Request() req) {
         return await this.edustatusService.getUserCertificates(req.user.id);
+    }
+
+    @Get('certificates/me/detail')
+    @ApiOperation({
+        summary: 'user certification detail by level',
+    })
+    @ApiOkResponse({
+        status: 200,
+        type: CertificateDetailDto,
+    })
+    async getUserCertificateDetail(
+        @Query('level') query: string,
+        @Request() req) {
+        return await this.edustatusService.getUserCertificateDetail(req.user.id, query);
     }
 
     @Get('studied/me')

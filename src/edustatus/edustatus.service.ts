@@ -19,10 +19,12 @@ import {
   LevelProgress,
   CertificateDto,
   HomeInfoDto,
+  CertificateDetailDto,
 } from './dto/edustatus.dto';
 import { GetReadStoryDto } from './dto/get-readstory.dto';
 import { UpdateEduStatusDto, UpdateEduCompleted } from './dto/update-edustatus.dto';
 import { LevelTestResultDto } from 'src/leveltest/dto/leveltest.dto';
+import { GetCertificateDetailDto } from './dto/get-edustatus.dto';
 
 @Injectable()
 export class EdustatusService {
@@ -477,6 +479,29 @@ export class EdustatusService {
     }
 
     return certificates
+  }
+
+  async getUserCertificateDetail(
+    user_id, level: string): Promise<CertificateDetailDto> {
+      let readContents = await this.readstoryModel.find({
+        userId: new Types.ObjectId(user_id),
+        completed: true,
+        level: level,
+      }).sort({ completedAt: -1});
+
+      let educontentsCount = await this.educontentsModel.find({
+        level: level,
+      }).count();
+
+      if (readContents.length == educontentsCount) {
+        let dto = new CertificateDetailDto()
+        dto.level = level;
+        dto.completedAt = readContents[0].completedAt;
+        dto.completion = true;
+        return dto
+      } else {
+        throw new NotAcceptableException('Not completed Level')
+      }
   }
 
   async getStudiedDates(user_id: string, query: GetReadStoryDto) {
