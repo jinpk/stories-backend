@@ -23,6 +23,7 @@ import { LevelTestDto, LevelTestResultDto } from './dto/leveltest.dto';
 import { UpdateLevelTestDto } from './dto/update-leveltest.dto';
 import { GetPagingLevelTestDto, GetStaticsLevelTestDto } from './dto/get-leveltest.dto';
 import { LeveltestService } from './leveltest.service';
+import { EduStatusDto } from 'src/edustatus/dto/edustatus.dto';
 
 @Controller('leveltest')
 @ApiTags('leveltest')
@@ -109,13 +110,14 @@ export class LeveltestController {
   @Post('leveltest')
   @ApiOperation({
     summary: '사용자 레벨 테스트 결과 제출',
+    description: '모든 문제를 맞혀야 다음 스탭으로 이동 가능. total= step * 4, 총 맞춘갯수 = (step-1) * 4 + correct'
   })
   @ApiBody({ type: LevelTestResultDto })
   @ApiOkResponse({
       status: 200,
-      type: String,
+      type: EduStatusDto,
   })
   async saveLevelTestResult(@Request() req,@Body() body) {
-      return await this.leveltestService.postLevelTest(req.user.id, body)
+    return await this.leveltestService.postLevelTest(req.user.id, body)
   }
 }

@@ -1,18 +1,32 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { now, HydratedDocument } from 'mongoose';
+import { now, HydratedDocument, Types } from 'mongoose';
 
 export type ReadStoryDocument = HydratedDocument<ReadStory>;
 
 @Schema({ timestamps: true })
 export class ReadStory {
-    @Prop()
-    userId: string;
+    _id?: Types.ObjectId;
 
     @Prop()
-    eduContentsId: string;
+    userId: Types.ObjectId;
+
+    @Prop()
+    level: string;
+
+    @Prop()
+    eduContentsId: Types.ObjectId;
 
     @Prop()
     contentsSerialNum: string;
+
+    @Prop({default: false})
+    completed?: boolean;
+
+    @Prop({default: null})
+    completedAt?: Date;
+
+    @Prop({})
+    lastReadAt: Date;
 
     @Prop({})
     createdAt?: Date;

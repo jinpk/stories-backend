@@ -19,7 +19,7 @@ import {
     ApiTags,
 } from '@nestjs/swagger'
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
-import { EduStatusDto, Statics, Completed, CertificateDto } from './dto/edustatus.dto';
+import { EduStatusDto, CertificateDto, HomeInfoDto } from './dto/edustatus.dto';
 import { ReadStoryDto } from './dto/readstory.dto';
 import { GetReadStoryDto } from './dto/get-readstory.dto';
 import { UpdateEduStatusDto, UpdateEduCompleted } from './dto/update-edustatus.dto';
@@ -51,30 +51,10 @@ export class EdustatusController {
         return await this.edustatusService.getEduStatusById(userId); 
     }
 
-    @Put('static')
-    @ApiOperation({
-        summary: '사용자 학습 통계지표 업데이트',
-    })
-    @ApiBody({
-        type: Statics
-    })
-    @ApiOkResponse({
-        status: 200,
-        type: String,
-    })
-    async updateEduStatics(
-        @Body() body,
-        @Request() req) {
-            if (!(await this.edustatusService.existEdustatus(req.user.id))) {
-                throw new NotFoundException('NotFound Edustatus');
-            }
-            return await this.edustatusService.updateUserEduStatic(req.user.id, body);
-    }
-
     @Put('level')
     @ApiOperation({
         summary: '사용자 레벨별 진행현황 업데이트',
-        description: 'When user read one content, put one contentId in array. or send empty array.'
+        description: 'When user read one content, put one contentId and serialnum'
     })
     @ApiBody({
         type:UpdateEduCompleted,
@@ -94,18 +74,19 @@ export class EdustatusController {
 
     @Get('me')
     @ApiOperation({
-        summary: 'HOME 사용자 학습 진행상황',
+        summary: 'Home Screen: User education info',
+        description: 'get user education info',
     })
     @ApiOkResponse({
         status: 200,
-        type: EduStatusDto,
+        type: HomeInfoDto,
     })
     async getEduStatus(@Request() req) {
         if (!(await this.edustatusService.existEdustatus(req.user.id))) {
             throw new NotFoundException('NotFound Edustatus');
         }
-        console.log(req.user.id)
-        return await this.edustatusService.getEduStatusById(req.user.id);
+
+        return await this.edustatusService.getHomeinfoByUserId(req.user.id);
         
     }
 

@@ -32,11 +32,5 @@ export class LevelTestResultDto{
   step: string;
 
   @ApiProperty({})
-  correct: number;
-
-  @ApiProperty({})
-  total: number;
-
-  @ApiProperty({})
-  updatedAt: Date;
+  lastStepCorrect: number;
 }

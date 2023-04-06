@@ -14,13 +14,13 @@ export class LevelProgressDetail {
     seriesTotal: number;
 
     @ApiProperty({})
-    seriesComplete: number;
+    seriesCompleted: string[];
 
     @ApiProperty({})
     articleTotal: number;
 
     @ApiProperty({})
-    articleComplete: number;
+    articleCompleted: string[];
 
     @ApiProperty({})
     quizResult: QuizResult;
@@ -32,101 +32,90 @@ export class LevelProgressDetail {
 export class LevelProgress { 
 }
 
-export class RecentSeries {
+export class RecentContent {
     @ApiProperty({})
-    contentsId: string;
+    _id: string;
 
     @ApiProperty({})
     contentsSerialNum: string;
+
+    @ApiProperty({})
+    title: string;
+
+    @ApiProperty({})
+    content: string;
+
+    @ApiProperty({})
+    seriesNum: number;
+
+    @ApiProperty({})
+    storyIndex: number;
+
+    @ApiProperty({})
+    imagePath: string;
+}
+
+export class EduStatusDto {
+    id?: string;
+
+    @ApiProperty({})
+    userId: string;
+
+    @ApiProperty({})
+    firstLevel: string;
+
+    @ApiProperty({})
+    latestLevel: string;
+
+    @ApiProperty({})
+    selectedLevel: string;
+
+    // @ApiProperty({})
+    // levelProgress: LevelProgress;
+
+    // @ApiProperty({})
+    // recentSeries: RecentSeries;
+
+    // @ApiProperty({})
+    // recentArticle: RecentArticle;
+
+    // @ApiProperty({
+    // description: '개인 학습정보 통계 지표',
+    // default: {},
+    // })
+    // statics: Object;
+
+    @ApiProperty({})
+    updateAt?: Date;
+}
+
+
+export class HomeInfoDto {
+    id?: string;
+
+    @ApiProperty({})
+    userId: string;
+
+    @ApiProperty({})
+    selectedLevel: string;
 
     @ApiProperty({})
     seriesTotal: number;
 
     @ApiProperty({})
-    title: string;
-}
-
-export class RecentArticle {
-    @ApiProperty({})
-    contentsId: string;
+    articleTotal: number;
 
     @ApiProperty({})
-    contentsSerialNum: string;
+    seriesCompleted: number;
 
     @ApiProperty({})
-    title: string;
-}
-
-export class Statics {
-    @ApiProperty({
-        description: '분단위로 저장',
-    })
-    total: number;
+    articleCompleted: number;
 
     @ApiProperty({})
-    read: number;
+    recentSeries: RecentContent;
 
     @ApiProperty({})
-    correctRate: number;
-
-    @ApiProperty({})
-    words: number;
-}
-
-export class Completed {
-    @ApiProperty({})
-    articleCompleted: string[];
-  
-    @ApiProperty({})
-    seriesCompleted: string[];
-}
-
-export class LevelCompleted {
-}
-
-export class CurrentLevel {
-    @ApiProperty({})
-    level: string;
-
-    @ApiProperty({})
-    total: number;
-
-    @ApiProperty({})
-    completed: number;
-
-    @ApiProperty({})
-    updatedAt?: Date;
-}
-
-export class EduStatusDto {
-    @ApiProperty({})
-    firstLevel: string;
-
-    @ApiProperty({})
-    currentLevel: CurrentLevel;
-
-    @ApiProperty({})
-    levelProgress: LevelProgress;
-
-    @ApiProperty({})
-    recentSeries: RecentSeries;
-
-    @ApiProperty({})
-    recentArticle: RecentArticle;
-
-    @ApiProperty({
-    description: '개인 학습정보 통계 지표',
-    default: {},
-    })
-    statics: Statics;
-
-    @ApiProperty({
-    description: '레벨별 완료 한 array',
-    })
-    levelCompleted: LevelCompleted;
-
-    @ApiProperty({})
-    userId: string;
+    recentArticle: RecentContent;
 
     @ApiProperty({})
     updateAt?: Date;
