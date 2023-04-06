@@ -40,7 +40,7 @@ export class EduContents {
   @Prop()
   timeLine: TimeLine[];
 
-  @Prop({default: now()})
+  @Prop({})
   createdAt?: Date;
 }
 
@@ -64,7 +64,7 @@ export class Quizs {
   @Prop()
   options: string[];
 
-  @Prop({default: now()})
+  @Prop({})
   createdAt?: Date;
 }
 

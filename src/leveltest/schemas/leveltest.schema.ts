@@ -20,7 +20,7 @@ export class LevelTest {
   @Prop()
   correct_answer: number;
 
-  @Prop({default: now()})
+  @Prop({})
   createdAt?: Date;
 }
 

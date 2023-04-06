@@ -21,3 +21,24 @@ export class StaticsVocabDto {
     })
     completeRate: number;
   }
+
+  export class Statics {
+    id?: string;
+
+    @ApiProperty({})
+    userId: string;
+
+    @ApiProperty({
+        description: '분단위로 저장',
+    })
+    total: number;
+
+    @ApiProperty({})
+    read: number;
+
+    @ApiProperty({})
+    correctRate: number;
+
+    @ApiProperty({})
+    words: number;
+}

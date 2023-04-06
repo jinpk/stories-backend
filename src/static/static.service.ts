@@ -49,11 +49,6 @@ export class StaticService {
         completed[i.toString()] = 0
       }
 
-      edustatus.forEach((content, _) => {
-        added[content.currentLevel.level] += content.currentLevel.total;
-        completed[content.currentLevel.level] += content.currentLevel.completed;
-      });
-
       for (let i = 1; i < 11; i++) {
         const avgAdded = added[i.toString()]/count;
         const avgCompleted = completed[i.toString()]/count;
@@ -146,11 +141,6 @@ export class StaticService {
       for (let i = 1; i < 11; i++) {
         rates[i.toString()] = 0
       }
-
-      edustatus.forEach((content, _) => {
-        total += 1;
-        rates[content.currentLevel.level] += 1;
-      })
 
       Object.keys(rates).forEach(key => {
         if (rates[key] != 0) {

@@ -1,43 +1,28 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { now, HydratedDocument } from 'mongoose';
-import { 
-    RecentSeries,
-    RecentArticle,
-    LevelProgress,
-    Statics,
-    LevelCompleted,
-    CurrentLevel,
-} from '../dto/edustatus.dto'
+import { now, HydratedDocument, Types } from 'mongoose';
 
 export type EduStatusDocument = HydratedDocument<EduStatus>;
 
 @Schema({ timestamps: true })
 export class EduStatus {
+    _id?: Types.ObjectId
+
     @Prop()
     firstLevel: string;
 
     @Prop()
-    currentLevel: CurrentLevel;
+    latestLevel: string;
 
     @Prop()
-    levelProgress: LevelProgress;
+    selectedLevel: string;
+
+    @Prop({type: Object})
+    levelProgress: any;
 
     @Prop()
-    recentSeries: RecentSeries;
+    userId: Types.ObjectId;
 
-    @Prop()
-    recentArticle: RecentArticle;
-
-    @Prop({default: {}})
-    statics: Statics;
-
-    @Prop()
-    levelCompleted: LevelCompleted;
-
-    @Prop()
-    userId: string;
-
-    @Prop({default: now()})
+    @Prop({})
     createdAt?: Date;
 }
 

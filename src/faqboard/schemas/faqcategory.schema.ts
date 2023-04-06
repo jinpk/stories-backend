@@ -8,7 +8,7 @@ export class FaqCategory {
   @Prop()
   category: string;
 
-  @Prop({default: now()})
+  @Prop({})
   createdAt?: Date;
 }
 

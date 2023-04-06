@@ -2,8 +2,13 @@ import { ApiProperty } from '@nestjs/swagger';
 import { now } from 'mongoose';
 
 export class ReadStoryDto {
+    id: string;
+
     @ApiProperty()
     userId: string;
+
+    @ApiProperty()
+    level: string;
 
     @ApiProperty()
     eduContentsId: string;
@@ -11,9 +16,18 @@ export class ReadStoryDto {
     @ApiProperty()
     contentsSerialNum: string;
 
-    @ApiProperty({default: now()})
+    @ApiProperty()
+    lastReadAt: Date;
+
+    @ApiProperty()
+    completed?: boolean;
+
+    @ApiProperty()
+    completedAt?: Date;
+
+    @ApiProperty({})
     createdAt?: Date;
 
-    @ApiProperty({default: now()})
+    @ApiProperty({})
     updatedAt?: Date;
 }

@@ -23,7 +23,10 @@ export class LeveltestService {
   ) {}
 
   async postLevelTest(user_id: string, body: LevelTestResultDto) {
-    return await this.edustatusService.updateEduStatus(user_id, body)
+    const status = await this.edustatusService.updateEduStatus(user_id, body)
+
+    let dto = this.edustatusService._edustatusToDto(status)
+    return dto
   }
 
   async deleteLevelTest(id: string) {

@@ -27,7 +27,7 @@ export class Popup {
   @Prop()
   link: PopupLink;
 
-  @Prop({default: now()})
+  @Prop({})
   createdAt?: Date;
 }
 

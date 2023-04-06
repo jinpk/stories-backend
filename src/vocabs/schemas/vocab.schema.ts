@@ -27,7 +27,7 @@ export class Vocab {
   @Prop()
   previewVocabulary: PreviewVocabulary;
 
-  @Prop({default: now()})
+  @Prop({})
   createdAt?: Date;
 }
 

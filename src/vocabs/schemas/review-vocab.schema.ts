@@ -17,10 +17,10 @@ export class ReviewVocab {
   @Prop({default: false})
   complete: boolean;
 
-  @Prop({default: now()})
+  @Prop({})
   createdAt?: Date;
 
-  @Prop({default: now()})
+  @Prop({})
   updatedAt?: Date;
 }
 

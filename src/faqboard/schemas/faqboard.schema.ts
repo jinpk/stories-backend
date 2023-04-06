@@ -14,7 +14,7 @@ export class FaqBoard {
   @Prop()
   answer: string;
 
-  @Prop({default: now()})
+  @Prop({})
   createdAt?: Date;
 }
 

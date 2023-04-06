@@ -14,7 +14,7 @@ export class QuizResult {
     @Prop()
     corrected: boolean;
 
-    @Prop({default: now()})
+    @Prop({})
     createdAt?: Date;
 }
 
