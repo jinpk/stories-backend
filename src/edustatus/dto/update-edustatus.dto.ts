@@ -14,3 +14,8 @@ export class UpdateEduCompleted {
     @ApiProperty({})
     contentsSerialNum: string;
 }
+
+export class ChangeSelectedLevelDto {
+    @ApiProperty({})
+    level: string;
+}

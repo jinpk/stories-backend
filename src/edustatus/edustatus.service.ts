@@ -25,6 +25,7 @@ import { GetReadStoryDto } from './dto/get-readstory.dto';
 import { UpdateEduStatusDto, UpdateEduCompleted } from './dto/update-edustatus.dto';
 import { LevelTestResultDto } from 'src/leveltest/dto/leveltest.dto';
 import { GetCertificateDetailDto } from './dto/get-edustatus.dto';
+import { ReadStoryDto } from './dto/readstory.dto';
 
 @Injectable()
 export class EdustatusService {
@@ -229,31 +230,35 @@ export class EdustatusService {
       return true
   }
 
-  async updateUserCompleted(user_id: string, body: UpdateEduCompleted) {
+  async changeSelectedLevel(user_id, level: string): Promise<EduStatusDto> {
+    const edustatus = await this.edustatusModel.findOneAndUpdate({
+      userId: new Types.ObjectId(user_id),
+    }, {
+      $set: {
+        selectedLevel: level,
+      }
+    });
+
+    let dto = this._edustatusToDto(edustatus);
+
+    return dto
+  }
+
+  async updateUserCompleted(
+    user_id: string,
+    body: UpdateEduCompleted): Promise<ReadStoryDto> {
     const content = await this.educontentsModel.findOne({
       _id: new Types.ObjectId(body.contentId),
     });
 
-    await this.createReadStory(user_id, body)
+    if (!content) {
+      throw new NotFoundException('Not found educontents')
+    }
 
-    // // static read update
-    // var count = 0
-    // Object.keys(status.levelProgress).forEach((content, _) => {
-    //   count += (status.levelProgress[content].seriesComplete + status.levelProgress[content].articleComplete);
-    // });
+    let readStory = await this.createReadStory(user_id, body);
 
-    // let updatedLevel = +status.selectedLevel + 1;
-    // if (updatedLevel > 10) {
-    //   updatedLevel = 10;
-    // }
-
-    // const result = await this.edustatusModel.findOneAndUpdate({userId: user_id}, { 
-    //   $set: {
-    //     selectedLevel: updatedLevel,
-    //     updatedAt: now()}
-    // });
-
-    return 'result';
+    let dto = this._readstoryToDto(readStory)
+    return dto;
   }
 
   async calculateLevel(step: string, correct: number): Promise<string> {
@@ -391,7 +396,7 @@ export class EdustatusService {
     }
 
     const result = await new this.readstoryModel(story_result).save();
-    return result._id.toString();
+    return result;
   }
 
   async getReadStoriesCount(user_id, serial_num: string) {
@@ -493,7 +498,7 @@ export class EdustatusService {
         level: level,
       }).count();
 
-      if (readContents.length == educontentsCount) {
+      if ((readContents.length == educontentsCount) && (readContents.length != 0)) {
         let dto = new CertificateDetailDto()
         dto.level = level;
         dto.completedAt = readContents[0].completedAt;
@@ -508,14 +513,28 @@ export class EdustatusService {
     const start_date = new Date(query.start).toString()
     const end_date = new Date(query.end).toString()
 
-    const studied = await this.readstoryModel.find({
-      "updatedAt": {
+    const filter: FilterQuery<ReadStoryDto> = {
+      userId: new Types.ObjectId(user_id),
+      lastReadAt: {
         $gte: new Date(start_date),
         $lte: new Date(end_date)
       }
-    });
+    };
 
-    return studied
+    const projection: ProjectionFields<EduStatusDto> = {
+      _id: 0,
+      userId: 0,
+      level: 0,
+      createdAt: 0,
+      updatedAt: 0,
+    };
+
+    var cursor =  await this.readstoryModel.aggregate([
+      { $match: filter},
+      { $project: projection}
+    ]);
+
+    return cursor
   }
 
   async updateRecentContent(level, serial_number: string){
@@ -585,6 +604,22 @@ export class EdustatusService {
     const dto = new EduStatusDto();
     dto.id = doc._id.toHexString();
     dto.userId = doc.userId.toHexString();
+    dto.firstLevel = doc.firstLevel;
+    dto.latestLevel = doc.latestLevel;
+    dto.selectedLevel = doc.latestLevel;
+
+    return dto
+  }
+
+  _readstoryToDto(doc: ReadStory | ReadStoryDocument): ReadStoryDto {
+    const dto = new ReadStoryDto();
+    dto.id = doc._id.toHexString();
+    dto.completed = doc.completed;
+    dto.completedAt = doc.completedAt;
+    dto.contentsSerialNum = doc.contentsSerialNum;
+    dto.eduContentsId = doc.eduContentsId.toHexString();
+    dto.lastReadAt = doc.lastReadAt;
+    dto.level = doc.level;
 
     return dto
   }

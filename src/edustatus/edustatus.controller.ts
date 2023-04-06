@@ -19,10 +19,19 @@ import {
     ApiTags,
 } from '@nestjs/swagger'
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
-import { EduStatusDto, CertificateDto, HomeInfoDto, CertificateDetailDto } from './dto/edustatus.dto';
+import { 
+    EduStatusDto,
+    CertificateDto,
+    HomeInfoDto, 
+    CertificateDetailDto,
+} from './dto/edustatus.dto';
 import { ReadStoryDto } from './dto/readstory.dto';
 import { GetReadStoryDto } from './dto/get-readstory.dto';
-import { UpdateEduStatusDto, UpdateEduCompleted } from './dto/update-edustatus.dto';
+import {
+    UpdateEduStatusDto,
+    UpdateEduCompleted,
+    ChangeSelectedLevelDto
+} from './dto/update-edustatus.dto';
 import { EdustatusService } from './edustatus.service';
 import { query } from 'express';
 import { GetCertificateDetailDto } from './dto/get-edustatus.dto';
@@ -52,9 +61,9 @@ export class EdustatusController {
         return await this.edustatusService.getEduStatusById(userId); 
     }
 
-    @Put('level')
+    @Post('readcontents')
     @ApiOperation({
-        summary: '사용자 레벨별 진행현황 업데이트',
+        summary: 'User complete read content',
         description: 'When user read one content, put one contentId and serialnum'
     })
     @ApiBody({
@@ -76,22 +85,18 @@ export class EdustatusController {
     @Put('changelevel')
     @ApiOperation({
         summary: 'Change selectedLevel',
-        description: 'When user read one content, put one contentId and serialnum'
-    })
-    @ApiBody({
-        type:UpdateEduCompleted,
     })
     @ApiOkResponse({
         status: 200,
-        type: String,
+        type: EduStatusDto,
     })
     async updateEduLevel(
-        @Body() body,
+        @Body() body: ChangeSelectedLevelDto,
         @Request() req){
             if (!(await this.edustatusService.existEdustatus(req.user.id))) {
                 throw new NotFoundException('NotFound Edustatus');
             }
-            return await this.edustatusService.updateUserCompleted(req.user.id, body);
+            return await this.edustatusService.changeSelectedLevel(req.user.id, body.level);
     }
 
     @Get('me')

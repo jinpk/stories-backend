@@ -10,7 +10,7 @@ export class UserStatic {
   @Prop()
   userId: Types.ObjectId;
 
-  @Prop()
+  @Prop({default: 0})
   totalStudyTime: number;
 
   @Prop()
