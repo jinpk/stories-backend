@@ -454,20 +454,27 @@ export class EdustatusService {
   }
 
   async getUserCertificates(user_id: string): Promise<CertificateDto[]> {
-    const status = await this.edustatusModel.findOne({ userId: user_id });
-
-    var lvl_progress: LevelProgress = status.levelProgress
-    var certificates: CertificateDto[] = []
-
-    Object.keys(lvl_progress).forEach((content, _) => {
-      if ((lvl_progress[content].articleTotal == 0) && (lvl_progress[content].seriesTotal == 0)) {
-      }else{
-        if ((lvl_progress[content].articleTotal == lvl_progress[content].articleComplete) && 
-        (lvl_progress[content].seriesTotal == lvl_progress[content].seriesComplete)) {
-          certificates.push({'level': content, completion: true})
-        }
-      }
+    let readContents = await this.readstoryModel.find({
+      userId: new Types.ObjectId(user_id),
+      completed: true,
     });
+
+    let educontents = await this.educontentsModel.find();
+
+    var certificates: CertificateDto[] = []
+    for (let i=1; i < 11; i++) {
+      let levelStr = i.toString();
+      let cert:CertificateDto = {level: levelStr, completion: false}
+
+      let total = educontents.filter(element => element.level == levelStr)
+      let complete = readContents.filter(element => element.level == levelStr)
+
+      if (total.length == complete.length) {
+        cert.completion = true;
+      }
+
+      certificates.push(cert)
+    }
 
     return certificates
   }

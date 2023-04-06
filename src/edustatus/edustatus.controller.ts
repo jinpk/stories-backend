@@ -63,6 +63,27 @@ export class EdustatusController {
         status: 200,
         type: String,
     })
+    async patchupdateEduLevel(
+        @Body() body,
+        @Request() req){
+            if (!(await this.edustatusService.existEdustatus(req.user.id))) {
+                throw new NotFoundException('NotFound Edustatus');
+            }
+            return await this.edustatusService.updateUserCompleted(req.user.id, body);
+    }
+
+    @Put('changelevel')
+    @ApiOperation({
+        summary: 'Change selectedLevel',
+        description: 'When user read one content, put one contentId and serialnum'
+    })
+    @ApiBody({
+        type:UpdateEduCompleted,
+    })
+    @ApiOkResponse({
+        status: 200,
+        type: String,
+    })
     async updateEduLevel(
         @Body() body,
         @Request() req){
