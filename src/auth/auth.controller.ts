@@ -35,6 +35,7 @@ import {
   EmailVerificationReqeust,
   EmailVerificationConfirmReqeust,
   TTMIKLoginDto,
+  LoginResponseDto,
 } from './dto';
 import { LocalAuthAdminGuard } from './guard/local-auth.guard';
 import { AdminService } from 'src/admin/admin.service';
@@ -134,29 +135,32 @@ export class AuthController {
     description: `**본 서비스는 TTMIK 회원과 미러링 됨.**
     \n\n TTMIK 로그인 시스템에서 발급 받은 JWT_TOKEN으로 요청.
     \n* countryCode는 Device에서 받아와 항상 요청 필요
-    \n* 이메일 인증을 꼭 미리하고 TTMIK 회원가입 > Stories 로그인 요청하여 Stories 회원가입 필요.
-    \n* 스토리즈에서 미리 이메일 인증을하고 TTMIK에 가입하면
-    \n* TTMIK JWT Payload의 email을 읽어와서 자동으로 이메일 인증요청 API를 호출합니다.
-    \n* 처음 인증하는 경우 이메일 인증을하고 JWT응답을 바로해 주지만 
-    \n다음 로그인시 TTMIK 토큰을 새로 발급받아서 요청해야 TTMIK JWT.payload.isVerify가 업데이트 되어있습니다.
-    `,
+    \n
+    \n* tttmik.JWT.isVerify가 false이면 response.verified: false (200) 응답
+    \n* \`email/verification/code\`, \`email/verification\` 로 이메일 인증하고
+    \n  발급받은 authId를 다시 담아서 로그인 요청
+    \n  (authId를 담아서 요청하면, authId가 요휴한 경우 jwt.isVerifiy를 true로 업데이트 합니다.)
+    \n* 처음 인증하는 경우 이메일 인증을하고 JWT응답을 바로해 주지만 다음 로그인시 TTMIK JWT도 새로 발급받아서
+    \n  요청해야함. (기존에 가지고 있던 JWT는 최신화 되지 않아서 새로 발급 필요)`,
   })
   @ApiBody({
     type: TTMIKLoginDto,
   })
   @ApiOkResponse({
-    type: TokenDto,
+    type: LoginResponseDto,
   })
   @ApiForbiddenResponse({
     description: `- TTMIK JWT 검증하지 못한 경우\n
-      - TTMIK 회원가입전 이메일 인증을 안한 경우\n
-      - TTMIK JWT Payload에 이메일이 없는 경우`,
+    - TTMIK JWT Payload에 이메일이 없는 경우\n
+    - TTMIK.JWT의 isVerifiy가 false일떄 입력한 authId가 유효하지 않은경우
+    \n(인증처리되지 않음, 이미 사용한 경우)
+      `,
   })
   @ApiUnprocessableEntityResponse({
     description: `- TTMIK 시스템으로 이메일 인증 요청 실패한 경우`,
   })
   @ApiBadRequestResponse({ description: 'TTMIK token이 유효하지 않은 경우' })
-  async ttmkiLogin(@Body() body: TTMIKLoginDto): Promise<TokenDto> {
+  async ttmkiLogin(@Body() body: TTMIKLoginDto): Promise<LoginResponseDto> {
     const { token, countryCode } = body;
     let payload: TTMIKJwtPayload;
     try {
@@ -165,12 +169,21 @@ export class AuthController {
         throw new ForbiddenException('TTMIK JWT에 email이 없습니다.');
       }
     } catch (error) {
-      console.log(error);
       throw new ForbiddenException('Invalid TTMIK Jwt Token.');
     }
 
-    if (payload.referer === 'ttmik-stories' && !payload.isVerify) {
+    // 이메일 인증전까지 스토리즈 회원 시스템에 입력하지 않음.
+    // referer과 상관없이 절대적 isVerify 검증
+    // 이메일 인증 안되어 있으면 verified: false 내려주고
+    // 프론트에서 인증 먼저 해야함.
+    if (!payload.isVerify) {
       // 기존에 인증했을걸 가져와서 인증 처리
+      if (!body.authId) {
+        return {
+          verified: false,
+          email: payload.email,
+        };
+      }
       await this.authService.forceVerifyEmail(payload.email);
     }
 
@@ -186,7 +199,7 @@ export class AuthController {
       );
     }
 
-    return tokenResponse;
+    return { accessToken: tokenResponse.accessToken, verified: true };
   }
 
   @Post('passwordchange')

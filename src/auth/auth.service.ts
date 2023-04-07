@@ -36,7 +36,7 @@ export class AuthService {
       email,
     });
     if (!auth) {
-      throw new ForbiddenException();
+      throw new ForbiddenException('invaild auth');
     }
 
     // admin token
