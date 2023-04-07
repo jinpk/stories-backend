@@ -6,6 +6,7 @@ import { QuizResult, QuizResultSchema } from './schemas/quizresult.schema';
 import { ReadStory, ReadStorySchema } from './schemas/readstory.schema';
 import { EdustatusController } from './edustatus.controller';
 import { EdustatusService } from './edustatus.service';
+import { StaticModule } from 'src/static/static.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { EdustatusService } from './edustatus.service';
     MongooseModule.forFeature([{ name: EduStatus.name, schema: EduStatusSchema }]),
     MongooseModule.forFeature([{ name: QuizResult.name, schema: QuizResultSchema }]),
     MongooseModule.forFeature([{ name: ReadStory.name, schema: ReadStorySchema }]),
+    StaticModule,
   ],
   controllers: [EdustatusController],
   providers: [EdustatusService],

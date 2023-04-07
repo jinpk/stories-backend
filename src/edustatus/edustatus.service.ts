@@ -26,6 +26,7 @@ import { UpdateEduStatusDto, UpdateEduCompleted } from './dto/update-edustatus.d
 import { LevelTestResultDto } from 'src/leveltest/dto/leveltest.dto';
 import { GetCertificateDetailDto } from './dto/get-edustatus.dto';
 import { ReadStoryDto } from './dto/readstory.dto';
+import { StaticService } from 'src/static/static.service';
 
 @Injectable()
 export class EdustatusService {
@@ -34,6 +35,7 @@ export class EdustatusService {
     @InjectModel(QuizResult.name) private quizresultModel: Model<QuizResultDocument>,
     @InjectModel(ReadStory.name) private readstoryModel: Model<ReadStoryDocument>,
     @InjectModel(EduContents.name) private educontentsModel: Model<EduContentsDocument>,
+    private staticService: StaticService,
   ) {}
 
   async getEduStatusById(user_id: string) {
@@ -349,6 +351,7 @@ export class EdustatusService {
 
     const result = await new this.edustatusModel(edustatus).save();
 
+    await this.staticService.createUserStatic(user_id);
 
     return result; 
   }

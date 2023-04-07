@@ -65,4 +65,12 @@ export class StaticController {
         }
         return await this.staticService.getLevelTestStatic(query);
     }
+
+    @Post('studiedtime')
+    @ApiOperation({
+        summary: 'Ping users studying time every 20sec',
+    })
+    async postUserStudyTime(@Request() req) {
+        return await this.staticService.updateUserStudyTime(req.user.id);
+    }
 }

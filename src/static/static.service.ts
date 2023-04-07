@@ -11,6 +11,7 @@ import {
 import { PagingResDto } from 'src/common/dto/response.dto';
 import { CommonExcelService, UtilsService } from 'src/common/providers';
 import { EXCEL_COLUMN_LIST } from './static.constant';
+import { UserStatic, UserStaticDocument } from './schemas/userstatic.schema';
 import { EduStatus, EduStatusDocument } from '../edustatus/schemas/edustatus.schema';
 import { ReviewVocab, ReviewVocabDocument } from '../vocabs/schemas/review-vocab.schema';
 import { StaticsVocabDto } from './dto/static.dto';
@@ -21,9 +22,17 @@ export class StaticService {
     constructor(
         private utilsService: UtilsService,
         private commonExcelService: CommonExcelService,
+        @InjectModel(UserStatic.name) private userstaticModel: Model<UserStaticDocument>,
         @InjectModel(EduStatus.name) private edustatusModel: Model<EduStatusDocument>,
         @InjectModel(ReviewVocab.name) private reviewvocabModel: Model<ReviewVocabDocument>,
     ) {}
+
+    async createUserStatic(user_id: string) {
+      let userStatic = new UserStatic()
+      userStatic.userId = new Types.ObjectId(user_id);
+
+      await new this.userstaticModel(userStatic).save();
+    }
 
     async getContentsCompleteStatic(
       query: GetContentsCompleteDto
@@ -173,5 +182,14 @@ export class StaticService {
         EXCEL_COLUMN_LIST,
         excelData,
       );
+    }
+
+    async updateUserStudyTime(user_id: string) {
+      await this.userstaticModel.findOneAndUpdate({
+        userId: new Types.ObjectId(user_id)
+      },
+      {
+        $inc: {totalStudyTime: 20}
+      })
     }
 }

@@ -11,19 +11,16 @@ export class UserStatic {
   userId: Types.ObjectId;
 
   @Prop({default: 0})
-  totalStudyTime: number;
+  totalStudyTime?: number;
 
-  @Prop()
-  read: number;
+  @Prop({default: 0})
+  read?: number;
 
-  @Prop()
+  @Prop({default: 0})
   correctRate: number;
 
-  @Prop()
+  @Prop({default: 0})
   words: number;
-
-  @Prop({})
-  createdAt?: Date;
 }
 
 export const UserStaticSchema = SchemaFactory.createForClass(UserStatic);
