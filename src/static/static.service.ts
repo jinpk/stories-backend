@@ -177,21 +177,29 @@ export class StaticService {
       const end_date = new Date(query.end).toString()
 
       const edustatus = await this.edustatusModel.find({
-        "currentLevel.updatedAt": {
+        updatedAt: {
           $gte: new Date(start_date),
           $lte: new Date(end_date)
         }
       });
 
+      total = edustatus.length;
+
+      let userCounts = {}
       for (let i = 1; i < 11; i++) {
         rates[i.toString()] = 0
+        userCounts[i.toString()] = 0
       }
 
+      // level별 유저수
+      edustatus.forEach(element => {
+        userCounts[element.latestLevel] += 1;
+      })
+
       Object.keys(rates).forEach(key => {
-        if (rates[key] != 0) {
-          rates[key] = (rates[key] / total) * 100.0;
-        } else {}
-      });
+          rates[key] = userCounts[key]*100.0/total
+        }
+      );
 
       if (query.excel === '1') {
         return await this.staticdataToExcel(rates)
