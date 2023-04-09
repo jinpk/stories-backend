@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
@@ -431,7 +432,7 @@ export class EducontentsService {
     });
 
     if (bookmarked) {
-      return 'Already bookmarked.';
+      throw new ForbiddenException('Already bookmarked.');
     } else {
     }
 
@@ -452,7 +453,7 @@ export class EducontentsService {
     });
 
     if (!result) {
-      return '일치하는 bookmark_id가 없습니다.';
+      throw new ForbiddenException('일치하는 bookmark_id가 없습니다.');
     }
 
     return bookmark_id;
