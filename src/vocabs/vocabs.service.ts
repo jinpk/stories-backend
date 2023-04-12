@@ -38,7 +38,16 @@ export class VocabsService {
 
   async updateVocabById(id: string, body: UpdateVocabDto) {
     await this.vocabModel.findByIdAndUpdate(id, { 
-      $set: {body, updatedAt: now()}
+      $set: {
+        contentsSerialNum: body.contentsSerialNum,
+        vocab: body.vocab,
+        audioFilePath: body.audioFilePath,
+        connSentence: body.connSentence,
+        value: body.value,
+        meaningEn: body.meaningEn,
+        previewVocabulary: body.previewVocabulary,
+        updatedAt: now()
+      }
     });
   }
 
