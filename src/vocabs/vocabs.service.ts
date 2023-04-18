@@ -1,4 +1,8 @@
-import { Injectable, ConsoleLogger } from '@nestjs/common';
+import { Injectable,
+  UseGuards,
+  UnauthorizedException,
+  ConflictException,
+  ForbiddenException, } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   now,
@@ -8,6 +12,7 @@ import {
   ProjectionFields,
   Types,
 } from 'mongoose';
+
 import { PagingResDto, ReviewVocabPagingResDto } from 'src/common/dto/response.dto';
 import { Vocab, VocabDocument } from './schemas/vocab.schema';
 import { ReviewVocab, ReviewVocabDocument } from './schemas/review-vocab.schema';
@@ -33,7 +38,16 @@ export class VocabsService {
 
   async updateVocabById(id: string, body: UpdateVocabDto) {
     await this.vocabModel.findByIdAndUpdate(id, { 
-      $set: {body, updatedAt: now()}
+      $set: {
+        contentsSerialNum: body.contentsSerialNum,
+        vocab: body.vocab,
+        audioFilePath: body.audioFilePath,
+        connSentence: body.connSentence,
+        value: body.value,
+        meaningEn: body.meaningEn,
+        previewVocabulary: body.previewVocabulary,
+        updatedAt: now()
+      }
     });
   }
 
@@ -66,7 +80,7 @@ export class VocabsService {
     });
 
     if (exist) {
-      return "Already Registered."
+      throw new ForbiddenException("Already Registered.");
     }
 
     reviewVocab = {

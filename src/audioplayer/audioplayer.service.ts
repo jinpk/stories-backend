@@ -26,19 +26,19 @@ export class AudioplayerService {
       ) {}
 
     async GetAudioPlayerBySerialNum(contents_serial_num: string): Promise<AudioPlayerDto> {
-        const educontents = await this.educontentsModel.find({
+        const educontents = await this.educontentsModel.findOne({
             contentsSerialNum: { $eq: contents_serial_num }
         });
 
         var audioplayer: AudioPlayerDto = new AudioPlayerDto();
         audioplayer = {
-            id: educontents[0]._id.toString(),
-            contentsSerialNum: educontents[0].contentsSerialNum,
-            level: educontents[0].level,
-            title: educontents[0].title,
-            content: educontents[0].content,
-            imagePath: educontents[0].imagePath,
-            audioFilePath: educontents[0].audioFilePath
+            id: educontents._id.toString(),
+            contentsSerialNum: educontents.contentsSerialNum,
+            level: educontents.level,
+            title: educontents.title,
+            content: educontents.content,
+            imagePath: educontents.imagePath,
+            audioFilePath: educontents.audioFilePath
         }
         return audioplayer;
     }
@@ -98,8 +98,6 @@ export class AudioplayerService {
             { $match: filter },
             { $project: projection },
         ]);
-
-        console.log(cursor)
 
         if (query.filterType == "COMPLETE") {
             const readstory = await this.readstoryModel.find({

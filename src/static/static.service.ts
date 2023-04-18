@@ -11,11 +11,20 @@ import {
 import { PagingResDto } from 'src/common/dto/response.dto';
 import { CommonExcelService, UtilsService } from 'src/common/providers';
 import { EXCEL_COLUMN_LIST } from './static.constant';
+import {
+  EduContents,
+  EduContentsDocument
+} from 'src/educontents/schemas/educontents.schema';
 import { UserStatic, UserStaticDocument } from './schemas/userstatic.schema';
+import { ReadStory, ReadStoryDocument } from '../edustatus/schemas/readstory.schema';
 import { EduStatus, EduStatusDocument } from '../edustatus/schemas/edustatus.schema';
 import { ReviewVocab, ReviewVocabDocument } from '../vocabs/schemas/review-vocab.schema';
 import { StaticsVocabDto } from './dto/static.dto';
-import { GetContentsCompleteDto, GetVocabQuizDto, GetLevelTestResultDto } from './dto/get-static.dto';
+import {
+  GetContentsCompleteDto,
+  GetVocabQuizDto,
+  GetLevelTestResultDto
+} from './dto/get-static.dto';
 
 @Injectable()
 export class StaticService {
@@ -24,6 +33,8 @@ export class StaticService {
         private commonExcelService: CommonExcelService,
         @InjectModel(UserStatic.name) private userstaticModel: Model<UserStaticDocument>,
         @InjectModel(EduStatus.name) private edustatusModel: Model<EduStatusDocument>,
+        @InjectModel(EduContents.name) private educontentsModel: Model<EduContentsDocument>,
+        @InjectModel(ReadStory.name) private readstoryModel: Model<ReadStoryDocument>,
         @InjectModel(ReviewVocab.name) private reviewvocabModel: Model<ReviewVocabDocument>,
     ) {}
 
@@ -37,41 +48,66 @@ export class StaticService {
     async getContentsCompleteStatic(
       query: GetContentsCompleteDto
     ){
-      var completed: {[key: string]: any} = {}
-      var added: {[key: string]: any} = {}
-      var rates: {[key: string]: {'avgAdded':number, 'avgCompleted':number, 'rate':number}} = {}
+      var rates: {[key: string]: {'avgCompleted':number}} = {}
 
       const start_date = new Date(query.start).toString()
       const end_date = new Date(query.end).toString()
 
-      const edustatus = await this.edustatusModel.find({
-        "currentLevel.updatedAt": {
-          $gte: new Date(start_date),
-          $lte: new Date(end_date)
+      const docs = await this.readstoryModel.aggregate([
+        {
+          $match: {
+            $expr: {
+              $and: [
+                { $gte: ['$completedAt', new Date(start_date)] },
+                { $lte: ['$completedAt', new Date(end_date)] }
+              ],
+            },
+          },
+        },
+        {
+          $group: {
+            _id: { "userId" : '$userId', "level" : '$level' },
+            completedCount: {
+              $sum: {
+                $cond: [{ $eq: ['$completed', true]}, 1, 0],
+              }
+            },
+          },
+        },
+        {
+          $group: {
+            _id: '$_id.level',
+            completedCount: {
+              $sum: '$completedCount'
+            },
+            userCount: {
+              $sum: 1,
+            }
+          },
         }
-      });
+      ]);
 
-      const count = edustatus.length;
-
-      for (let i = 1; i < 11; i++) {
-        added[i.toString()] = 0
-        completed[i.toString()] = 0
+      // level별 컨텐츠 수
+      let contentsCounts = {};
+      for (let i=1; i<11; i++) {
+        contentsCounts[i.toString()] = 0;
       }
 
+      let contents = await this.educontentsModel.find();
+
+      contents.forEach(element => {
+        contentsCounts[element.level] += 1;
+      });
+
       for (let i = 1; i < 11; i++) {
-        const avgAdded = added[i.toString()]/count;
-        const avgCompleted = completed[i.toString()]/count;
+        docs.forEach(doc => {
+          if (doc._id == i.toString()) {
+            const avgCompleted = (doc.completedCount*100.0/(contentsCounts[i.toString()]*doc.userCount));
 
-        var rate = 0
-        if ((avgAdded == 0) || (avgCompleted == 0)) {
-        } else {
-          rate = (avgCompleted/avgAdded)*100.0;
-        }
-
-        rates[i.toString()] = {
-          'avgAdded': avgAdded,
-          'avgCompleted': avgCompleted,
-          'rate': rate}
+            rates[i.toString()] = {
+              'avgCompleted': avgCompleted}
+          }
+        })
       }
 
       if (query.excel === '1') {
@@ -141,21 +177,29 @@ export class StaticService {
       const end_date = new Date(query.end).toString()
 
       const edustatus = await this.edustatusModel.find({
-        "currentLevel.updatedAt": {
+        updatedAt: {
           $gte: new Date(start_date),
           $lte: new Date(end_date)
         }
       });
 
+      total = edustatus.length;
+
+      let userCounts = {}
       for (let i = 1; i < 11; i++) {
         rates[i.toString()] = 0
+        userCounts[i.toString()] = 0
       }
 
+      // level별 유저수
+      edustatus.forEach(element => {
+        userCounts[element.latestLevel] += 1;
+      })
+
       Object.keys(rates).forEach(key => {
-        if (rates[key] != 0) {
-          rates[key] = (rates[key] / total) * 100.0;
-        } else {}
-      });
+          rates[key] = userCounts[key]*100.0/total
+        }
+      );
 
       if (query.excel === '1') {
         return await this.staticdataToExcel(rates)
@@ -165,8 +209,6 @@ export class StaticService {
     }
 
     async staticdataToExcel(data: Object) {
-      console.log(data)
-
       var excelData = []
       var rows = Object.keys(data['1'])
       for (const row of rows) {

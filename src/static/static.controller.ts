@@ -37,7 +37,7 @@ export class StaticController {
         if (!req.user.isAdmin) {
             throw new UnauthorizedException('Not an Admin')
         }
-        await this.staticService.getContentsCompleteStatic(query);
+        return await this.staticService.getContentsCompleteStatic(query);
     }
 
     @Get('vocabquiz')

@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
   UnprocessableEntityException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
@@ -80,7 +81,18 @@ export class EducontentsService {
 
   async updateEduContentsById(id: string, body: UpdateEduContentsDto) {
     await this.educontentsModel.findByIdAndUpdate(id, {
-      $set: { body, updatedAt: now() },
+      $set: {
+        contentsSerialNum: body.contentsSerialNum,
+        level: body.level,
+        title: body.title,
+        content: body.content,
+        seriesNum: body.seriesNum,
+        storyIndex: body.storyIndex,
+        imagePath: body.imagePath,
+        audioFilePath: body.audioFilePath,
+        timeLine: body.timeLine,
+        updatedAt: now()
+      },
     });
   }
 
@@ -363,7 +375,15 @@ export class EducontentsService {
 
   async updateQuizsById(id: string, body: UpdateQuizsDto) {
     await this.quizsModel.findByIdAndUpdate(id, {
-      $set: { body, updatedAt: now() },
+      $set: {
+        contentsSerialNum: body.contentsSerialNum,
+        quizType: body.quizType,
+        question: body.question,
+        passage: body.passage,
+        answer: body.answer,
+        options: body.options,
+        updatedAt: now()
+      },
     });
   }
 
@@ -431,7 +451,7 @@ export class EducontentsService {
     });
 
     if (bookmarked) {
-      return 'Already bookmarked.';
+      throw new ForbiddenException('Already bookmarked.');
     } else {
     }
 
@@ -452,7 +472,7 @@ export class EducontentsService {
     });
 
     if (!result) {
-      return '일치하는 bookmark_id가 없습니다.';
+      throw new ForbiddenException('일치하는 bookmark_id가 없습니다.');
     }
 
     return bookmark_id;
