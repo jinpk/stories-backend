@@ -38,7 +38,7 @@ export class UsersController {
   async deleteUser(
     @Req() req,
     @Param('id') id: string,
-    @Body() body: DeleteUserDto,
+    // @Body() body: DeleteUserDto,
   ) {
     if (req.user.id !== id && !req.user.isAdmin) {
       throw new UnauthorizedException();

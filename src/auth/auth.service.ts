@@ -168,7 +168,7 @@ export class AuthService {
   async login(sub: string, isAdmin?: boolean) {
     const payload = { sub, isAdmin };
     return {
-      accessToken: this.jwtService.sign(payload),
+      accessToken: this.jwtService.sign(payload, { expiresIn: '30d' }),
     };
   }
 
@@ -184,7 +184,6 @@ export class AuthService {
       email: payload.email,
       nickname: payload.name,
       ttmik: payload.isPremium,
-
       countryCode,
       newsletter: true,
     };
