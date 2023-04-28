@@ -25,14 +25,12 @@ import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator
 import {
   EduContentsDto,
   ContentsQuizDto,
-  ContentsQuizResultDto,
   UploadContentsDto,
   BookmarkDto,
 } from './dto/educontents.dto';
 import {
   GetListEduContentsDto,
   GetListQuizDto,
-  GetContentsQuizResultDto,
   GetListBookmarkDto,
 } from './dto/get-educontents.dto';
 import {

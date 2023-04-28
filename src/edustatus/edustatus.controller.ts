@@ -33,7 +33,7 @@ import {
     ChangeSelectedLevelDto
 } from './dto/update-edustatus.dto';
 import { EdustatusService } from './edustatus.service';
-import { query } from 'express';
+import { QuizResultDto } from './dto/quizresult.dto';
 import { GetCertificateDetailDto } from './dto/get-edustatus.dto';
   
 @Controller('edustatus')
@@ -153,5 +153,25 @@ export class EdustatusController {
     })
     async getUserStudied(@Request() req, @Query() query: GetReadStoryDto) {
         return await this.edustatusService.getStudiedDates(req.user.id, query);
+    }
+
+    @Post('quizresult')
+    @ApiOperation({
+        summary: 'Post each quiz result',
+    })
+    @ApiBody({
+        type: QuizResultDto,
+    })
+    @ApiOkResponse({
+        status: 200,
+        type: String,
+    })
+    async patquizResult(
+        @Body() body,
+        @Request() req){
+            if (!(await this.edustatusService.existEdustatus(req.user.id))) {
+                throw new NotFoundException('NotFound Edustatus');
+            }
+            return await this.edustatusService.createQuizResult(req.user.id, body);
     }
 }

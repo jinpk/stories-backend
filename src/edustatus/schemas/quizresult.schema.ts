@@ -1,20 +1,20 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { now, HydratedDocument } from 'mongoose';
+import { Types, HydratedDocument } from 'mongoose';
 
 export type QuizResultDocument = HydratedDocument<QuizResult>;
 
 @Schema({ timestamps: true })
 export class QuizResult {
     @Prop()
-    userId: string;
+    userId: Types.ObjectId;
 
     @Prop()
-    quizId: string;
+    quizId: Types.ObjectId;
 
     @Prop()
     corrected: boolean;
 
-    @Prop({})
+    @Prop()
     createdAt?: Date;
 }
 

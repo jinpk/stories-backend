@@ -27,6 +27,7 @@ import { LevelTestResultDto } from 'src/leveltest/dto/leveltest.dto';
 import { GetCertificateDetailDto } from './dto/get-edustatus.dto';
 import { ReadStoryDto } from './dto/readstory.dto';
 import { StaticService } from 'src/static/static.service';
+import { QuizResultDto } from './dto/quizresult.dto';
 
 @Injectable()
 export class EdustatusService {
@@ -444,10 +445,10 @@ export class EdustatusService {
     return readstory
   }
 
-  async createQuizResult(user_id, quiz_id: string, correct: boolean): Promise<string> {
+  async createQuizResult(user_id: string, body: QuizResultDto): Promise<string> {
     const quiz = await this.quizresultModel.find({
-      userId: { $eq: user_id },
-      quizId: { $eq: quiz_id },
+      userId: { $eq: new Types.ObjectId(user_id) },
+      quizId: { $eq: new Types.ObjectId(body.quizId) },
     });
 
     if (!quiz) {
@@ -456,12 +457,13 @@ export class EdustatusService {
 
     var quizresult: QuizResult = new QuizResult();
     quizresult = {
-      userId: user_id,
-      quizId: quiz_id,
-      corrected: correct,
+      userId: new Types.ObjectId(user_id),
+      quizId: new Types.ObjectId(body.quizId),
+      corrected: body.corrected,
     }
 
     const result = await new this.quizresultModel(quizresult).save();
+    
     return result._id.toString();
   }
 
