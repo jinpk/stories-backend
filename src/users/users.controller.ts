@@ -22,14 +22,58 @@ import { UserDto } from './dto/user.dto';
 import { GetUsersDto } from './dto/get-user.dto';
 import { UsersService } from './users.service';
 import { UpdateUserByEmail, UpdateUserDto } from './dto/update.user.dto';
-import { DeleteUserDto } from './dto/delete-user.dto';
 import { Public } from 'src/auth/decorator/auth.decorator';
+import { UserAgreeDto, UserAgreeUpdateDto } from './dto/user-agree.dto';
+import { UsersAgreeService } from './users-agree.service';
 
 @Controller('users')
 @ApiTags('users')
 @ApiBearerAuth()
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly usersAgreeService: UsersAgreeService,
+  ) {}
+
+  @Post(':userId/agrees/:agreeId')
+  @ApiOperation({
+    summary: '회원 약관 동의',
+  })
+  @ApiOkResponse({
+    type: [UserAgreeDto],
+  })
+  async agreeUser(
+    @Body() body: UserAgreeUpdateDto,
+    @Param('userId') userId: string,
+    @Param('agreeId') agreeId: string,
+    @Req() req,
+  ) {
+    if (userId !== req.user.id) {
+      throw new UnauthorizedException();
+    }
+
+    await this.usersAgreeService.agreeByUserId(
+      req.user.id,
+      agreeId,
+      body.agreed,
+    );
+  }
+
+  @Get(':userId/agrees')
+  @ApiOperation({
+    summary: '회원 약관 동의 목록 조회',
+  })
+  @ApiOkResponse({
+    type: [UserAgreeDto],
+  })
+  async getUserAgrees(@Param('userId') userId: string, @Req() req) {
+    if (userId !== req.user.id) {
+      throw new UnauthorizedException();
+    }
+
+    return await this.usersAgreeService.findAgreesByUserId(req.user.id);
+  }
+
   @Post(':id/withdrawal')
   @ApiOperation({
     summary: '회원 탈퇴(삭제)',

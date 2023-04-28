@@ -8,6 +8,7 @@ import { VerifyEmailEvent } from 'src/auth/events/verify-email.event';
 import { EmailService } from 'src/common/providers';
 import { NotificationsService } from 'src/notifications/notifications.service';
 import { UserCreatedEvent } from 'src/users/events/create-user.event';
+import { UsersAgreeService } from 'src/users/users-agree.service';
 
 @Injectable()
 export class EventService {
@@ -15,6 +16,7 @@ export class EventService {
   constructor(
     private readonly notificationsService: NotificationsService,
     private readonly emailService: EmailService,
+    private readonly usersAgreeService: UsersAgreeService,
   ) {}
 
   // 인증요청 이벤트
@@ -36,6 +38,7 @@ export class EventService {
 
     this.notificationsService.initUserNotificationSettings(payload.userId);
     this.emailService.sendJoinedEmail(payload.email, payload.nickname);
+    this.usersAgreeService.initAgreesByUserId(payload.userId);
   }
 
   // 비밀번호 재설정 요청 이벤트

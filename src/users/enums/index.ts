@@ -7,3 +7,9 @@ export enum UserStates {
   Normal = 'normal',
   Deleted = 'deleted',
 }
+
+export enum UserAgreeTypes {
+  Adult = 'adult',
+  TermsCond = 'terms-conditions',
+  PersonalInfo = 'personal-info',
+}
