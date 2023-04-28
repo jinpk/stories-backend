@@ -16,17 +16,19 @@ import {
 import { PagingResDto, ReviewVocabPagingResDto } from 'src/common/dto/response.dto';
 import { Vocab, VocabDocument } from './schemas/vocab.schema';
 import { ReviewVocab, ReviewVocabDocument } from './schemas/review-vocab.schema';
-import { VocabDto, CoreVocabDto, ReviewVocabDto } from './dto/vocab.dto';
+import { VocabDto, ReviewVocabDto } from './dto/vocab.dto';
 import { UpdateVocabDto } from './dto/update-vocab.dto';
 import { GetVocabsDto, GetReviewVocabDto, GetCoreVocabDto } from './dto/get-vocab.dto';
 import { EXCEL_COLUMN_LIST } from './vocabs.constant';
 import { CommonExcelService, UtilsService } from 'src/common/providers';
+import { StaticService } from 'src/static/static.service';
 
 @Injectable()
 export class VocabsService {
   constructor(
     private utilsService: UtilsService,
     private commonExcelService: CommonExcelService,
+    private staticService: StaticService,
     @InjectModel(Vocab.name) private vocabModel: Model<VocabDocument>,
     @InjectModel(ReviewVocab.name) private reviewvocabModel: Model<ReviewVocabDocument>,
   ) {}
@@ -93,10 +95,13 @@ export class VocabsService {
     return result._id.toString()
   }
 
-  async updateReviewVocabById(vocab_id: string) {
+  async updateReviewVocabById(user_id, vocab_id: string) {
     await this.reviewvocabModel.findByIdAndUpdate(vocab_id, { 
       $set: {complete: true, updatedAt: now()}
     });
+
+    await this.staticService.updateUserWords(user_id);
+
     return vocab_id
   }
 

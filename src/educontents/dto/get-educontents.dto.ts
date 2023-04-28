@@ -36,13 +36,5 @@ export class GetListEduContentsDto extends PagingExcelReqDto {
 export class GetListQuizDto extends PagingReqDto {
 }
 
-export class GetContentsQuizResultDto{
-  @ApiProperty({})
-  level: string;
-
-  @ApiProperty({})
-  contentsId: string;
-}
-
 export class GetListBookmarkDto extends PagingReqDto {
 }

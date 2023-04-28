@@ -71,20 +71,6 @@ export class ContentsQuizDto {
   options: string[];
 }
 
-export class ContentsQuizResultDto {
-  @ApiProperty({})
-  storyRead: string;
-
-  @ApiProperty({})
-  correctAnswer: number;
-
-  @ApiProperty({})
-  total: number;
-
-  @ApiProperty({})
-  nextContentsId: string;
-}
-
 export class UploadContentsDto {
   @ApiProperty({})
   bulkId: string;

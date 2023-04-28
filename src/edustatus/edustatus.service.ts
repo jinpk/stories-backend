@@ -16,15 +16,13 @@ import { ReadStory, ReadStoryDocument } from './schemas/readstory.schema';
 import { 
   EduStatusDto,
   LevelProgressDetail,
-  LevelProgress,
   CertificateDto,
   HomeInfoDto,
   CertificateDetailDto,
 } from './dto/edustatus.dto';
 import { GetReadStoryDto } from './dto/get-readstory.dto';
-import { UpdateEduStatusDto, UpdateEduCompleted } from './dto/update-edustatus.dto';
+import { UpdateEduCompleted } from './dto/update-edustatus.dto';
 import { LevelTestResultDto } from 'src/leveltest/dto/leveltest.dto';
-import { GetCertificateDetailDto } from './dto/get-edustatus.dto';
 import { ReadStoryDto } from './dto/readstory.dto';
 import { StaticService } from 'src/static/static.service';
 import { QuizResultDto } from './dto/quizresult.dto';
@@ -451,7 +449,7 @@ export class EdustatusService {
       quizId: { $eq: new Types.ObjectId(body.quizId) },
     });
 
-    if (!quiz) {
+    if (quiz) {
       throw new NotAcceptableException("Already in Document.");
     } else {}
 
@@ -463,22 +461,27 @@ export class EdustatusService {
     }
 
     const result = await new this.quizresultModel(quizresult).save();
+
+    // userstatic correctRate update
+    let correct_rate = await this.getQuizCorrectRate(user_id);
+
+    await this.staticService.updateUserCorrectRate(user_id, correct_rate);
     
     return result._id.toString();
   }
 
-  async getQuizCorrectRate(user_id: string) {
+  async getQuizCorrectRate(user_id: string): Promise<number> {
     const total_quiz_result = await this.quizresultModel.find({
-      userId: { $eq: user_id },
+      userId: { $eq: new Types.ObjectId(user_id) },
     }).count();
 
     const correct_quiz_result = await this.quizresultModel.find({
-      userId: { $eq: user_id },
+      userId: { $eq: new Types.ObjectId(user_id) },
       corrected: { $eq: true },
     }).count();
 
     const correct_rate = (correct_quiz_result/total_quiz_result)*100
-    return correct_rate.toFixed(0)
+    return Number(correct_rate.toFixed(0))
   }
 
   async getMasteredVocabs(user_id: string) {

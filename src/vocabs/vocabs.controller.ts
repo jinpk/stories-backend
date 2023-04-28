@@ -130,7 +130,7 @@ export class VocabsController {
       if (!(await this.vocabsService.existReviewVocabById(req.user.id, reviewvocabId))) {
         throw new NotFoundException('NotFound ReviewVocab');
       }
-      return await this.vocabsService.updateReviewVocabById(reviewvocabId)
+      return await this.vocabsService.updateReviewVocabById(req.user.id, reviewvocabId)
     }
 
     @Get('reviewquiz/:userId')

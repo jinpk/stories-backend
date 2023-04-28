@@ -234,4 +234,41 @@ export class StaticService {
         $inc: {totalStudyTime: 20}
       })
     }
+
+    async updateUserCorrectRate(user_id: string, correct_rate: number) {
+      await this.userstaticModel.findOneAndUpdate({
+        userId: new Types.ObjectId(user_id)
+      },
+      {
+        correctRate: correct_rate,
+      });
+    }
+
+    async updateUserReadStory(user_id: string, correct_rate: number) {
+      let read_count = await this.readstoryModel.find({
+        userId: new Types.ObjectId(user_id),
+        completed: true,
+      }).count();
+
+      await this.userstaticModel.findOneAndUpdate({
+        userId: new Types.ObjectId(user_id)
+      },
+      {
+        read: read_count,
+      });
+    }
+
+    async updateUserWords(user_id: string) {
+      let word_count = await this.reviewvocabModel.find({
+        userId: user_id,
+        completed: true,
+      }).count();
+
+      await this.userstaticModel.findOneAndUpdate({
+        userId: user_id
+      },
+      {
+        words: word_count,
+      });
+    }
 }
