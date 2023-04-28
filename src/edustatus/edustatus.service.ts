@@ -139,13 +139,13 @@ export class EdustatusService {
       {
         $project: {
           'readstories._id': 0,
-         'readstories.__v': 0,
-         'readstories.level': 0,
-         'readstories.userId': 0,
-         'readstories.eduContentsId': 0,
-         'readstories.contentsSerialNum': 0,
-         'readstories.createdAt': 0,
-         'readstories.updatedAt': 0,
+          'readstories.__v': 0,
+          'readstories.level': 0,
+          'readstories.userId': 0,
+          'readstories.eduContentsId': 0,
+          'readstories.contentsSerialNum': 0,
+          'readstories.createdAt': 0,
+          'readstories.updatedAt': 0,
         }
        },
       {
@@ -187,37 +187,62 @@ export class EdustatusService {
     dto.seriesCompleted = 0
     dto.articleCompleted = 0
 
-    cursor.forEach(element => {
-      if (element.contents.contentsSerialNum.includes('a' || 'A')) {
-        if (element.readstories.completed) {
-          dto.articleCompleted += 1
-        }
-        if (dto.recentArticle == null) {
-          dto.recentArticle = element.contents
+    let levelContents = await this.educontentsModel.aggregate([
+      {
+        $match: { level: dto.selectedLevel },
+      },
+      {
+        $sort: { storyIndex: 1, seriesNum : 1 }
+      },
+      {
+        $project: {
+         '__v': 0,
+         'level': 0,
+         'vocabCount': 0,
+         'questionCount': 0,
+         'timeLine': 0,
+         'createdAt': 0,
+         'updatedAt': 0,
         }
       }
-      if (element.contents.contentsSerialNum.includes('s' || 'S')) {
-        if (element.readstories.completed) {
-          dto.seriesCompleted += 1
-        }
-        if (dto.recentSeries == null) {
-          dto.recentSeries = element.contents
-        }
-      }
-    });
-
-    let levelContents = await this.educontentsModel.find({
-      level: dto.selectedLevel
-    })
+    ])
 
     levelContents.forEach(element => {
       if (element.contentsSerialNum.includes('a' || 'A')) {
         dto.articleTotal += 1;
+        if (!dto.recentArticle) {
+          dto.recentArticle = element;
+        }
       }
       if (element.contentsSerialNum.includes('s' || 'S')) {
         dto.seriesTotal += 1;
+        if (!dto.recentSeries) {
+          dto.recentSeries = element;
+        }
       }
     })
+
+    cursor.forEach(element => {
+      if (element.contents) {
+        if (element.contents.contentsSerialNum.includes('a' || 'A')) {
+          if (element.readstories.completed) {
+            dto.articleCompleted += 1
+          }
+          if (dto.recentArticle == null) {
+            dto.recentArticle = element.contents
+          }
+        }
+        if (element.contents.contentsSerialNum.includes('s' || 'S')) {
+          if (element.readstories.completed) {
+            dto.seriesCompleted += 1
+          }
+          if (dto.recentSeries == null) {
+            dto.recentSeries = element.contents
+          }
+        }
+      } else {
+      }
+    });
 
     return dto
   }
