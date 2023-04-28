@@ -21,7 +21,7 @@ import {
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
 import { LevelTestDto, LevelTestResultDto } from './dto/leveltest.dto';
 import { UpdateLevelTestDto } from './dto/update-leveltest.dto';
-import { GetPagingLevelTestDto, GetStaticsLevelTestDto } from './dto/get-leveltest.dto';
+import { GetPagingLevelTestDto } from './dto/get-leveltest.dto';
 import { LeveltestService } from './leveltest.service';
 import { EduStatusDto } from 'src/edustatus/dto/edustatus.dto';
 
