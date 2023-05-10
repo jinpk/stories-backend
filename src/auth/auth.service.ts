@@ -148,6 +148,7 @@ export class AuthService {
       },
     );
 
+
     const user = await this.usersService.findById(userId);
     if (!user) {
       throw new NotFoundException('처리할 수 없는 계정입니다.');
