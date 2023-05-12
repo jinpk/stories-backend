@@ -115,6 +115,17 @@ export class EducontentsService {
     return educontent;
   }
 
+  /*
+  * Bulk 개별 조회
+  * @params bulkId ObjectId
+  * @return: {
+  *   _id: string,
+  *   filesCount: number,
+  *   createdAt: ISODate,
+  *   logs: Array,
+  *   updatedAt: ISODate,
+  * }
+  */
   async getBulk(bulkId: string): Promise<Bulk> {
     const doc = await this.bulkModel.aggregate([
       {
@@ -139,8 +150,8 @@ export class EducontentsService {
 
   /*
   * 가장 최근의 Bulk 업로드 날짜 조회
-  * @params: 없음
-  * @return: {
+  * @params 
+  * @return {
   *   recentDate: "YYYY-MM-DD"
   * }
   */
