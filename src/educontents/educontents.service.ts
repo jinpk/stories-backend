@@ -91,7 +91,7 @@ export class EducontentsService {
         imagePath: body.imagePath,
         audioFilePath: body.audioFilePath,
         timeLine: body.timeLine,
-        updatedAt: now()
+        updatedAt: now(),
       },
     });
   }
@@ -382,7 +382,7 @@ export class EducontentsService {
         passage: body.passage,
         answer: body.answer,
         options: body.options,
-        updatedAt: now()
+        updatedAt: now(),
       },
     });
   }
@@ -447,12 +447,10 @@ export class EducontentsService {
   async createBookmark(user_id, educontents_id: string): Promise<string> {
     const bookmarked = await this.bookmarkModel.findOne({
       userId: { $eq: user_id },
-      educontentsId: { $eq: educontents_id },
+      eduContentsId: { $eq: educontents_id },
     });
-
     if (bookmarked) {
       throw new ForbiddenException('Already bookmarked.');
-    } else {
     }
 
     var bookmark: Bookmark = new Bookmark();
