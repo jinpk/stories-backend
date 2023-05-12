@@ -1,3 +1,9 @@
+/*
+  레벨테스트 조회,제출,관리 서비스 함수
+  -관리자 레벨테스트 등록/수정/삭제
+  -사용자 레벨테스트 조회/제출
+*/
+
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
@@ -14,11 +20,6 @@ import { GetPagingLevelTestDto } from './dto/get-leveltest.dto';
 import { UtilsService } from 'src/common/providers';
 import { EdustatusService } from '../edustatus/edustatus.service'
 
-/*
-  레벨테스트 조회,제출,관리 서비스 함수
-  -관리자 레벨테스트 등록/수정/삭제
-  -사용자 레벨테스트 조회/제출
-*/
 @Injectable()
 export class LeveltestService {
   constructor(
