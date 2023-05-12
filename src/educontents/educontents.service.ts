@@ -10,7 +10,6 @@ import {
   now,
   FilterQuery,
   Model,
-  PipelineStage,
   ProjectionFields,
   Types,
 } from 'mongoose';
@@ -25,7 +24,6 @@ import { Vocab, VocabDocument } from '../vocabs/schemas/vocab.schema';
 import { Bookmark, BookmarkDocument } from './schemas/bookmark.schema';
 import {
   EduContentsDto,
-  UploadContentsDto,
   ContentsQuizDto,
   BookmarkDto,
 } from './dto/educontents.dto';
@@ -117,6 +115,17 @@ export class EducontentsService {
     return educontent;
   }
 
+  /*
+  * Bulk 개별 조회
+  * @params bulkId ObjectId
+  * @return: {
+  *   _id: string,
+  *   filesCount: number,
+  *   createdAt: ISODate,
+  *   logs: Array,
+  *   updatedAt: ISODate,
+  * }
+  */
   async getBulk(bulkId: string): Promise<Bulk> {
     const doc = await this.bulkModel.aggregate([
       {
@@ -137,6 +146,43 @@ export class EducontentsService {
       throw new NotFoundException();
     }
     return doc[0];
+  }
+
+  /*
+  * 가장 최근의 Bulk 업로드 날짜 조회
+  * @params 
+  * @return {
+  *   recentDate: "YYYY-MM-DD"
+  * }
+  */
+  async getRecentBulk(): Promise<Object> {
+    const doc = await this.bulkModel.aggregate([
+      {
+        $sort: { completedAt: -1},
+      },
+      {
+        $limit: 1,
+      },
+    ]);
+    if (!doc) {
+      throw new NotFoundException();
+    }
+
+    let res = {recentDate: ''}
+
+    if (doc[0].completedAt != null) {
+      let month = doc[0].completedAt.getMonth() + 1;
+      let day = doc[0].completedAt.getDate();
+
+      month = month >= 10 ? month : '0' + month;
+      day = day >= 10 ? day : '0' + day;
+
+      res = {recentDate: doc[0].completedAt.getFullYear() + '-' + month + '-' + day }
+    } else {
+      throw new Error('completeAt의 값이 null 입니다.');
+    }
+
+    return res;
   }
 
   async createContentsList(path: string): Promise<string> {

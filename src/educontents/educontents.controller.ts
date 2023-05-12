@@ -96,6 +96,24 @@ export class EducontentsController {
     return await this.educontentsService.getBulk(bulkId);
   }
 
+  @Get('recentbulk/')
+  @ApiOperation({
+    summary: '(ADMIN) 최근 Bulk 업로드 날짜 조회',
+  })
+  @ApiOkResponse({
+    status: 200,
+    type: Object,
+  })
+  async getRecentBulk(
+    @Request() req,
+  ): Promise<Object> {
+    if (!req.user.isAdmin) {
+      throw new ForbiddenException('Not an Admin');
+    }
+
+    return await this.educontentsService.getRecentBulk();
+  }
+
   @Put(':educontentsId')
   @ApiOperation({
     summary: '(ADMIN) 학습 컨텐츠 수정',

@@ -218,7 +218,7 @@ export class VocabsService {
       data: data,
     };
   }
-
+  
   async getPagingCoreVocabsBySerialNum(
     query: GetCoreVocabDto,
   ): Promise<PagingResDto<VocabDto> | Buffer> {
@@ -263,6 +263,7 @@ export class VocabsService {
 
   async getPagingReviewVocabs(
     user_id: string,
+    // page, limit: number,
   ): Promise<ReviewVocabPagingResDto<ReviewVocabDto> | Buffer> {
     var query = new GetReviewVocabDto()
     query.userId = user_id;
