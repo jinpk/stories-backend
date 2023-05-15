@@ -14,14 +14,14 @@ export class ReviewVocab {
   @Prop()
   level: string;
 
-  @Prop({default: false})
-  complete: boolean;
+  @Prop({default: 0})
+  correctCount?: number;
+
+  @Prop({default: null})
+  complete?: boolean;
 
   @Prop({})
   createdAt?: Date;
-
-  @Prop({})
-  updatedAt?: Date;
 }
 
 export const ReviewVocabSchema = SchemaFactory.createForClass(ReviewVocab);

@@ -16,7 +16,7 @@ import {
 import { PagingResDto, ReviewVocabPagingResDto } from 'src/common/dto/response.dto';
 import { Vocab, VocabDocument } from './schemas/vocab.schema';
 import { ReviewVocab, ReviewVocabDocument } from './schemas/review-vocab.schema';
-import { VocabDto, ReviewVocabDto } from './dto/vocab.dto';
+import { VocabDto, ReviewVocabDto, ReviewVocabResultDto } from './dto/vocab.dto';
 import { UpdateVocabDto } from './dto/update-vocab.dto';
 import { GetVocabsDto, GetReviewVocabDto, GetCoreVocabDto } from './dto/get-vocab.dto';
 import { EXCEL_COLUMN_LIST } from './vocabs.constant';
@@ -89,20 +89,31 @@ export class VocabsService {
       userId: id,
       level: level,
       vocabId: objVocabId,
-      complete: false,
     }
     const result = await new this.reviewvocabModel(reviewVocab).save()
     return result._id.toString()
   }
 
-  async updateReviewVocabById(user_id, vocab_id: string) {
-    await this.reviewvocabModel.findByIdAndUpdate(vocab_id, { 
-      $set: {complete: true, updatedAt: now()}
+  async updateReviewVocabById(user_id, vocab_id: string): Promise<ReviewVocabResultDto> {
+    let res = new ReviewVocabResultDto();
+    let result = await this.reviewvocabModel.findByIdAndUpdate(vocab_id, { 
+      correctCount: {$inc: 1}
     });
 
-    await this.staticService.updateUserWords(user_id);
+    if (result.correctCount >= 3) {
+      result.complete = true
+      await result.save();
+      await this.staticService.updateUserWords(user_id);
+    }
 
-    return vocab_id
+    if (result.complete) {
+      res.complete = result.complete
+    } else {
+      res.complete = false;
+    }
+    res.correctCount = result.correctCount;
+
+    return res
   }
 
   async getVocabById(id: string): Promise<VocabDto> {
