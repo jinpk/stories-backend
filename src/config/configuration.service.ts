@@ -11,6 +11,10 @@ export class AppConfigService {
   get jwtSecret(): string {
     return this.configService.get<string>('app.jwtSecret');
   }
+  get ttmikJwtSecret(): string {
+    return this.configService.get('app.ttmikJwtSecret');
+  }
+
   get awsAccessKey(): string {
     return this.configService.get<string>('app.awsAccessKey');
   }
@@ -47,4 +51,6 @@ export class AppConfigService {
   get playConsolePrivateKey(): string {
     return this.configService.get('app.playConsolePrivateKey');
   }
+
+ 
 }

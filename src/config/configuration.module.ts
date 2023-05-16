@@ -13,6 +13,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         MONGO_URI: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
         AWS_ACCESS_KEY: Joi.string().required(),
+        TTMIK_JWT_SECRET: Joi.string().required(),
         AWS_SECRET_KEY: Joi.string().required(),
         HOST: Joi.string().uri().required(),
         FIREBASE_PROJECT_ID: Joi.string().required(),

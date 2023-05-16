@@ -1,16 +1,15 @@
-import { Injectable, ConsoleLogger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as AWS from 'aws-sdk';
 import { SendEmailRequest } from 'aws-sdk/clients/ses';
 import { createReadStream } from 'fs';
 import { AppConfigService } from 'src/config';
 import { SendEmailDto } from './dto/email.dto';
-import { FilesToBucketDto, FilesFromBucketDto } from './dto/s3.dto';
+import { FilesToBucketDto } from './dto/s3.dto';
 import * as XLSX from 'xlsx';
 
 @Injectable()
 export class AwsService {
   private s3: AWS.S3;
-  private ssm: AWS.SSM;
   private ses: AWS.SES;
 
   private parentJwtSecretKey: string;
@@ -23,14 +22,7 @@ export class AwsService {
     });
     this.s3 = new AWS.S3();
     this.ses = new AWS.SES();
-    this.ssm = new AWS.SSM();
-    this.ssm.getParameter({ Name: '/ttmik-jwt-secrets-key' }, (err, data) => {
-      if (err) {
-        console.error(err);
-      } else {
-        this.parentJwtSecretKey = data.Parameter.Value;
-      }
-    });
+    this.parentJwtSecretKey = this.configService.ttmikJwtSecret;
   }
 
   get getParentJwtSecretKey(): string {

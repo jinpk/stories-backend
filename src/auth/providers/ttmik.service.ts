@@ -24,15 +24,7 @@ export class TTMIKService {
       },
     );
 
-    if (res.status !== 200 && res.status !== 201) {
-      console.error(
-        'failed to verifiy email to ttmik system.: ',
-        res.status,
-        res.statusText,
-        res.data,
-      );
-      throw new Error('TTMIK System 이메일 인증 변경 요청 실패 하였습니다.');
-    }
+    console.log('verifyEmail', JSON.stringify(res.data));
   }
 
   async resetPassword(
@@ -53,15 +45,7 @@ export class TTMIKService {
       },
     );
 
-    if (res.status !== 200 && res.status !== 201) {
-      console.error(
-        'failed to reset password to ttmik system.: ',
-        res.status,
-        res.statusText,
-        res.data,
-      );
-      throw new Error('TTMIK System 비밀번호 초기화 요청 실패 하였습니다.');
-    }
+    console.log('resetPassword', JSON.stringify(res.data));
   }
 
   async validatePassword(adminToken: string, email: string, password: string) {
@@ -78,14 +62,6 @@ export class TTMIKService {
       },
     );
 
-    if (res.status !== 200) {
-      console.error(
-        'failed to validate password to ttmik system.: ',
-        res.status,
-        res.statusText,
-        res.data,
-      );
-      throw new Error('TTMIK System 비밀번호 검증 요청 실패 하였습니다.');
-    }
+    console.log('validatePassword', JSON.stringify(res.data));
   }
 }

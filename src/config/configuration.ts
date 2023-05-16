@@ -4,6 +4,7 @@ export default registerAs('app', () => ({
   host: process.env.HOST,
   mongoURI: process.env.MONGO_URI,
   jwtSecret: process.env.JWT_SECRET,
+  ttmikJwtSecret: process.env.TTMIK_JWT_SECRET,
   awsAccessKey: process.env.AWS_ACCESS_KEY,
   awsSecret: process.env.AWS_SECRET_KEY,
 
@@ -12,6 +13,8 @@ export default registerAs('app', () => ({
   firebasePrivateKey: process.env.FIREBASE_PRIVATE_KEY,
   firebaseClientId: process.env.FIREBASE_CLIENT_ID,
   firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+
+
   googleAPIKey: process.env.GOOGLE_API_KEY,
 
   playConsoleClientEmail: process.env.PLAYCONSOLE_CLIENT_EMAIL,

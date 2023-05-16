@@ -148,7 +148,6 @@ export class AuthService {
       },
     );
 
-
     const user = await this.usersService.findById(userId);
     if (!user) {
       throw new NotFoundException('처리할 수 없는 계정입니다.');
@@ -158,12 +157,17 @@ export class AuthService {
     try {
       await this.ttmikService.validatePassword(token, user.email, dto.password);
     } catch (error) {
-      console.error(error);
+      console.error(JSON.stringify(error));
       throw new BadRequestException('현재 비밀번호가 일치하지 않습니다.');
     }
 
     // 초기화 요청
-    await this.ttmikService.resetPassword(token, user.email, dto.newPassword);
+    try {
+      await this.ttmikService.resetPassword(token, user.email, dto.newPassword);
+    } catch (error) {
+      console.error(JSON.stringify(error));
+      throw new BadRequestException('비밀번호 초기화 요청 실패');
+    }
   }
 
   async login(sub: string, isAdmin?: boolean) {
