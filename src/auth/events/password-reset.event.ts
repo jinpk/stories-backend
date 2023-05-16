@@ -1,3 +1,4 @@
+// 비밀번호 초기화 완료 이벤트
 export class PasswordResetedEvent {
   static event = 'password.reseted';
 
@@ -22,6 +23,7 @@ export class PasswordResetedEvent {
   }
 }
 
+// 비밀번호 초기화 요청 이벤트
 export class PasswordResetEvent {
   static event = 'password.reset';
 

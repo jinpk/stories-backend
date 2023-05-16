@@ -29,6 +29,7 @@ export class AuthService {
     @InjectModel(Auth.name) private authModel: Model<AuthDocument>,
   ) {}
 
+  // TTMIK 시스템 연동 이메일 인증
   async forceVerifyEmail(email: string) {
     const auth = await this.authModel.findOne({
       used: false,
@@ -49,6 +50,7 @@ export class AuthService {
       },
     );
 
+    // TTMIK로 이메일 강제 인증 요청
     try {
       await this.ttmikService.verifyEmail(token, email);
     } catch (error) {
@@ -60,7 +62,7 @@ export class AuthService {
     await auth.save();
   }
 
-  // return verification code
+  // 이메일 인증 코드 row 생성
   async genEmailAuth(email: string): Promise<{ code: string; authId: string }> {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -69,6 +71,7 @@ export class AuthService {
     return { authId: doc._id.toHexString(), code };
   }
 
+  // 이메일 인증 코드 검증
   async verifyEmailAuth(authId: string, code: string) {
     const auth = await this.authModel.findById(authId);
     if (!auth) {
@@ -85,6 +88,7 @@ export class AuthService {
     await auth.save();
   }
 
+  // TTMIK JWT 파싱
   async parseTTMIKToken(token: string): Promise<TTMIKJwtPayload> {
     const payload = await this.jwtService.verifyAsync(token, {
       secret: this.awsService.getParentJwtSecretKey,
@@ -92,6 +96,8 @@ export class AuthService {
     return payload;
   }
 
+  // 로그인 전 비밀번호 초기화 링크 생성
+  // 사용자가 해당 링크 클릭했을때 담겨있는 token 값으로 서버에 검증 재요청 시나리오
   async genResetPasswordLink(email: string): Promise<string> {
     // 인증 JWT 생성
     const token = await this.jwtService.signAsync(
@@ -109,11 +115,13 @@ export class AuthService {
     return link;
   }
 
+  // 로그인 JWT 검증
   async parseToken(token: string): Promise<string> {
     const payload = await this.jwtService.verifyAsync(token);
     return payload.email;
   }
 
+  // 비밀번호 초기화 메일에 담겨있는 JWT 검증
   async parsePasswordResetToken(token: string): Promise<string> {
     const payload = await this.jwtService.verifyAsync(token);
     if (payload?.action === DynamicLinkActions.PasswordReset) {
@@ -121,6 +129,7 @@ export class AuthService {
     }
   }
 
+  // TTMIK 시스템 비밀번호 초기화 요청
   async resetTTMIKPassword(email: string, password: string) {
     // ttmik system 요청에 필요한 admin token 생성
     const token = await this.jwtService.signAsync(
@@ -136,7 +145,7 @@ export class AuthService {
     await this.ttmikService.resetPassword(token, email, password);
   }
 
-  // @Service
+  // TTMIK 시스템으로 비밀번호 재설정 변경 요청
   async changePassword(userId: string, dto: ChangePasswordDto) {
     // ttmik system 요청에 필요한 admin token 생성
     const token = await this.jwtService.signAsync(
@@ -153,7 +162,7 @@ export class AuthService {
       throw new NotFoundException('처리할 수 없는 계정입니다.');
     }
 
-    // 기존 비밀번호 검증
+    // TTMIK 기존 비밀번호 검증
     try {
       await this.ttmikService.validatePassword(token, user.email, dto.password);
     } catch (error) {
@@ -161,7 +170,7 @@ export class AuthService {
       throw new BadRequestException('현재 비밀번호가 일치하지 않습니다.');
     }
 
-    // 초기화 요청
+    // TTMIK 초기화 요청
     try {
       await this.ttmikService.resetPassword(token, user.email, dto.newPassword);
     } catch (error) {
@@ -170,6 +179,7 @@ export class AuthService {
     }
   }
 
+  // SUB로 로그인 JWT 생성
   async login(sub: string, isAdmin?: boolean) {
     const payload = { sub, isAdmin };
     return {
@@ -177,13 +187,7 @@ export class AuthService {
     };
   }
 
-  async logout(sub: string, isAdmin?: boolean) {
-    const payload = { sub, isAdmin };
-    return {
-      accessToken: this.jwtService.sign(payload),
-    };
-  }
-
+  // 사용자 회원가입 요청
   async signUp(payload: TTMIKJwtPayload, countryCode: string) {
     const user: User = {
       email: payload.email,

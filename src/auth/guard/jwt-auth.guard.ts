@@ -9,6 +9,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     super();
   }
 
+  // @IsPublic Decorator를 가진 컨트롤러 함수는 JWT 가드 제외 대상입니다.
   canActivate(context: ExecutionContext) {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),

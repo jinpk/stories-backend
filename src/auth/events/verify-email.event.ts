@@ -1,3 +1,4 @@
+// 이메일 인증요청 이벤트
 export class VerifyEmailEvent {
   static event = 'verifiy.email';
 
