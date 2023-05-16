@@ -78,6 +78,9 @@ export class UploadContentsDto {
 
 export class BookmarkDto {
   @ApiProperty({})
+  id?: string;
+
+  @ApiProperty({})
   userId: string;
 
   @ApiProperty({})

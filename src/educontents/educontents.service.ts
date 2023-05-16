@@ -492,7 +492,7 @@ export class EducontentsService {
   // EduContents Bookmark Services
   async createBookmark(user_id, educontents_id: string): Promise<string> {
     const bookmarked = await this.bookmarkModel.findOne({
-      userId: { $eq: user_id },
+      userId: { $eq: new Types.ObjectId(user_id) },
       eduContentsId: { $eq: educontents_id },
     });
     if (bookmarked) {
@@ -501,7 +501,7 @@ export class EducontentsService {
 
     var bookmark: Bookmark = new Bookmark();
     bookmark = {
-      userId: user_id,
+      userId: new Types.ObjectId(user_id),
       eduContentsId: educontents_id,
     };
 
@@ -516,7 +516,7 @@ export class EducontentsService {
     });
 
     if (!result) {
-      throw new ForbiddenException('일치하는 bookmark_id가 없습니다.');
+      throw new NotFoundException('일치하는 bookmark_id가 없습니다.');
     }
 
     return bookmark_id;
@@ -526,7 +526,7 @@ export class EducontentsService {
     user_id,
     query: GetListBookmarkDto,
   ): Promise<PagingResDto<BookmarkDto> | Buffer> {
-    const filter: FilterQuery<VocabDocument> = {
+    const filter: FilterQuery<BookmarkDocument> = {
       userId: { $eq: user_id },
     };
 

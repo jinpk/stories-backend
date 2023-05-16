@@ -444,15 +444,6 @@ export class EdustatusService {
   }
 
   async createQuizResult(user_id: string, body: QuizResultDto): Promise<string> {
-    const quiz = await this.quizresultModel.find({
-      userId: { $eq: new Types.ObjectId(user_id) },
-      quizId: { $eq: new Types.ObjectId(body.quizId) },
-    });
-
-    if (quiz) {
-      throw new NotAcceptableException("Already in Document.");
-    } else {}
-
     var quizresult: QuizResult = new QuizResult();
     quizresult = {
       userId: new Types.ObjectId(user_id),

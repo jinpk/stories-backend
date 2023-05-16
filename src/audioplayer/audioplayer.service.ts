@@ -69,7 +69,7 @@ export class AudioplayerService {
         // 북마크 or Not
         if (query.bookmarked) {
             var bookmarks = await this.bookmarkModel.find({
-                userId: { $eq: user_id }
+                userId: { $eq: new Types.ObjectId(user_id) }
             });
             if (bookmarks.length != 0) {
                 bookmarks.forEach((content, _) => {

@@ -1,12 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { now, HydratedDocument } from 'mongoose';
+import { Types, HydratedDocument } from 'mongoose';
 
 export type FaqBoardDocument = HydratedDocument<FaqBoard>;
 
 @Schema({ timestamps: true })
 export class FaqBoard {
   @Prop()
-  categoryId: string;
+  _id?: Types.ObjectId;
+
+  @Prop()
+  categoryId: Types.ObjectId;
 
   @Prop()
   question: string;

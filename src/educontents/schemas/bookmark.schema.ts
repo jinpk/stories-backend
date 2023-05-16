@@ -1,12 +1,14 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { now, HydratedDocument } from 'mongoose';
+import { Types, HydratedDocument } from 'mongoose';
 
 export type BookmarkDocument = HydratedDocument<Bookmark>;
 
 @Schema({ timestamps: true })
 export class Bookmark {
+  _id?: string;
+
   @Prop()
-  userId: string;
+  userId: Types.ObjectId;
   
   @Prop()
   eduContentsId: string;

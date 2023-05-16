@@ -134,7 +134,7 @@ export class ReviewVocabDto{
 }
 
 export class ReviewVocabResultDto{
-  @ApiProperty({})
+  @ApiProperty({default: false})
   complete: boolean;
 
   @ApiProperty({})

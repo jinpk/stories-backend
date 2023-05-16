@@ -1,23 +1,29 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class FaqBoardDto{
-    @ApiProperty({})
-    categoryId: string;
-  
-    @ApiProperty({})
-    question: string;
-  
-    @ApiProperty({})
-    answer: string;
+  @ApiProperty({})
+  id?: string;
 
-    @ApiProperty({})
-    createdAt?: Date;
-  }
+  @ApiProperty({})
+  categoryId: string;
+
+  @ApiProperty({})
+  question: string;
+
+  @ApiProperty({})
+  answer: string;
+
+  @ApiProperty({})
+  createdAt?: Date;
+}
 
 export class FaqCategoryDto{
-    @ApiProperty({})
-    category: string;
+  @ApiProperty({})
+  id?: string;
 
-    @ApiProperty({})
-    createdAt?: Date;
+  @ApiProperty({})
+  category: string;
+
+  @ApiProperty({})
+  createdAt?: Date;
 }

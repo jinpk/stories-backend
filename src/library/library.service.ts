@@ -55,7 +55,7 @@ export class LibraryService {
       // 북마크 or Not
       if (query.bookmarked.toString() == "true") {
         const bookmarks = await this.bookmarkModel.find({
-            userId: { $eq: user_id }
+            userId: { $eq: new Types.ObjectId(user_id) }
         });
 
         if (bookmarks.length != 0) {

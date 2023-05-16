@@ -72,12 +72,12 @@ export class VocabsService {
     return true;
   }
 
-  async createReviewVocab(id, vocab_id, level: string) {
+  async createReviewVocab(user_id, vocab_id, level: string) {
     var reviewVocab: ReviewVocab = new ReviewVocab()
     var objVocabId = new Types.ObjectId(vocab_id)
 
     const exist = await this.reviewvocabModel.findOne({
-      userId: id,
+      userId: new Types.ObjectId(user_id),
       vocabId: objVocabId 
     });
 
@@ -86,7 +86,7 @@ export class VocabsService {
     }
 
     reviewVocab = {
-      userId: id,
+      userId: new Types.ObjectId(user_id),
       level: level,
       vocabId: objVocabId,
     }
@@ -300,7 +300,7 @@ export class VocabsService {
 
     var filter: FilterQuery<ReviewVocabDocument> = {userId: {}}
     filter = {
-      userId: { $eq: query.userId },
+      userId: { $eq: new Types.ObjectId(query.userId) },
       complete: { $eq: false },
     };
 
@@ -326,7 +326,7 @@ export class VocabsService {
     const data = cursor[0].data;
 
     const completed_count = await this.reviewvocabModel.find({
-      userId: { $eq: query.userId },
+      userId: { $eq: new Types.ObjectId(query.userId) },
       complete: { $eq: true },
     }).count();
 
