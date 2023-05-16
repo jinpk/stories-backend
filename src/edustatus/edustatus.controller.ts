@@ -166,7 +166,7 @@ export class EdustatusController {
         status: 200,
         type: String,
     })
-    async patquizResult(
+    async putquizResult(
         @Body() body,
         @Request() req){
             if (!(await this.edustatusService.existEdustatus(req.user.id))) {

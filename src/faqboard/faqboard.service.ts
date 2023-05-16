@@ -4,7 +4,6 @@ import {
   now,
   FilterQuery,
   Model,
-  PipelineStage,
   ProjectionFields,
   Types,
 } from 'mongoose';
@@ -36,7 +35,7 @@ export class FaqboardService {
   async createFaq(body: FaqBoardDto): Promise<string> {
     var faqboard: FaqBoard = new FaqBoard();
     faqboard = {
-      categoryId: body.categoryId,
+      categoryId: new Types.ObjectId(body.categoryId),
       question: body.question,
       answer: body.answer
     }
