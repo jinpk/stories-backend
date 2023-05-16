@@ -13,18 +13,20 @@ import {
  } from '@nestjs/common';
  import {
   ApiBearerAuth,
-  ApiBody,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger'
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
-import { VocabDto, CoreVocabDto, ReviewVocabDto } from './dto/vocab.dto';
+import {
+  VocabDto,
+  CoreVocabDto,
+  ReviewVocabDto,
+  ReviewVocabResultDto
+} from './dto/vocab.dto';
 import { UpdateVocabDto } from './dto/update-vocab.dto';
-import { GetVocabsDto, GetReviewVocabDto, GetCoreVocabDto } from './dto/get-vocab.dto';
+import { GetVocabsDto, GetCoreVocabDto } from './dto/get-vocab.dto';
 import { VocabsService } from './vocabs.service';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { Public } from 'src/auth/decorator/auth.decorator';
 
 @Controller('vocabs')
 @ApiTags('vocabs')
@@ -124,14 +126,18 @@ export class VocabsController {
     })
     @ApiOkResponse({
       status: 200,
-      type: String,
+      type: ReviewVocabResultDto,
     })
-    async updateUserReviewVocab(@Request() req, @Param('reviewvocabId') reviewvocabId: string) {
-      if (!(await this.vocabsService.existReviewVocabById(req.user.id, reviewvocabId))) {
-        throw new NotFoundException('NotFound ReviewVocab');
+    async updateUserReviewVocab(
+      @Request() req,
+      @Param('reviewvocabId') reviewvocabId: string)
+      : Promise<ReviewVocabResultDto>
+      {
+        if (!(await this.vocabsService.existReviewVocabById(req.user.id, reviewvocabId))) {
+          throw new NotFoundException('NotFound ReviewVocab');
+        }
+        return await this.vocabsService.updateReviewVocabById(req.user.id, reviewvocabId)
       }
-      return await this.vocabsService.updateReviewVocabById(req.user.id, reviewvocabId)
-    }
 
     @Get('reviewquiz/:userId')
     @ApiOperation({
@@ -139,9 +145,11 @@ export class VocabsController {
       description: 'total: 남은 갯수, completed: 완료한 갯수',
     })
     @ApiOkResponsePaginated(ReviewVocabDto)
-    async getListUserReviewVocab(@Request() req, @Param('userId') userId: string) {
+    async getListUserReviewVocab(
+      @Request() req,
+      @Param('userId') userId: string) {
       if (req.user.id != userId) {
-        throw new NotFoundException('NotFound Same user');
+        throw new NotFoundException('NotFound User');
       }
       return await this.vocabsService.getPagingReviewVocabs(userId)
     }

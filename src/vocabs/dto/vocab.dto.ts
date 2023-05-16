@@ -96,7 +96,7 @@ export class CoreVocabDto{
 export class ReviewVocabDto{
   @ApiProperty({})
   @IsString()
-  id: string;
+  id?: string;
 
   @ApiProperty({})
   @IsString()
@@ -131,4 +131,13 @@ export class ReviewVocabDto{
 
   @ApiProperty({})
   updatedAt?: Date;
+}
+
+export class ReviewVocabResultDto{
+  @ApiProperty({})
+  complete: boolean;
+
+  @ApiProperty({})
+  correctCount: number;
+
 }
