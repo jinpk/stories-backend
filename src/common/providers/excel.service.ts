@@ -7,11 +7,13 @@ import { UtilsService } from './utils.service';
 export class CommonExcelService {
   constructor(private utilsService: UtilsService) {}
 
+  // 관리자 엑셀 다운로드를 위한 json > excel 공통 함수
   async listToExcelBuffer(
     columns: ExcelColumnList[],
     data: any[],
   ): Promise<Buffer> {
     const workbook = xlsx.utils.book_new();
+    // 받아온 컬럼 정보로 엑셀 헤더 맵핑
     const worksheet = xlsx.utils.json_to_sheet(
       data.map((x) => {
         const obj = {};
@@ -41,6 +43,7 @@ export class CommonExcelService {
         return obj;
       }),
     );
+    // 헤더 기본 스타일링
     worksheet['!cols'] = columns.map((x) => ({
       wch: 30,
       font: {
@@ -54,6 +57,7 @@ export class CommonExcelService {
     }));
     xlsx.utils.book_append_sheet(workbook, worksheet, 'sheet-0');
 
+    // 엑셀 버퍼 생성
     const xlsxBuffer = xlsx.write(workbook, {
       bookType: 'xlsx',
       type: 'buffer',

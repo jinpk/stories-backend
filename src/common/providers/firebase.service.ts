@@ -25,6 +25,7 @@ export class FirebaseService {
     });
   }
 
+  // Firebase Cloud Messaging 발송
   sendPush(params: PushParams) {
     if (!params.payload) {
       params.payload = {};
@@ -59,6 +60,7 @@ export class FirebaseService {
       });
   }
 
+  // 다이나믹 링크 생성
   async generateDynamicLink(params: DynamicLinkQuery): Promise<string> {
     const res = await this.httpService.axiosRef.post(
       DYNAMICLINK_POST_URL,

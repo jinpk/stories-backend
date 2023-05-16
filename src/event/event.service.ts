@@ -25,7 +25,7 @@ export class EventService {
     this.logger.debug(
       `event detected: ${VerifyEmailEvent.event}, ${payload.email}`,
     );
-
+    // 인증 확인 이메일 발송
     this.emailService.sendVerifyEmail(payload.email, payload.code);
   }
 
@@ -36,8 +36,11 @@ export class EventService {
       `event detected: ${UserCreatedEvent.event}, ${payload.userId}`,
     );
 
+    // 사용자 타입별 알림 on/off 여부 리스트 초기화
     this.notificationsService.initUserNotificationSettings(payload.userId);
+    // 웰컬 이메일 발송
     this.emailService.sendJoinedEmail(payload.email, payload.nickname);
+    // 사용자 약관동의 리스트 초기화
     this.usersAgreeService.initAgreesByUserId(payload.userId);
   }
 
@@ -47,6 +50,7 @@ export class EventService {
     this.logger.debug(
       `event detected: ${PasswordResetEvent.event}, ${payload.email}`,
     );
+    // 비밀번호 재설정 인증코드 이메일 발송
     this.emailService.sendPasswordResetEmail(
       payload.email,
       payload.nickname,
@@ -60,12 +64,11 @@ export class EventService {
     this.logger.debug(
       `event detected: ${PasswordResetedEvent.event}, ${payload.email}`,
     );
+    // 비밀번호 재설정 변경 이메일 발송
     this.emailService.sendPasswordChangedEmail(
       payload.email,
       payload.nickname,
       payload.resetLink,
     );
   }
-
-  // 결제 검증 완료 이벤트
 }

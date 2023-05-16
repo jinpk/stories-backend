@@ -1,5 +1,7 @@
 import { registerAs } from '@nestjs/config';
 
+
+// 프로세스 시작시 받아온 env 정보를 프로세스 메모리로 할당함.
 export default registerAs('app', () => ({
   host: process.env.HOST,
   mongoURI: process.env.MONGO_URI,

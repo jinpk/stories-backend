@@ -7,6 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 @Global()
 @Module({
   imports: [
+    // 필수 env 정보 검증
     ConfigModule.forRoot({
       load: [configuration],
       validationSchema: Joi.object({
@@ -22,8 +23,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         FIREBASE_CLIENT_ID: Joi.string().required(),
         FIREBASE_CLIENT_EMAIL: Joi.string().required(),
         GOOGLE_API_KEY: Joi.string().required(),
-        //PLAYCONSOLE_PRIVATE_KEY: Joi.string().required(),
-        //PLAYCONSOLE_CLIENT_EMAIL: Joi.string().required(),
+        // PLAYCONSOLE_PRIVATE_KEY: Joi.string().required(),
+        // PLAYCONSOLE_CLIENT_EMAIL: Joi.string().required(),
       }),
     }),
   ],

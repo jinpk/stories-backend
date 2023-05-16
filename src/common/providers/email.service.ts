@@ -22,6 +22,7 @@ export class EmailService {
     this.emailLogoImageUri = `${this.configService.host}/${EMAIL_HERO_IMAGE_PATH}`;
   }
 
+  // 웰컬 이메일 발송 템플릿
   async sendJoinedEmail(email: string, nickname: string) {
     const welcomeImage = `${this.configService.host}/${EMAIL_WELCOME_IMAGE_PATH}`;
     const params: EmailTemplateParams = {
@@ -57,6 +58,7 @@ export class EmailService {
     });
   }
 
+  // 이메일 인증 요청 이메일 발송 템플릿
   async sendVerifyEmail(email: string, code: string) {
     const params: EmailTemplateParams = {
       host: this.configService.host,
@@ -79,6 +81,7 @@ export class EmailService {
     });
   }
 
+  // 결제완료 이메일 발송 템플릿
   async sendPaymendtedEmail(email: string, nickname: string) {
     const params: EmailTemplateParams = {
       host: this.configService.host,
@@ -105,6 +108,7 @@ export class EmailService {
     });
   }
 
+  // 비밀번호 초기화 이메일 발송 템플릿
   async sendPasswordResetEmail(email: string, nickname: string, link: string) {
     const params: EmailTemplateParams = {
       host: this.configService.host,
@@ -129,6 +133,7 @@ export class EmailService {
     });
   }
 
+  // 비밀번호 변경 완료 이메일 발송 템플릿
   async sendPasswordChangedEmail(
     email: string,
     nickname: string,
@@ -158,6 +163,7 @@ export class EmailService {
     });
   }
 
+  // ejs html으로 변환하는 공통 함수
   async _convertEJSToHtml(params: EmailTemplateParams): Promise<string> {
     return new Promise((resolve, reject) => {
       ejs.renderFile(
