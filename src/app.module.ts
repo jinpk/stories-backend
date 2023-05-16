@@ -26,6 +26,7 @@ import { EdustatusModule } from './edustatus/edustatus.module';
 import { AudioplayerModule } from './audioplayer/audioplayer.module';
 import { StaticController } from './static/static.controller';
 import { StaticModule } from './static/static.module';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 
 @Module({
   imports: [
@@ -47,7 +48,7 @@ import { StaticModule } from './static/static.module';
     AdminModule,
     CouponsModule,
     NotificationsModule,
-    //SubscriptionsModule,
+    SubscriptionsModule,
     FilesModule,
     EventModule,
     SchedulerModule,
