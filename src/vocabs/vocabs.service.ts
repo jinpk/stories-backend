@@ -17,7 +17,6 @@ import {
   ProjectionFields,
   Types,
 } from 'mongoose';
-
 import { PagingResDto, ReviewVocabPagingResDto } from 'src/common/dto/response.dto';
 import { Vocab, VocabDocument } from './schemas/vocab.schema';
 import { ReviewVocab, ReviewVocabDocument } from './schemas/review-vocab.schema';
@@ -149,12 +148,14 @@ export class VocabsService {
       throw new ForbiddenException("Already Registered.");
     }
 
-    reviewVocab = {
-      userId: new Types.ObjectId(user_id),
-      level: level,
-      vocabId: objVocabId,
-    }
+    reviewVocab.userId = new Types.ObjectId(user_id);
+    reviewVocab.level = level;
+    reviewVocab.vocabId = objVocabId;
+
+    console.log(reviewVocab)
+    console.log("@@@")
     const result = await new this.reviewvocabModel(reviewVocab).save()
+
     return result._id.toString()
   }
 
@@ -171,10 +172,10 @@ export class VocabsService {
   async updateReviewVocabById(user_id, reviewvocab_id: string): Promise<ReviewVocabResultDto> {
     let res = new ReviewVocabResultDto();
     let result = await this.reviewvocabModel.findByIdAndUpdate(reviewvocab_id, { 
-      correctCount: {$inc: 1}
+      $inc: {correctCount: 1}
     });
 
-    if (result.correctCount >= 3) {
+    if (result.correctCount + 1 >= 3) {
       result.complete = true
       await result.save();
       await this.staticService.updateUserWords(user_id);
@@ -185,7 +186,7 @@ export class VocabsService {
     } else {
       res.complete = false;
     }
-    res.correctCount = result.correctCount;
+    res.correctCount = result.correctCount + 1;
 
     return res
   }

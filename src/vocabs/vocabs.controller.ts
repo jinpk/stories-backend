@@ -115,7 +115,7 @@ export class VocabsController {
       if (!(await this.vocabsService.existVocabById(vocabId))) {
         throw new NotFoundException('NotFound Vocab');
       }
-      
+      console.log("log1")
       return await this.vocabsService.createReviewVocab(req.user.id, vocabId, level)
     }
 

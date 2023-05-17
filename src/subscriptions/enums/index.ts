@@ -9,3 +9,7 @@ export enum SubscriptionStates {
   Expried = 'expired',
   Cancel = 'cancel',
 }
+
+export interface ItunesValidationResponse {
+  status: number;
+}
