@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { SubscriptionsService } from './subscriptions.service';
 import { SubscriptionsController } from './subscriptions.controller';
-import { GoogleVerifierService } from './providers/google-verifier.service';
+import { IAPValidatorProvider } from './providers/iap-validator.provider';
 import { MongooseModule } from '@nestjs/mongoose';
 import {
   Subscription,
@@ -16,7 +16,7 @@ import { HttpModule } from '@nestjs/axios';
       { name: Subscription.name, schema: SubscriptionSchema },
     ]),
   ],
-  providers: [SubscriptionsService, GoogleVerifierService],
+  providers: [SubscriptionsService, IAPValidatorProvider],
   controllers: [SubscriptionsController],
 })
 export class SubscriptionsModule {}

@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Post, Query, Request } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
 import { GetSubscriptionsDto } from './dto/get-subscription.dto';
 import { SubscriptionsDto } from './dto/subscription.dto';
@@ -30,10 +30,23 @@ export class SubscriptionsController {
     await this.subscriptionsService.verify(body);
   }
 
-  @Get('')
-  @ApiOperation({
-    summary: '결제 내역 조회',
-  })
-  @ApiOkResponsePaginated(SubscriptionsDto)
-  listSubscriptions(@Query() query: GetSubscriptionsDto) {}
+  // @Get('')
+  // @ApiOperation({
+  //   summary: '결제 내역 조회',
+  // })
+  // @ApiOkResponsePaginated(SubscriptionsDto)
+  // async listSubscriptions(
+  //   @Query() query: GetSubscriptionsDto,
+  //   @Request() req
+  //   ) {
+  //   if (!req.user.isAdmin) {
+  //     if (query.userId != req.user.id) {
+  //       throw new Error('인증 실패')
+  //     } else {
+  //       return await this.subscriptionsService.findListSubscription(query);
+  //     }
+  //   } else {
+  //     return await this.subscriptionsService.findListSubscription(query);
+  //   }
+  // }
 }

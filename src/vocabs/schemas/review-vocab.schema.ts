@@ -5,16 +5,15 @@ export type ReviewVocabDocument = HydratedDocument<ReviewVocab>;
 
 @Schema({ timestamps: true })
 export class ReviewVocab {
-  @Prop()
   _id?: Types.ObjectId;
 
-  @Prop()
+  @Prop({})
   userId: Types.ObjectId;
 
-  @Prop()
+  @Prop({})
   vocabId: Types.ObjectId;
 
-  @Prop()
+  @Prop({})
   level: string;
 
   @Prop({default: 0})

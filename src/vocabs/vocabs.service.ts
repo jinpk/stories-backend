@@ -1,8 +1,13 @@
-import { Injectable,
-  UseGuards,
-  UnauthorizedException,
-  ConflictException,
-  ForbiddenException, } from '@nestjs/common';
+/*
+  단어 및 리뷰단어 조회,제출,관리 서비스 함수
+  -관리자 레벨테스트 등록/수정/삭제
+  -사용자 레벨테스트 조회/제출
+*/
+
+import {
+  Injectable,
+  ForbiddenException
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   now,
@@ -12,7 +17,6 @@ import {
   ProjectionFields,
   Types,
 } from 'mongoose';
-
 import { PagingResDto, ReviewVocabPagingResDto } from 'src/common/dto/response.dto';
 import { Vocab, VocabDocument } from './schemas/vocab.schema';
 import { ReviewVocab, ReviewVocabDocument } from './schemas/review-vocab.schema';
@@ -33,13 +37,42 @@ export class VocabsService {
     @InjectModel(ReviewVocab.name) private reviewvocabModel: Model<ReviewVocabDocument>,
   ) {}
 
-  async deleteVocab(id: string) {
-    await this.vocabModel.findByIdAndDelete(id);
-    return id
+  /*
+  * 단어 삭제
+  * @params:
+  *   vocabId: string    vocab id
+  * @return: {
+  *   string,
+  * }
+  */
+  async deleteVocab(vacabId: string) {
+    const result = await this.vocabModel.findByIdAndDelete(vacabId);
+    return result._id.toString()
   }
 
-  async updateVocabById(id: string, body: UpdateVocabDto) {
-    await this.vocabModel.findByIdAndUpdate(id, { 
+  /*
+  * 단어 수정
+  * @params:
+  *   vocabId: string    user id
+  *   body: {
+  *     contentsSerialNum: string
+  *     vocab:             string
+  *     audioFilePath:     string
+  *     connSentence:      string
+  *     value:             string
+  *     meaningEn:         string
+  *     previewVocabulary: string     "Y" || "N"
+  *   }
+  * @return: {
+  *   id: string,
+  *   userId: string,
+  *   firstLevel: string,           사용자 최초 테스트 레벨
+  *   latestLevel: string,          사용자 최고 테스트 레벨
+  *   selectedLevel: string,        사용자 마지막 선택 레벨
+  * }
+  */
+  async updateVocabById(vocabId: string, body: UpdateVocabDto) {
+    const result = await this.vocabModel.findByIdAndUpdate(vocabId, { 
       $set: {
         contentsSerialNum: body.contentsSerialNum,
         vocab: body.vocab,
@@ -51,56 +84,98 @@ export class VocabsService {
         updatedAt: now()
       }
     });
+
+    return result._id.toString();
   }
 
-  async existVocabById(id: string): Promise<boolean> {
-    const vocab = await this.vocabModel.findById(id);
+  /*
+  * 단어 DB 데이터 유효성 검증
+  * @params:
+  *   vocabId: string    vocab id
+  * @return: {
+  *   boolean,
+  * }
+  */
+  async existVocabById(vocabId: string): Promise<boolean> {
+    const vocab = await this.vocabModel.findById(vocabId);
     if (!vocab) {
       return false;
     }
     return true;
   }
 
-  async existReviewVocabById(user_id, id: string): Promise<boolean> {
-    const reviewvocab = await this.reviewvocabModel.findById(id);
+  /*
+  * 리뷰단어 DB 데이터 유효성 검증
+  * @params:
+  *   userId: string    user id
+  *   reviewVocabId: string    reviewvocab id 
+  * @return: {
+  *   boolean,
+  * }
+  */
+  async existReviewVocabById(userId, reviewVocabId: string): Promise<boolean> {
+    const reviewvocab = await this.reviewvocabModel.findById(reviewVocabId);
     if (!reviewvocab) {
       return false;
     }
-    if (reviewvocab.userId != user_id) {
+    if (reviewvocab.userId != userId) {
       return false;
     }
     return true;
   }
 
+  /*
+  * 사용자 리뷰단어 등록 함수
+  * @params:
+  *   user_id: string     user id
+  *   vocab_id: string    vocab id
+  *   level: string       level 
+  * @return: {
+  *   string,
+  * }
+  */
   async createReviewVocab(user_id, vocab_id, level: string) {
     var reviewVocab: ReviewVocab = new ReviewVocab()
     var objVocabId = new Types.ObjectId(vocab_id)
 
     const exist = await this.reviewvocabModel.findOne({
       userId: new Types.ObjectId(user_id),
-      vocabId: objVocabId 
+      vocabId: objVocabId,
+      complete: { $ne: true}
     });
 
     if (exist) {
       throw new ForbiddenException("Already Registered.");
     }
 
-    reviewVocab = {
-      userId: new Types.ObjectId(user_id),
-      level: level,
-      vocabId: objVocabId,
-    }
+    reviewVocab.userId = new Types.ObjectId(user_id);
+    reviewVocab.level = level;
+    reviewVocab.vocabId = objVocabId;
+
+    console.log(reviewVocab)
+    console.log("@@@")
     const result = await new this.reviewvocabModel(reviewVocab).save()
+
     return result._id.toString()
   }
 
-  async updateReviewVocabById(user_id, vocab_id: string): Promise<ReviewVocabResultDto> {
+  /*
+  * 사용자 리뷰단어 완료 업데이트 함수
+  * @params:
+  *   user_id: string     user id
+  *   reviewvocab_id: string    reviewvocab id
+  * @return: {
+  *   complete: boolean      완료 여부
+  *   correctCount: number   완료 횟수
+  * }
+  */
+  async updateReviewVocabById(user_id, reviewvocab_id: string): Promise<ReviewVocabResultDto> {
     let res = new ReviewVocabResultDto();
-    let result = await this.reviewvocabModel.findByIdAndUpdate(vocab_id, { 
-      correctCount: {$inc: 1}
+    let result = await this.reviewvocabModel.findByIdAndUpdate(reviewvocab_id, { 
+      $inc: {correctCount: 1}
     });
 
-    if (result.correctCount >= 3) {
+    if (result.correctCount + 1 >= 3) {
       result.complete = true
       await result.save();
       await this.staticService.updateUserWords(user_id);
@@ -111,7 +186,7 @@ export class VocabsService {
     } else {
       res.complete = false;
     }
-    res.correctCount = result.correctCount;
+    res.correctCount = result.correctCount + 1;
 
     return res
   }
@@ -301,7 +376,6 @@ export class VocabsService {
     var filter: FilterQuery<ReviewVocabDocument> = {userId: {}}
     filter = {
       userId: { $eq: new Types.ObjectId(query.userId) },
-      complete: { $eq: false },
     };
 
     const projection: ProjectionFields<VocabDto> = {

@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { AppOS } from 'src/common/enums';
 import { VerifySubscriptionDto } from './dto/verify-subscription.dto';
 import { SubscriptionStates } from './enums';
+import { IAPValidatorProvider } from './providers/iap-validator.provider';
 import { GoogleVerifierService } from './providers/google-verifier.service';
 import {
   Subscription,
@@ -14,9 +15,9 @@ import {
 @Injectable()
 export class SubscriptionsService {
   constructor(
-    private googleVerifierService: GoogleVerifierService,
     @InjectModel(Subscription.name)
     private subscriptionModel: Model<SubscriptionDocument>,
+    private iapValidatorProvider: IAPValidatorProvider,
   ) {}
 
   async verify(dto: VerifySubscriptionDto) {
