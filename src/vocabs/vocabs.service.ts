@@ -189,9 +189,25 @@ export class VocabsService {
     return res
   }
 
-  async getVocabById(id: string): Promise<VocabDto> {
+  /*
+  * 등록 단어 개별 조회
+  * @params:
+  *   vocabId: string     vocabId
+  * @return: {
+      contentsSerialNum: string
+      vocab:             string
+      audioFilePath:     string
+      meaningEn:         string
+      value:             string
+      connSentence:      string
+      previewVocabulary: string     "Y" | "N"
+      level:             string
+      connStory:         string     연결된 스토리 제목
+    }
+  */
+  async getVocabById(vocabId: string): Promise<VocabDto> {
     const filter: FilterQuery<VocabDocument> = {
-      _id: new Types.ObjectId(id),
+      _id: new Types.ObjectId(vocabId),
     };
 
     const lookups: PipelineStage[] = [
@@ -222,6 +238,8 @@ export class VocabsService {
       previewVocabulary: 1,
       level: '$educontents.level',
       connStory: '$educontents.title',
+      createdAt: 0,
+      updatedAt: 0,
     };
 
     const cursor = await this.vocabModel.aggregate([
@@ -232,6 +250,29 @@ export class VocabsService {
     return cursor[0];
   }
 
+  /*
+  * 단어 목록 검색
+  * @query:
+  *   vocab:          string     vocab
+  *   level:          string     
+  *   contents_vocab: string     
+  * @return: {
+  *   total:              number
+  *   data: [
+  *     {
+  *       contentsSerialNum: string
+          vocab:             string
+          audioFilePath:     string
+          meaningEn:         string
+          value:             string
+          connSentence:      string
+          previewVocabulary: string     "Y" | "N"
+          level:             string
+          connStory:         string     연결된 스토리 제목
+        }
+  *   ]
+  * 
+  */
   async getPagingVocabs(
     query: GetVocabsDto,
   ): Promise<PagingResDto<VocabDto> | Buffer> {
@@ -303,6 +344,26 @@ export class VocabsService {
     };
   }
   
+  /*
+  * 컨텐츠 시리얼 넘버별 핵심 단어 목록 검색
+  * @query:
+  *   contentsSerialNum:          string     vocab
+  *   previewVocabulary:          string     
+  * @return: {
+  *   total:              number
+  *   data: [
+  *     {
+  *       id:                string
+  *       contentsSerialNum: string
+          vocab:             string
+          audioFilePath:     string
+          meaningEn:         string
+          value:             string
+          connSentence:      string
+          previewVocabulary: string     "Y" | "N"
+        }
+  *   ]
+  */
   async getPagingCoreVocabsBySerialNum(
     query: GetCoreVocabDto,
   ): Promise<PagingResDto<VocabDto> | Buffer> {
@@ -345,6 +406,25 @@ export class VocabsService {
     };
   }
 
+  /*
+  * 컨텐츠 시리얼 넘버별 핵심 단어 목록 검색
+  * @params:
+  *   user_id:          string
+  * @return: {
+  *   total:              number
+  *   completed:          number
+  *   data: [
+  *     {
+  *       id:                string
+          vocab:             string
+          audioFilePath:     string
+          meaningEn:         string
+          value:             string
+          connSentence:      string
+          complete:          boolean
+        }
+  *   ]
+  */
   async getListReviewVocabs(
     user_id: string,
   ): Promise<ReviewVocabPagingResDto<ReviewVocabDto> | Buffer> {

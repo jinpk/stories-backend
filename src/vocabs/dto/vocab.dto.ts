@@ -6,7 +6,7 @@ export type PreviewVocabulary = 'Y' | 'N';
 export class VocabDto{
   @ApiProperty({})
   @IsString()
-  id: string;
+  id?: string;
 
   @ApiProperty({})
   @IsString()

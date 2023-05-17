@@ -180,6 +180,8 @@ export class UsersService {
       new UserCreatedEvent(doc._id.toString(), doc.email, doc.nickname),
     );
 
+    // 3일 무료 이용권 생성
+
     return doc._id.toString();
   }
 
