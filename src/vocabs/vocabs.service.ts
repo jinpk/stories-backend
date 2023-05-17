@@ -151,9 +151,7 @@ export class VocabsService {
     reviewVocab.userId = new Types.ObjectId(user_id);
     reviewVocab.level = level;
     reviewVocab.vocabId = objVocabId;
-
-    console.log(reviewVocab)
-    console.log("@@@")
+    
     const result = await new this.reviewvocabModel(reviewVocab).save()
 
     return result._id.toString()
@@ -347,14 +345,11 @@ export class VocabsService {
     };
   }
 
-  async getPagingReviewVocabs(
+  async getListReviewVocabs(
     user_id: string,
-    // page, limit: number,
   ): Promise<ReviewVocabPagingResDto<ReviewVocabDto> | Buffer> {
     var query = new GetReviewVocabDto()
     query.userId = user_id;
-    query.page = '1';
-    query.limit = '1000';
 
     const lookups: PipelineStage[] = [
       {
@@ -373,9 +368,9 @@ export class VocabsService {
       },
     ];
 
-    var filter: FilterQuery<ReviewVocabDocument> = {userId: {}}
+    var filter: FilterQuery<ReviewVocabDocument> = {}
     filter = {
-      userId: { $eq: new Types.ObjectId(query.userId) },
+      userId: { $eq: new Types.ObjectId(user_id) },
     };
 
     const projection: ProjectionFields<VocabDto> = {
@@ -392,12 +387,8 @@ export class VocabsService {
       ...lookups,
       { $match: filter },
       { $project: projection },
-      { $sort: { createdAt: -1 } },
-      this.utilsService.getCommonMongooseFacet(query),
+      { $sort: { createdAt: -1 } }
     ]);
-
-    const metdata = cursor[0].metadata;
-    const data = cursor[0].data;
 
     const completed_count = await this.reviewvocabModel.find({
       userId: { $eq: new Types.ObjectId(query.userId) },
@@ -405,9 +396,9 @@ export class VocabsService {
     }).count();
 
     return {
-      total: metdata[0]?.total || 0,
+      total: cursor.length || 0,
       completed: completed_count || 0,
-      data: data,
+      data: cursor,
     };
   }
 }
