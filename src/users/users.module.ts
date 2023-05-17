@@ -1,3 +1,4 @@
+import { WelcomePromotion, WelcomePromotionSchema } from './schemas/welcome-promotion.schema';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -13,6 +14,7 @@ import { UsersAgreeService } from './users-agree.service';
     AwsModule,
     JwtModule,
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([{ name: WelcomePromotion.name, schema: WelcomePromotionSchema }]),
     MongooseModule.forFeature([
       { name: UserAgree.name, schema: UserAgreeSchema },
     ]),

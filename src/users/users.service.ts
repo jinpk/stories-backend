@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { AnyKeys, FilterQuery, Model } from 'mongoose';
 import { UserDto } from './dto/user.dto';
 import { User, UserDocument } from './schemas/user.schema';
+import { WelcomePromotion, WelcomePromotionDocument } from './schemas/welcome-promotion.schema';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { UserCreatedEvent } from './events/create-user.event';
 import { UpdateUserDto, UpdateUserTTMIKDto } from './dto/update.user.dto';
@@ -18,6 +19,7 @@ export class UsersService {
   constructor(
     private commonExcelService: CommonExcelService,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(WelcomePromotion.name) private welcomepromotionModel: Model<WelcomePromotionDocument>,
     private eventEmitter: EventEmitter2,
     private jwtService: JwtService,
     private awsService: AwsService,
@@ -181,6 +183,16 @@ export class UsersService {
     );
 
     // 3일 무료 이용권 생성
+    let exist = await this.userModel.find({
+      email: { $eq: doc.email}
+    });
+
+    // 처음 가입한 이메일인 경우만 지급
+    if (exist.length <= 1){
+      let welcome = new WelcomePromotion();
+      welcome.userId = doc._id;
+      await this.welcomepromotionModel.create(welcome)
+    }
 
     return doc._id.toString();
   }

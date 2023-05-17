@@ -5,7 +5,7 @@ export enum SubscriptionTypes {
 
 export enum SubscriptionStates {
   Active = 'active',
-  Expried = 'expired',
+  Expired = 'expired',
 }
 
 export interface ItunesValidationResponse {
