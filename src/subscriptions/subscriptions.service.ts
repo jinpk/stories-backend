@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import { AppOS } from 'src/common/enums';
 import { VerifySubscriptionDto } from './dto/verify-subscription.dto';
 import { SubscriptionStates } from './enums';
+import { IAPValidatorProvider } from './providers/iap-validator.provider';
 import { GoogleVerifierService } from './providers/google-verifier.service';
 import {
   Subscription,
@@ -13,25 +14,41 @@ import {
 @Injectable()
 export class SubscriptionsService {
   constructor(
-    private googleVerifierService: GoogleVerifierService,
     @InjectModel(Subscription.name)
     private subscriptionModel: Model<SubscriptionDocument>,
+    private iapValidatorProvider: IAPValidatorProvider,
   ) {}
 
-  async verify(dto: VerifySubscriptionDto) {
+  async verify(userId: string, body: VerifySubscriptionDto) {
     // 구독이 갱신 결제인지 첫 구독 결제인지 고유 값이 transactionId가 맞는지는 확인 필요.
     const existSubscription = await this.subscriptionModel.findOne({
-      transactionId: dto.transactionId,
+      transactionId: body.transactionId,
     });
 
     // 앱스토어, 플레이스토어 인앱결제 검증 return data
-    let verifiedResult: any;
-    /*if (dto.os === AppOS.Android) {
-      verifiedResult = await this.googleVerifierService.verifySubscription(
-        dto.token,
-      );
-    } else if (dto.os === AppOS.Ios) {
-    }*/
+    let orderId: string;
+    try {
+      if (body.os === 'ios') {
+        const appstoreRes = await this.iapValidatorProvider.validateIOSPurchase(
+          body.receipt,
+        );
+        orderId = appstoreRes.receipt.in_app[0].transaction_id;
+      } else {
+        const { purchaseToken } = JSON.parse(body.receipt);
+        const playstoreRes =
+          await this.iapValidatorProvider.validateGooglePurchase(
+            body.productId,
+            purchaseToken,
+          );
+        orderId = playstoreRes.orderId;
+      }
+      console.log(`IAP Purchased: ${body.os} - ${orderId}`);
+    } catch (error: any) {
+      console.error(`IAP Purchase Validation error: ${JSON.stringify(error)}`);
+      // if (this.configService.get('env') === 'production') {
+      //   throw error;
+      // }
+    }
 
     verifiedResult = {};
 

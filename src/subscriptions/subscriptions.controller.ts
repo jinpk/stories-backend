@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Post, Query, Request } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags, ApiOkResponse } from '@nestjs/swagger';
 import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
 import { GetSubscriptionsDto } from './dto/get-subscription.dto';
 import { SubscriptionsDto } from './dto/subscription.dto';
@@ -23,6 +23,10 @@ export class SubscriptionsController {
     \n그 외 다운/업그레이드 및 취소 액션이 일어나면 해당 API호출
     \n(호출시 서버에서 각 OS 서버로 결제 검증하여 업데이트 함)`,
   })
+  @ApiOkResponse({
+    status: 200,
+    type: String,
+  })
   async verifySubscription(@Body() body: VerifySubscriptionDto) {
     await this.subscriptionsService.verify(body);
   }
@@ -32,5 +36,18 @@ export class SubscriptionsController {
     summary: '결제 내역 조회',
   })
   @ApiOkResponsePaginated(SubscriptionsDto)
-  listSubscriptions(@Query() query: GetSubscriptionsDto) {}
+  async listSubscriptions(
+    @Query() query: GetSubscriptionsDto,
+    @Request() req
+    ) {
+    if (!req.user.isAdmin) {
+      if (query.userId != req.user.id) {
+        throw new Error('인증 실패')
+      } else {
+        return await this.subscriptionsService.findListSubscription(query);
+      }
+    } else {
+      return await this.subscriptionsService.findListSubscription(query);
+    }
+  }
 }

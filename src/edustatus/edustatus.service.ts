@@ -404,15 +404,6 @@ export class EdustatusService {
   }
 
   async createReadStory(user_id: string, body: UpdateEduCompleted) {
-    const readstory = await this.readstoryModel.findOne({
-      userId: new Types.ObjectId(user_id),
-      contentsSerialNum: body.contentsSerialNum
-    });
-
-    if (readstory) {
-      throw new  NotAcceptableException("Already in readstories Document.")
-    } else {}
-
     var story_result: ReadStory = new ReadStory()
     story_result = {
       userId: new Types.ObjectId(user_id),
@@ -559,69 +550,6 @@ export class EdustatusService {
     ]);
 
     return cursor
-  }
-
-  async updateRecentContent(level, serial_number: string){
-    // if (serial_number.includes('S') || serial_number.includes('s')) {
-    //   var seriesNum = +serial_number.substr(3, 3)
-    //   var storyIndex = +serial_number.slice(-4)
-
-    //   if (recSeries.seriesTotal == storyIndex) {
-    //     const serieses = await this.educontentsModel.find({
-    //       level: { $eq: level },
-    //       seriesNum: { $eq: seriesNum + 1 },
-    //     });
-
-    //     if (serieses.length != 0) {
-    //       const seriesTemp = serieses.sort((a, b) => a.seriesNum > b.seriesNum ? -1 : 1);
-    //       const sortedSeries = seriesTemp.sort((a, b) => a.storyIndex > b.storyIndex ? -1 : 1);
-
-    //       const series_sorted_len = sortedSeries.length;
-      
-    //       var series_count = 0;
-    //       sortedSeries.forEach((content, _) => {
-    //         if (content.seriesNum == sortedSeries[series_sorted_len-1].seriesNum) {
-    //           series_count += 1;
-    //         }
-    //       });
-
-    //       recSeries.contentsId = sortedSeries[series_sorted_len -1]._id.toString();
-    //       recSeries.contentsSerialNum = sortedSeries[series_sorted_len-1].contentsSerialNum;
-    //       recSeries.seriesTotal = series_count;
-    //       recSeries.title = sortedSeries[series_sorted_len-1].title;
-    //     }
-    //   } else {
-    //     const series = await this.educontentsModel.findOne({
-    //       level: { $eq: level },
-    //       seriesNum: { $eq: seriesNum },
-    //       storyIndex: { $eq: storyIndex+1 },
-    //     });
-        
-    //     if (series) {
-    //       recSeries.contentsId = series._id.toString();
-    //       recSeries.contentsSerialNum = series.contentsSerialNum;
-    //       recSeries.title = series.title;
-    //     }
-    //   }
-    // }
-
-    // if (serial_number.includes('A') || serial_number.includes('a')) {
-    //   var storyIndex = +serial_number.slice(-6)
-
-    //   const article = await this.educontentsModel.findOne({
-    //     level: { $eq: level },
-    //     seriesNum: { $eq: 0 },
-    //     storyIndex: { $eq: storyIndex+1 },
-    //   });
-
-    //   if (article) {
-    //     recArticle.contentsId = article._id.toString();
-    //     recArticle.contentsSerialNum = article.contentsSerialNum;
-    //     recArticle.title = article.title;
-    //   }
-    // }
-
-    // return [recSeries, recArticle]
   }
 
   _edustatusToDto(doc: EduStatus | EduStatusDocument): EduStatusDto {

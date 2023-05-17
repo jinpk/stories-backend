@@ -1,3 +1,10 @@
+/*
+  오디오플레이어 조회,제출,관리 서비스 함수
+  -관리자 레벨테스트 등록/수정/삭제
+  -사용자 레벨테스트 조회/제출
+*/
+
+
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
@@ -25,12 +32,31 @@ export class AudioplayerService {
         @InjectModel(ReadStory.name) private readstoryModel: Model<ReadStoryDocument>,
       ) {}
 
+    /*
+    * GET 오디오플레이어 By Serialnumber
+    * @params:
+    *   contents_serial_num: string    컨텐츠 시리얼 넘버
+    *   body: {
+    *     step: string                스텝
+    *     lastStepCorrect: number     가장 스텝에서 맞춘 정답 갯수
+    *   }
+    * @return: {
+    *   id: string,
+    *   contentsSerialNum: string,
+    *   level: string,
+    *   title: string,
+    *   content: string,
+    *   imagePath: string,            오디오플레이어 썸네일 이미지 경로
+    *   audioFilePath: string,        오디오파일 경로 
+    * }
+    */
     async GetAudioPlayerBySerialNum(contents_serial_num: string): Promise<AudioPlayerDto> {
         const educontents = await this.educontentsModel.findOne({
             contentsSerialNum: { $eq: contents_serial_num }
         });
 
         var audioplayer: AudioPlayerDto = new AudioPlayerDto();
+
         audioplayer = {
             id: educontents._id.toString(),
             contentsSerialNum: educontents.contentsSerialNum,
@@ -43,6 +69,24 @@ export class AudioplayerService {
         return audioplayer;
     }
     
+    /*
+    * GET 오디오플레이어 By Serialnumber
+    * @params:
+    *   contents_serial_num: string    컨텐츠 시리얼 넘버
+    *   body: {
+    *     step: string                스텝
+    *     lastStepCorrect: number     가장 스텝에서 맞춘 정답 갯수
+    *   }
+    * @return: {
+    *   id: string,
+    *   contentsSerialNum: string,
+    *   level: string,
+    *   title: string,
+    *   content: string,
+    *   imagePath: string,            오디오플레이어 썸네일 이미지 경로
+    *   audioFilePath: string,        오디오파일 경로 
+    * }
+    */
     async existBycontentsSerialNum(contents_serial_num: string): Promise<boolean> {
         const educontents = await this.educontentsModel.find({
             contentsSerialNum: { $eq: contents_serial_num }
