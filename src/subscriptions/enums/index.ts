@@ -4,8 +4,6 @@ export enum SubscriptionTypes {
 }
 
 export enum SubscriptionStates {
-  Pending = 'pending',
   Active = 'active',
   Expried = 'expired',
-  Cancel = 'cancel',
 }

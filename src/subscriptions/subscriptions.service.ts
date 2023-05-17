@@ -8,6 +8,7 @@ import { GoogleVerifierService } from './providers/google-verifier.service';
 import {
   Subscription,
   SubscriptionDocument,
+  SubscriptionHistory,
 } from './schemas/subscription.schema';
 
 @Injectable()
@@ -19,39 +20,39 @@ export class SubscriptionsService {
   ) {}
 
   async verify(dto: VerifySubscriptionDto) {
-    // 구독이 갱신 결제인지 첫 구독 결제인지 고유 값이 transactionId가 맞는지는 확인 필요.
+    console.log('subscription verify', JSON.stringify(dto));
+    // TODO: 구독이 갱신 결제인지 첫 구독 결제인지 고유 값이 어떤건지 확인하고
+    // 해당 고유값으로 확인 필요
+
     const existSubscription = await this.subscriptionModel.findOne({
-      transactionId: dto.transactionId,
+      // transactionId: dto.transactionId,
     });
 
+    const history = new SubscriptionHistory();
+
+    /** 앱스토어, 플레이스토어 인앱결제 정보 조회 FLOW */
+    // 1. API 요청으로 데이터 확인
     // 앱스토어, 플레이스토어 인앱결제 검증 return data
-    let verifiedResult: any;
-    /*if (dto.os === AppOS.Android) {
-      verifiedResult = await this.googleVerifierService.verifySubscription(
-        dto.token,
-      );
-    } else if (dto.os === AppOS.Ios) {
-    }*/
-
-    verifiedResult = {};
-
-    // 스트링으로 변환후 디비에 저장
-    verifiedResult = JSON.stringify(verifiedResult);
+    try {
+      if (dto.os === AppOS.Android) {
+      } else if (dto.os === AppOS.Ios) {
+      }
+      // 각 스토어 response data를 history로 데이터 가공 필요
+    } catch (error: any) {
+      console.error('iap validation error:', JSON.stringify(error));
+    }
 
     if (existSubscription) {
-      // 해당 구독 결제가 2회 > 갱신 결제인 경우 push
-      existSubscription.verifiedResults.push({ data: verifiedResult });
+      // 해당 구독 결제가 2회 이상 진행 즉 구독 갱신인 경우 push
+      existSubscription.histories.push(history);
+      // TODO: 여기서 히스토리 정보를 보고 만약 구독이 취소, 다운그레이드, 업그레인드인경우 상태 변경 필요
       await existSubscription.save();
     } else {
       // 첫 구독 결제하는거면 새로 생성
       await new this.subscriptionModel({
-        userId: dto.userId,
-        transactionId: dto.transactionId,
-        productId: dto.productId,
-        userCouponId: dto.userCouponId,
-        os: dto.os,
+        ...dto,
         state: SubscriptionStates.Active,
-        verifiedResults: [{ data: verifiedResult }],
+        histories: [history],
       }).save();
     }
   }
