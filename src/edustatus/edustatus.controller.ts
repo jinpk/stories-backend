@@ -174,4 +174,15 @@ export class EdustatusController {
             }
             return await this.edustatusService.createQuizResult(req.user.id, body);
     }
+
+    @Get('quizresult')
+    @ApiOperation({
+        summary: '사용자별 퀴즈 총갯수, 정답갯수, 정답률',
+    })
+    @ApiOkResponse({
+        status: 200,
+    })
+    async getUserQuizResult(@Request() req) {
+        return await this.edustatusService.getQuizCorrectResult(req.user.id);
+    }
 }

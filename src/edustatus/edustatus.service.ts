@@ -445,14 +445,14 @@ export class EdustatusService {
     const result = await new this.quizresultModel(quizresult).save();
 
     // userstatic correctRate update
-    let correct_rate = await this.getQuizCorrectRate(user_id);
+    let correct_rate = await this.getQuizCorrectResult(user_id);
 
-    await this.staticService.updateUserCorrectRate(user_id, correct_rate);
+    await this.staticService.updateUserCorrectRate(user_id, correct_rate['rate']);
     
     return result._id.toString();
   }
 
-  async getQuizCorrectRate(user_id: string): Promise<number> {
+  async getQuizCorrectResult(user_id: string) {
     const total_quiz_result = await this.quizresultModel.find({
       userId: { $eq: new Types.ObjectId(user_id) },
     }).count();
@@ -463,7 +463,14 @@ export class EdustatusService {
     }).count();
 
     const correct_rate = (correct_quiz_result/total_quiz_result)*100
-    return Number(correct_rate.toFixed(0))
+
+    const res ={
+      total: total_quiz_result,
+      correct: correct_quiz_result,
+      rete: Number(correct_rate.toFixed(0))
+    }
+
+    return res
   }
 
   async getMasteredVocabs(user_id: string) {

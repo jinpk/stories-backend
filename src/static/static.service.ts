@@ -1,14 +1,15 @@
+/*
+  유저 조회,등록,관리 서비스 함수
+  -관리자 유저 관리
+  -사용자 조회/등록
+*/
+
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
-  now,
-  FilterQuery,
   Model,
-  PipelineStage,
-  ProjectionFields,
   Types,
 } from 'mongoose';
-import { PagingResDto } from 'src/common/dto/response.dto';
 import { CommonExcelService, UtilsService } from 'src/common/providers';
 import { EXCEL_COLUMN_LIST } from './static.constant';
 import {
@@ -29,7 +30,6 @@ import {
 @Injectable()
 export class StaticService {
     constructor(
-        private utilsService: UtilsService,
         private commonExcelService: CommonExcelService,
         @InjectModel(UserStatic.name) private userstaticModel: Model<UserStaticDocument>,
         @InjectModel(EduStatus.name) private edustatusModel: Model<EduStatusDocument>,
@@ -118,6 +118,56 @@ export class StaticService {
     }
 
     async getVocabQuizStatic(
+      query: GetVocabQuizDto,
+    ){
+      var rates = {}
+
+      const start_date = new Date(query.start).toString()
+      const end_date = new Date(query.end).toString()
+
+      const reviewvocab = await this.reviewvocabModel.find({
+        "updatedAt": {
+          $gte: new Date(start_date),
+          $lte: new Date(end_date)
+        }
+      });
+
+      const staticvocab: StaticsVocabDto = {
+        addedVocabCount: 0,
+        studiedVocabCount: 0,
+        completeRate: 0,
+      }
+
+      for (let i = 1; i < 11; i++) {
+        rates[i.toString()] = staticvocab
+      }
+
+      reviewvocab.forEach((content, _) => {
+        var tempData: StaticsVocabDto = {
+          addedVocabCount: rates[content.level]['addedVocabCount'] + 1,
+          studiedVocabCount: rates[content.level]['studiedVocabCount'],
+          completeRate: 0,
+        }
+        if (content.complete) {
+          tempData.studiedVocabCount += 1
+        }
+        rates[content.level] = tempData;
+      });
+
+      Object.keys(rates).forEach(key => {
+        if (rates[key].addedVocabCount != 0) {
+          rates[key].completeRate = (rates[key].studiedVocabCount / rates[key].addedVocabCount) * 100.0;
+        } else {}
+      });
+
+      if (query.excel === '1') {
+        return await this.staticdataToExcel(rates)
+      }
+
+      return rates
+    }
+
+        async getVocabQuizStatic(
       query: GetVocabQuizDto,
     ){
       var rates = {}
