@@ -1,3 +1,9 @@
+/*
+  notification 조회, 관리, 수정 서비스함수
+  -관리자 설정 조회/수정/등록
+  -사용자 알림 설정 조회/수정/등록
+*/
+
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
@@ -45,6 +51,13 @@ export class NotificationsService {
     private notificationSettingModel: mongoose.Model<NotificationSettingDocument>,
   ) {}
 
+  /*
+  * 유저 알림 설정 수정
+  * @params:
+  *   id:                   string
+  *   body:                 UpdateNotificationSettingDto
+  * @return: 
+  */
   async updateNotificationSetting(
     id: string,
     body: UpdateNotificationSettingDto,
@@ -54,6 +67,14 @@ export class NotificationsService {
     await this.notificationSettingModel.findByIdAndUpdate(id, { $set: body });
   }
 
+  /*
+  * 유저 알림 설정 조회
+  * @params:
+  *   userId:                   string
+  * @return: [
+  *   NotificationSetting            NotificationSettingDto Array
+  * ]
+  */
   async getUserNotificationSettings(
     userId: string,
   ): Promise<NotificationSettingDto[]> {
@@ -68,6 +89,13 @@ export class NotificationsService {
     return data;
   }
 
+  /*
+  * 알림 발송 목록 수정
+  * @params:
+  * @return: [
+  *   Notification            NotificationDto Array
+  * ]
+  */
   async getPendingPushNotifications(): Promise<NotificationDto[]> {
     const now = new Date();
     const docs = await this.notificationModel.find({
@@ -82,6 +110,12 @@ export class NotificationsService {
     return data;
   }
 
+  /*
+  * 알림 발송 목록 수정
+  * @params:
+  *   ids: []                         stringArray
+  * @return:
+  */
   async sentNotifications(ids: string[]) {
     await this.notificationModel.updateMany(
       { _id: { $in: ids } },
@@ -89,6 +123,13 @@ export class NotificationsService {
     );
   }
 
+  /*
+  * config 수정
+  * @params:
+  *   id:                         string
+  *   body:                       UpdateNotificationConfigDto
+  * @return:
+  */
   async updateNotificationConfigs(
     id: string,
     body: UpdateNotificationConfigDto,
@@ -96,6 +137,14 @@ export class NotificationsService {
     await this.notificationConfigModel.findByIdAndUpdate(id, { $set: body });
   }
 
+
+  /*
+  * config 조회
+  * @params:
+  * @return: [
+  *   NotificationConfig          NotificationConfigDto
+  * ]
+  */
   async getNotificationConfigs(): Promise<NotificationConfigDto[]> {
     const docs = await this.notificationConfigModel.find({});
     const data: NotificationConfigDto[] = docs.map((doc) =>
@@ -105,6 +154,17 @@ export class NotificationsService {
     return data;
   }
 
+  /*
+  * 등록한 알림 목록 조회
+  * @query:
+  *   query:                GetNotificationsDto
+  * @return: {
+  *   total:                number
+  *   data: [
+  *     {Notification}      NotificationDto
+  *   ]
+  * }
+  */
   async getPagingNotifications(
     query: GetNotificationsDto,
   ): Promise<PagingResDto<NotificationDto> | Buffer> {
@@ -148,6 +208,13 @@ export class NotificationsService {
     };
   }
 
+  /*
+  * 알림 생성
+  * @params:
+  *   body:                CreateNotificationDto
+  * @return:
+  *   id:                 string
+  */
   async createNotification(body: CreateNotificationDto) {
     const doc = await new this.notificationModel({
       context: body.context,
@@ -159,6 +226,11 @@ export class NotificationsService {
     return doc._id.toString();
   }
 
+  /*
+  * 알림 config 초기화
+  * @params:
+  * @return: {
+  */
   async initNotificationConfigs() {
     const configs: NotificationConfig[] = [
       {
@@ -186,6 +258,12 @@ export class NotificationsService {
     this.logger.log(`initialized notification configs`);
   }
 
+  /*
+  * 유저 알림 설정 초기화
+  * @params:
+  *   userId:             string
+  * @return: 
+  */
   async initUserNotificationSettings(userId: string) {
     const oid = new mongoose.Types.ObjectId(userId);
 
@@ -227,6 +305,13 @@ export class NotificationsService {
     this.logger.debug(`initialized notification setting: ${userId}`);
   }
 
+  /*
+  * Schema to dto 변환
+  * @params:
+  *   doc:                NotificationDocument
+  * @return: {
+  *   dto:               NotificationDto
+  */
   _notificationDocToDto(doc: NotificationDocument): NotificationDto {
     const dto = new NotificationDto();
     dto.context = doc.context;
@@ -239,6 +324,13 @@ export class NotificationsService {
     return dto;
   }
 
+  /*
+  * Schema to dto 변환
+  * @params:
+  *   doc:                NotificationConfigDocument
+  * @return: {
+  *   dto:               NotificationConfigDto
+  */
   _notificationConfigDocToDto(
     doc: NotificationConfigDocument,
   ): NotificationConfigDto {
@@ -252,6 +344,13 @@ export class NotificationsService {
     return dto;
   }
 
+  /*
+  * Schema to dto 변환
+  * @params:
+  *   doc:                NotificationSettingDocument
+  * @return: {
+  *   dto:               NotificationSettingDto
+  */
   _notificationSettingDocToDto(
     doc: NotificationSettingDocument,
   ): NotificationSettingDto {
