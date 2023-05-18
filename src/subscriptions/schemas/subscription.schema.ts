@@ -9,7 +9,6 @@ export type SubscriptionDocument = HydratedDocument<Subscription>;
 
 @Schema({ timestamps: true })
 export class SubscriptionHistory {
-  // TODO: 기능 구현에 맟줘 스키마 정의 필요
   @Prop({ default: null })
   createdAt?: Date;
 }

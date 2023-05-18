@@ -1,3 +1,9 @@
+/*
+  유저 조회,등록,관리 서비스 함수
+  -관리자 유저 관리
+  -사용자 조회/등록
+*/
+
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { AnyKeys, FilterQuery, Model } from 'mongoose';
@@ -25,6 +31,11 @@ export class UsersService {
     private awsService: AwsService,
   ) {}
 
+  /*
+  * test JWT
+  * @params:
+  * @return:
+  */
   async __testGenTTMIKJWT() {
     return await this.jwtService.signAsync(
       { sub: -1 },
@@ -32,6 +43,12 @@ export class UsersService {
     );
   }
 
+  /*
+  * JWT 검증
+  * @params:
+  *   token:                string
+  * @return: true || false  boolean
+  */
   async verifyTTMIKJWT(token: string) {
     const payload = await this.jwtService.verifyAsync(token, {
       secret: this.awsService.getParentJwtSecretKey,
@@ -42,6 +59,12 @@ export class UsersService {
     return false;
   }
 
+  /*
+  * 유저 활성화 여부 확인 by email
+  * @params:
+  *   email:                string
+  * @return: User             object
+  */
   async getActiveUserByEmail(email: string): Promise<User | null> {
     const doc = await this.userModel.findOne({
       deleted: { $ne: true },
@@ -51,6 +74,13 @@ export class UsersService {
     return doc;
   }
 
+  /*
+  * FCM 푸시 활성화 목록 조회
+  * @params:
+  * @return: [
+  *   "fcmtoken",           string
+  * ]
+  */
   async getActiveFCMUsers(): Promise<string[]> {
     const docs = await this.userModel
       .find()
@@ -63,6 +93,20 @@ export class UsersService {
     return docs.map((doc) => doc.fcmToken);
   }
 
+  /*
+  * 유저 리스트 조회
+  * @params:
+  *   email:              string
+  *   body:               UpdateUserTTMIKDto
+  * @return: {
+  *   total: number,
+  *   data: [
+  *     {
+  *       UserDocument
+  *     },
+  *   ]
+  * }
+  */
   async getPagingUsers(
     query: GetUsersDto,
   ): Promise<PagingResDto<UserDto> | Buffer> {
@@ -114,6 +158,13 @@ export class UsersService {
     };
   }
 
+  /*
+  * 유저 정보 수정
+  * @params:
+  *   email:             string
+  *   body:               UpdateUserTTMIKDto
+  * @return:
+  */
   async updateTTMIKByEmail(email: string, body: UpdateUserTTMIKDto) {
     const set: AnyKeys<UserDocument> = {};
     if (body.nickname !== undefined) {
@@ -127,6 +178,13 @@ export class UsersService {
     await this.userModel.findOneAndUpdate({ email }, { $set: set });
   }
 
+  /*
+  * 유저 정보 수정
+  * @params:
+  *   userId:             string
+  *   body:               UpdateUserDto
+  * @return:
+  */
   async updateById(userId: string, body: UpdateUserDto) {
     const set: AnyKeys<UserDocument> = {};
     if (body.fcmToken !== undefined) {
@@ -148,16 +206,36 @@ export class UsersService {
     await this.userModel.findByIdAndUpdate(userId, { $set: set });
   }
 
+  /*
+  * 삭제 여부 고려O 유저 조회 by email
+  * @params:
+  *   email:             string
+  * @return:
+  *   user               UserDocument
+  */
   async findOneByEmail(email: string): Promise<UserDocument> {
     const user = await this.userModel.findOne({ email, deleted: false });
     return user;
   }
 
+  /*
+  * 삭제 여부 고려X 유저 조회 by email
+  * @params:
+  *   email:             string
+  * @return:
+  *   user               UserDocument
+  */
   async findOneByEmailAll(email: string): Promise<UserDocument> {
     const user = await this.userModel.findOne({ email });
     return user;
   }
 
+  /*
+  * 유저 조회 by nickname
+  * @params:
+  *   nickname:             string
+  * @return: true || false  boolean
+  */
   async existingNickname(nickname: string): Promise<boolean> {
     const user = await this.userModel.findOne({ nickname, deleted: false });
     if (user) {
@@ -166,6 +244,14 @@ export class UsersService {
     return false;
   }
 
+  /*
+  * 유저 조회 by id
+  * @params:
+  *   id:              string
+  * @return: {
+  *   user               UserDocument
+  * }
+  */
   async findById(id: string): Promise<UserDocument | false> {
     const user = await this.userModel.findById(id);
     if (!user || user.deleted) {
@@ -174,6 +260,14 @@ export class UsersService {
     return user;
   }
 
+  /*
+  * 유저 가입 및 생성 함수
+  * @params:
+  *   user:              User
+  * @return: {
+  *   string
+  * }
+  */
   async create(user: User) {
     const doc = await new this.userModel(user).save();
 
@@ -197,12 +291,25 @@ export class UsersService {
     return doc._id.toString();
   }
 
+  /*
+  * 유저 탈퇴 및 삭제 함수
+  * @params:
+  *   id:                   string
+  * @return: {}
+  */
   async deleteUser(id: string) {
     await this.userModel.findByIdAndUpdate(id, {
       $set: { deleted: true, deletedAt: new Date() },
     });
   }
 
+  /*
+  * Schema to dto 변환
+  * @params:
+  *   doc:                UserDocument
+  * @return: {
+  *   user:               UserDto
+  */
   _userDocToDto(doc: UserDocument): UserDto {
     const user = new UserDto();
     user.id = doc._id.toString();
