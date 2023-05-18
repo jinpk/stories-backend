@@ -30,23 +30,23 @@ export class SubscriptionsController {
     await this.subscriptionsService.verify(body);
   }
 
-  @Get('')
-  @ApiOperation({
-    summary: '결제 내역 조회',
-  })
-  @ApiOkResponsePaginated(SubscriptionsDto)
-  async listSubscriptions(
-    @Query() query: GetSubscriptionsDto,
-    @Request() req
-    ) {
-    if (!req.user.isAdmin) {
-      if (query.userId != req.user.id) {
-        throw new Error('인증 실패')
-      } else {
-        return await this.subscriptionsService.findListSubscription(query);
-      }
-    } else {
-      return await this.subscriptionsService.findListSubscription(query);
-    }
-  }
+  // @Get('')
+  // @ApiOperation({
+  //   summary: '결제 내역 조회',
+  // })
+  // @ApiOkResponsePaginated(SubscriptionsDto)
+  // async listSubscriptions(
+  //   @Query() query: GetSubscriptionsDto,
+  //   @Request() req
+  //   ) {
+  //   if (!req.user.isAdmin) {
+  //     if (query.userId != req.user.id) {
+  //       throw new Error('인증 실패')
+  //     } else {
+  //       return await this.subscriptionsService.findListSubscription(query);
+  //     }
+  //   } else {
+  //     return await this.subscriptionsService.findListSubscription(query);
+  //   }
+  // }
 }
