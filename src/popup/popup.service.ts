@@ -1,12 +1,15 @@
+/*
+  팝업 조회,등록,관리 서비스 함수
+  - 팝업 조회/등록/관리
+*/
+
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   now,
   FilterQuery,
   Model,
-  PipelineStage,
   ProjectionFields,
-  Types,
 } from 'mongoose';
 import { PagingResDto } from 'src/common/dto/response.dto';
 import { Popup, PopupDocument } from './schemas/popup.schema';
@@ -22,6 +25,13 @@ export class PopupService {
     @InjectModel(Popup.name) private popupModel: Model<PopupDocument>,
   ) {}
 
+  /*  
+  * 팝업 조회 by Id
+  * @params:
+  *   popup_id:                string
+  * @return:
+  *   PopupDocument             object
+  */
   async getPopupById(popup_id: string): Promise<PopupDocument | false> {
     const popup =  await this.popupModel.findById(popup_id);
     if (!popup) {
@@ -31,6 +41,13 @@ export class PopupService {
     return popup;
   }
 
+  /*  
+  * 팝업 생성
+  * @params:
+  *   body:                PopupDto
+  * @return:
+  *   id                   string
+  */
   async createPopup(body: PopupDto): Promise<string> {
     var popup: Popup = new Popup();
     popup = {
@@ -46,6 +63,13 @@ export class PopupService {
     return result._id.toString(); 
   }
 
+  /*  
+  * 팝업 존재 유무 파악
+  * @params:
+  *   popup_id:            string
+  * @return:
+  *   true || false         string
+  */
   async existPopup(popup_id: string): Promise<boolean> {
     const popup = await this.popupModel.findOne({popup_id});
     if (!popup) {
@@ -54,6 +78,14 @@ export class PopupService {
       return true
   }
 
+  /*  
+  * 팝업 수정
+  * @params:
+  *   popup_id:            string
+  *   body:                UpdatePopupDto
+  * @return:
+  *   id                   string
+  */
   async updatePopup(popup_id: string, body: UpdatePopupDto): Promise<string> {
     const result = await this.popupModel.findByIdAndUpdate(popup_id, { 
       $set: {
@@ -70,11 +102,29 @@ export class PopupService {
     return result._id.toString();
   }
 
+  /*  
+  * 팝업 삭제
+  * @params:
+  *   popup_id:            string
+  * @return:
+  *   id                   string
+  */
   async deletePopup(popup_id: string): Promise<string> {
-    await this.popupModel.findByIdAndDelete(popup_id);
-    return popup_id
+    const result = await this.popupModel.findByIdAndDelete(popup_id);
+    return result._id.toString();
   }
 
+  /*
+  * 팝업 리스트 조회
+  * @params:
+  *   query:                GetListPopupDto
+  * @return: {
+  *   total:               number
+  *   data: [
+  *     {PopupDocument},
+  *   ]
+  * }
+  */
   async getPagingPopups(
     query: GetListPopupDto,
   ): Promise<PagingResDto<PopupDto> | Buffer> {
