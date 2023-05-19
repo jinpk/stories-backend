@@ -1,10 +1,13 @@
+/*
+  유저 라이브러리 조회
+  -사용자별 조회
+*/
+
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
-  now,
   FilterQuery,
   Model,
-  PipelineStage,
   ProjectionFields,
   Types,
 } from 'mongoose';
@@ -25,6 +28,15 @@ export class LibraryService {
     @InjectModel(ReadStory.name) private readstoryModel: Model<ReadStoryDocument>,
   ) {}
 
+  /*
+  * 라이브러리 조회 by userid
+  * @query:
+  *   query:             GetListUserLibraryDto
+  *   user_id:           string
+  * @return: [
+  *   Library,           LibraryDto[]
+  * ]
+  */
   async GetUserLibraryById(
     query: GetListUserLibraryDto,
     user_id: string

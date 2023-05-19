@@ -23,6 +23,13 @@ export class FaqboardService {
     @InjectModel(FaqCategory.name) private faqcategoryModel: Model<FaqCategoryDocument>,
   ) {}
   
+  /*
+  * Faq 조회 by Id
+  * @params:
+  *   faqboard_id:           string
+  * @return:
+  *   faqboard               FaqBoardDocument
+  */
   async GetFaqById(faqboard_id: string): Promise<FaqBoardDocument | false> {
     const faqboard = await this.faqboardModel.findById(faqboard_id);
     if (!faqboard) {
@@ -32,6 +39,13 @@ export class FaqboardService {
     return faqboard;
   }
 
+  /*
+  * Faq 생성
+  * @params:
+  *   body:                  FaqBoardDto
+  * @return:
+  *   id                     string
+  */
   async createFaq(body: FaqBoardDto): Promise<string> {
     var faqboard: FaqBoard = new FaqBoard();
     faqboard = {
@@ -43,6 +57,13 @@ export class FaqboardService {
     return result._id.toString(); 
   }
 
+  /*
+  * Faq 수정
+  * @params:
+  *   faqboard_id:           string
+  * @return:
+  *   true || false          boolean
+  */
   async existFaqById(faqboard_id: string): Promise<boolean> {
     const faqboard = await this.faqboardModel.findById(faqboard_id);
     if (!faqboard) {
@@ -51,6 +72,14 @@ export class FaqboardService {
     return true;
   }
 
+  /*
+  * Faq 수정
+  * @params:
+  *   faqboard_id:           string
+  *   body:                  UpdateFaqBoardDto
+  * @return:
+  *   id                     string
+  */
   async updateFaq(faqboard_id: string, body: UpdateFaqBoardDto): Promise<string> {
     const result = await this.faqboardModel.findByIdAndUpdate(faqboard_id, { 
       $set: {
@@ -63,11 +92,29 @@ export class FaqboardService {
     return result._id.toString();
   }
 
+  /*
+  * Faq 삭제
+  * @params:
+  *   faqboard_id:           string
+  * @return:
+  *   id                     string
+  */
   async deleteFaq(faqboard_id: string): Promise<string> {
     await this.faqboardModel.findByIdAndDelete(faqboard_id);
     return faqboard_id
   }
 
+  /*
+  * Faq 목록 조회
+  * @query:
+  *   query:                 GetListFaqBoardDto
+  * @return: {
+  *   total:                 number
+  *   data: [
+  *   FaqCategory,           FaqBoardDto[]
+  *   ]
+  * }
+  */
   async getPagingFaqs(
     query: GetListFaqBoardDto,
   ): Promise<PagingResDto<FaqBoardDto> | Buffer> {
@@ -101,6 +148,13 @@ export class FaqboardService {
   }
 
   // FAQ Catergory Services
+  /*
+  * Faq 카테고리 생성
+  * @params:
+  *   body:                  FaqCategoryDto
+  * @return:
+  *   id                     string
+  */
   async createFaqCategory(body: FaqCategoryDto): Promise<string> {
     var faqcategory: FaqCategory = new FaqCategory();
     faqcategory = {
@@ -110,6 +164,13 @@ export class FaqboardService {
     return result._id.toString(); 
   }
 
+  /*
+  * Faq 카테고리 조회 by Id
+  * @params:
+  *   faqcategory_id:        string
+  * @return:
+  *   true || false          boolean
+  */
   async existFaqCategoryById(faqcategory_id: string): Promise<boolean> {
     const faqcategory = await this.faqcategoryModel.findById(faqcategory_id);
     if (!faqcategory) {
@@ -118,6 +179,14 @@ export class FaqboardService {
     return true;
   }
 
+  /*
+  * Faq 카테고리 수정
+  * @params:
+  *   faqcategory_id:        string
+  *   body:                  UpdateFaqCategoryDto
+  * @return:
+  *   id                     string
+  */
   async updateFaqCategory(faqcategory_id: string, body: UpdateFaqCategoryDto): Promise<string> {
     const result = await this.faqcategoryModel.findByIdAndUpdate(faqcategory_id, { 
       $set: {
@@ -128,11 +197,29 @@ export class FaqboardService {
     return result._id.toString();
   }
 
+  /*
+  * Faq 카테고리 삭제
+  * @params:
+  *   faqcategory_id:        string
+  * @return:
+  *   id                     string
+  */
   async deleteFaqCategory(faqcategory_id: string): Promise<string> {
     await this.faqcategoryModel.findByIdAndDelete(faqcategory_id);
     return faqcategory_id
   }
 
+  /*
+  * Faq 카테고리 목록 조회
+  * @query:
+  *   query:             GetListFaqCategoryDto
+  * @return: {
+  *   total:                 number
+  *   data: [
+  *   FaqCategory,           FaqCategoryDto[]
+  *   ]
+  * }
+  */
   async getPagingFaqCategory(
     query: GetListFaqCategoryDto,
   ): Promise<PagingResDto<FaqCategoryDto> | Buffer> {
