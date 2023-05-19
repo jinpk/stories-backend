@@ -1,3 +1,10 @@
+/*
+  이벤트 트리거 함수
+  -인증요청
+  -회원가입
+  -비밀번호 재설정
+*/
+
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import {

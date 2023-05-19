@@ -1,4 +1,16 @@
-import { Injectable, Body, NotAcceptableException, NotFoundException } from '@nestjs/common';
+/*
+  학습상태 조회,등록,관리 서비스 함수
+  -학습상태 등록, 조회
+  -레벨테스트 결과 등록
+  -단어 퀴즈 조회/업데이트
+  -읽은 컨텐츠 등록/조회
+*/
+
+import {
+  Injectable,
+  NotAcceptableException,
+  NotFoundException
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   now,
@@ -8,7 +20,6 @@ import {
   ProjectionFields,
   Types,
 } from 'mongoose';
-import { PagingResDto } from 'src/common/dto/response.dto';
 import { EduContents, EduContentsDocument } from '../educontents/schemas/educontents.schema';
 import { EduStatus, EduStatusDocument } from './schemas/edustatus.schema';
 import { QuizResult, QuizResultDocument } from './schemas/quizresult.schema';
@@ -37,6 +48,13 @@ export class EdustatusService {
     private staticService: StaticService,
   ) {}
 
+  /*
+  * 유저 학습상태 조회 by Id
+  * @params:
+  *   user_id:              string
+  * @return: 
+  *   edustatus             EduStatusDto
+  */
   async getEduStatusById(user_id: string) {
     const filter: FilterQuery<EduStatusDto> = {
       userId: new Types.ObjectId(user_id),
@@ -87,6 +105,13 @@ export class EdustatusService {
     return edustatus
   }
 
+  /*
+  * 홈화면 정보 조회
+  * @params:
+  *   user_id:              string
+  * @return: 
+  *   dto                   HomeInfoDto
+  */
   async getHomeinfoByUserId(user_id: string) {
     const filter: FilterQuery<EduStatusDto> = {
       userId: new Types.ObjectId(user_id),
@@ -246,6 +271,13 @@ export class EdustatusService {
     return dto
   }
 
+  /*
+  * 사용자 학습상태 유무
+  * @params:
+  *   user_id:              string
+  * @return: 
+  *   true || false         boolean
+  */
   async existEdustatus(user_id: string): Promise<boolean> {
     const edustatus = await this.edustatusModel.findOne({
       userId: new Types.ObjectId(user_id),
@@ -256,6 +288,14 @@ export class EdustatusService {
       return true
   }
 
+  /*
+  * 사용자 레벨 설정 변경(홈화면)
+  * @params:
+  *   user_id:              string
+  *   level:                string
+  * @return: 
+  *   edustatus:           EduStatusDto
+  */
   async changeSelectedLevel(user_id, level: string): Promise<EduStatusDto> {
     const edustatus = await this.edustatusModel.findOneAndUpdate({
       userId: new Types.ObjectId(user_id),
@@ -270,6 +310,14 @@ export class EdustatusService {
     return dto
   }
 
+  /*
+  * 읽은 컨텐츠 저장
+  * @params:
+  *   user_id:              string
+  *   body:                 ReadStoryDto
+  * @return: 
+  *   readstory:           ReadStoryDto
+  */
   async updateUserCompleted(
     user_id: string,
     body: UpdateEduCompleted): Promise<ReadStoryDto> {
@@ -287,6 +335,14 @@ export class EdustatusService {
     return dto;
   }
 
+  /*
+  * 레벨 테스트 결과 계산
+  * @params:
+  *   step:                 string
+  *   correct:              number
+  * @return: 
+  *   calculatedlevel:           string
+  */
   async calculateLevel(step: string, correct: number): Promise<string> {
     const step_num: number = +step;
 
@@ -331,6 +387,19 @@ export class EdustatusService {
     return calculatedlevel
   }
 
+  /*
+  * 학습 상태 생성
+  * @params:
+  *   user_id:              string
+  *   body:                 LevelTestResultDto
+  * @return: 
+  *   firstLevel:           string
+  *   latestLevel:          string
+  *   selectedLevel:        string
+  *   levelProgress:        object
+  *   userId:               string
+  *   createdAt:            Date
+  */
   async createEduStatus(user_id: string, body: LevelTestResultDto) {
     var calculatedLevel = '1'
 
@@ -380,6 +449,19 @@ export class EdustatusService {
     return result; 
   }
 
+  /*
+  * 학습상태 업데이트
+  * @params:
+  *   user_id:              string
+  *   body:                 LevelTestResultDto
+  * @return: 
+  *   firstLevel:           string
+  *   latestLevel:          string
+  *   selectedLevel:        string
+  *   levelProgress:        object
+  *   userId:               string
+  *   createdAt:            Date
+  */
   async updateEduStatus(user_id: string, body: LevelTestResultDto) {
     let exist = await this.existEdustatus(user_id);
     if (exist) {
@@ -403,6 +485,14 @@ export class EdustatusService {
     return result; 
   }
 
+  /*
+  * 읽은 스토리 카운트
+  * @params:
+  *   user_id:              string
+  *   serial_num            string
+  * @return: 
+  *   readstory_count:      number
+  */
   async createReadStory(user_id: string, body: UpdateEduCompleted) {
     var story_result: ReadStory = new ReadStory()
     story_result = {
@@ -417,6 +507,14 @@ export class EdustatusService {
     return result;
   }
 
+  /*
+  * 읽은 스토리 카운트
+  * @params:
+  *   user_id:              string
+  *   serial_num            string
+  * @return: 
+  *   readstory_count:      number
+  */
   async getReadStoriesCount(user_id, serial_num: string) {
     const readstory_count = await this.readstoryModel.find({
       userId: { $eq: user_id },
@@ -426,6 +524,20 @@ export class EdustatusService {
     return readstory_count
   }
 
+  /*
+  * 읽은 스토리 조회
+  * @params:
+  *   user_id:              string
+  * @return: 
+  *   id:                   string
+  *   userId:               string
+  *   level:                string
+  *   eduContentsId:        string
+  *   contentsSerialNum     string
+  *   completed:            boolean
+  *   completedAt:          Date
+  *   lastedReadAt:         Date
+  */
   async getReadStories(user_id: string) {
     const readstory = await this.readstoryModel.find({
       userId: { $eq: user_id },
@@ -434,6 +546,14 @@ export class EdustatusService {
     return readstory
   }
 
+  /*
+  * 퀴즈 결과 저장
+  * @params:
+  *   user_id:              string
+  *   body:                 QuizResultDto
+  * @return: 
+  *   id:                   string
+  */
   async createQuizResult(user_id: string, body: QuizResultDto): Promise<string> {
     var quizresult: QuizResult = new QuizResult();
     quizresult = {
@@ -452,6 +572,16 @@ export class EdustatusService {
     return result._id.toString();
   }
 
+  /*
+  * 퀴즈 결과 조회
+  * @params:
+  *   user_id:              string
+  * @return: {
+  *   total:                number
+  *   correct:              number
+  *   rate:                 number
+  * }
+  */
   async getQuizCorrectResult(user_id: string) {
     const total_quiz_result = await this.quizresultModel.find({
       userId: { $eq: new Types.ObjectId(user_id) },
@@ -473,6 +603,13 @@ export class EdustatusService {
     return res
   }
 
+  /*
+  * 퀴즈 완료 갯수 조회
+  * @params:
+  *   user_id:              string
+  * @return:
+  *   quiz_result:          number
+  */
   async getMasteredVocabs(user_id: string) {
     const matered_quiz_result = await this.quizresultModel.find({
       userId: { $eq: user_id },
@@ -482,6 +619,16 @@ export class EdustatusService {
     return matered_quiz_result
   }
 
+  /*
+  * 유저별 Certificate 조회
+  * @params:
+  *   user_id:              string
+  * @return: [
+  *   {
+  *     certificate         CertificateDto[]
+  *   }
+  * ]
+  */
   async getUserCertificates(user_id: string): Promise<CertificateDto[]> {
     let readContents = await this.readstoryModel.find({
       userId: new Types.ObjectId(user_id),
@@ -508,6 +655,21 @@ export class EdustatusService {
     return certificates
   }
 
+  /*
+  * 학습 정보 날짜 조회
+  * @params:
+  *   user_id:              string
+  *   query:                GetReadStoryDto
+  * @return: [
+  *   {
+  *     eduContentId        string
+  *     contentSerialNum    string
+  *     completed           boolean
+  *     completedAt         Date
+  *     lastReadAt          Date
+  *   }
+  * ]
+  */
   async getUserCertificateDetail(
     user_id, level: string): Promise<CertificateDetailDto> {
       let readContents = await this.readstoryModel.find({
@@ -531,6 +693,21 @@ export class EdustatusService {
       }
   }
 
+  /*
+  * 학습 정보 날짜 조회
+  * @params:
+  *   user_id:              string
+  *   query:                GetReadStoryDto
+  * @return: [
+  *   {
+  *     eduContentId        string
+  *     contentSerialNum    string
+  *     completed           boolean
+  *     completedAt         Date
+  *     lastReadAt          Date
+  *   }
+  * ]
+  */
   async getStudiedDates(user_id: string, query: GetReadStoryDto) {
     const start_date = new Date(query.start).toString()
     const end_date = new Date(query.end).toString()
@@ -543,7 +720,7 @@ export class EdustatusService {
       }
     };
 
-    const projection: ProjectionFields<EduStatusDto> = {
+    const projection: ProjectionFields<ReadStoryDto> = {
       _id: 0,
       userId: 0,
       level: 0,
@@ -559,6 +736,13 @@ export class EdustatusService {
     return cursor
   }
 
+  /*
+  * Schema to dto 변환
+  * @params:
+  *   doc:                EduStatusDocument
+  * @return: {
+  *   dto:               EduStatusDto
+  */
   _edustatusToDto(doc: EduStatus | EduStatusDocument): EduStatusDto {
     const dto = new EduStatusDto();
     dto.id = doc._id.toHexString();
@@ -570,6 +754,13 @@ export class EdustatusService {
     return dto
   }
 
+  /*
+  * Schema to dto 변환
+  * @params:
+  *   doc:                ReadStoryDocument
+  * @return: {
+  *   dto:               ReadStoryDto
+  */
   _readstoryToDto(doc: ReadStory | ReadStoryDocument): ReadStoryDto {
     const dto = new ReadStoryDto();
     dto.id = doc._id.toHexString();

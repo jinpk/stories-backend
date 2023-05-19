@@ -1,3 +1,9 @@
+/*
+  FAQ 조회,등록,관리 서비스 함수
+  -FAQ 게시판 관리
+  -FAQ 카테고리 관리
+*/
+
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
