@@ -1,3 +1,8 @@
+/*
+  쿠폰 조회,등록,관리 서비스 함수
+  -쿠폰 발송/조회/수정 관리
+*/
+
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
@@ -28,6 +33,12 @@ export class CouponsService {
     private userCouponModel: Model<UserCouponDocument>,
   ) {}
 
+  /*
+  * 유저에게 쿠폰 발송
+  * @params:
+  *   body:                   CreateUserCouponDto
+  * @return: 
+  */
   async sentCouponToUsers(body: CreateUserCouponDto) {
     const docs: UserCoupon[] = body.userIds.map((x) => {
       return {
@@ -39,6 +50,13 @@ export class CouponsService {
     await this.userCouponModel.insertMany(docs);
   }
 
+  /*
+  * 쿠폰 조회 by Id
+  * @params:
+  *   id:                   string
+  * @return: 
+  *   true || false         boolean
+  */
   async existCouponById(id: string) {
     const coupon = await this.couponModel.findById(id);
     if (!coupon || coupon.deleted) {
@@ -47,19 +65,52 @@ export class CouponsService {
     return true;
   }
 
+  /*
+  * 쿠폰 조희 by Id
+  * @params:
+  *   id:                   string
+  * @return: 
+  *                         CouponDto
+  */
   async getCouponById(id: string): Promise<CouponDto> {
     const doc = await this.couponModel.findById(id);
     return this._docToCouponDto(doc);
   }
 
+  /*
+  * 쿠폰 삭제
+  * @params:
+  *   id:                   string
+  * @return: 
+  */
   async deleteCoupon(id: string) {
     await this.couponModel.findByIdAndUpdate(id, { $set: { deleted: true } });
   }
 
+  /*
+  * 쿠폰 수정
+  * @params:
+  *   id:                   string
+  *   body:                 UpdateCouponDto
+  * @return: 
+  */
   async updateCoupon(id: string, body: UpdateCouponDto) {
     await this.couponModel.findByIdAndUpdate(id, { $set: body });
   }
 
+  /*
+  * 쿠폰 발송 내역 조회
+  * @query:
+  *   query:               GetCouponsSentDto
+  * @return: {
+  *   total: number,
+  *   data: [
+  *     {
+  *       UserCouponDto
+  *     },
+  *   ]
+  * }
+  */
   async getPagingCouponSentList(
     query: GetCouponsSentDto,
   ): Promise<PagingResDto<UserCouponDto> | Buffer> {
@@ -154,6 +205,19 @@ export class CouponsService {
     };
   }
 
+  /*
+  * 쿠폰 목록 조회
+  * @query:
+  *   query:               GetCouponsDto
+  * @return: {
+  *   total: number,
+  *   data: [
+  *     {
+  *       CouponDocument
+  *     },
+  *   ]
+  * }
+  */
   async getPagingCoupons(
     query: GetCouponsDto,
   ): Promise<PagingResDto<CouponDto> | Buffer> {
@@ -231,6 +295,13 @@ export class CouponsService {
     };
   }
 
+  /*
+  * 쿠폰 생성
+  * @params:
+  *   body:                CreateCouponDto
+  * @return:
+  *   id:                 string
+  */
   async createCounpon(body: CreateCouponDto) {
     const doc = await new this.couponModel({
       name: body.name,
@@ -245,6 +316,13 @@ export class CouponsService {
     return doc._id.toString();
   }
 
+  /*
+  * Schema to dto 변환
+  * @params:
+  *   doc:                CouponDocument
+  * @return:
+  *   dto:            CouponDto
+  */
   _docToCouponDto(doc: CouponDocument): CouponDto {
     const dto = new CouponDto();
     dto.id = doc._id.toString();
