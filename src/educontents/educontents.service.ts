@@ -1,3 +1,10 @@
+/*
+  학습 컨텐츠 서비스 함수
+  - 학습컨텐츠(educontents) 등록/조회/관리
+  - 벌크 업로드
+  - 학습 퀴즈 조회/관리
+*/
+
 import {
   ConflictException,
   Injectable,
@@ -62,6 +69,13 @@ export class EducontentsService {
     private awsService: AwsService,
   ) {}
 
+  /*
+  * 학습 컨텐츠 조희
+  * @query:
+  *   id:                      string
+  * @return:
+  *   educontent:              EduContentsDocument
+  */
   async GetEducontents(
     educontents_id: string,
   ): Promise<EduContentsDocument | false> {
@@ -72,11 +86,25 @@ export class EducontentsService {
     return educontents;
   }
 
+  /*
+  * 학습 컨텐츠 삭제
+  * @params:
+  *   id:                      string
+  * @return:
+  *   id:                      string
+  */
   async deleteEduContents(id: string) {
     await this.educontentsModel.findByIdAndDelete(id);
     return id;
   }
 
+  /*
+  * 학습 컨텐츠 수정 by id
+  * @params:
+  *   id:                      string
+  *   body:                    UpdateEduContentsDto
+  * @return:
+  */
   async updateEduContentsById(id: string, body: UpdateEduContentsDto) {
     await this.educontentsModel.findByIdAndUpdate(id, {
       $set: {
@@ -94,6 +122,13 @@ export class EducontentsService {
     });
   }
 
+  /*
+  * 학습 컨텐츠 유무 by id
+  * @query:
+  *   id:                      string
+  * @return: 
+  *   true || false            boolean
+  */
   async existEduContentById(id: string): Promise<boolean> {
     const educontent = await this.educontentsModel.findById(id);
     if (!educontent) {
@@ -102,11 +137,25 @@ export class EducontentsService {
     return true;
   }
 
+  /*
+  * 학습 컨텐츠 by id
+  * @query:
+  *   id:             string
+  * @return: 
+  *   dto:            EduContentsDto
+  */
   async getEduContentById(id: string): Promise<EduContentsDto> {
     const doc = await this.educontentsModel.findById(id);
     return this._docToEduContentsDto(doc);
   }
 
+  /*
+  * Bulk 개별 조회
+  * @query:
+  *   id:             string
+  * @return: 
+  *   educontents:    EduContentsDocument
+  */
   async findById(id: string): Promise<EduContentsDocument | false> {
     const educontent = await this.educontentsModel.findById(id);
     if (!educontent) {
@@ -185,6 +234,13 @@ export class EducontentsService {
     return res;
   }
 
+  /*
+  * 컨첸츠 업로드
+  * @params:
+  *   path:               string
+  * @return:
+  *   id:                 string
+  */
   async createContentsList(path: string): Promise<string> {
     const bucket: string = 'ttmikstories-data';
     if (!path.endsWith('/')) {
@@ -220,6 +276,13 @@ export class EducontentsService {
     return doc._id.toHexString();
   }
 
+  /*
+  * 벌크 업로드
+  * @params:
+  *   bulkId:               GetListEduContentsDto
+  *   excelPaths:           string[]
+  * @return:
+  */
   async asyncBulkUpload(bulkId: Types.ObjectId, excelPaths: string[]) {
     const bucket: string = 'ttmikstories-data';
 
@@ -247,6 +310,12 @@ export class EducontentsService {
     });
   }
 
+  /*
+  * 벌크 업로드
+  * @params:
+  *   data:               GetListEduContentsDto
+  * @return:
+  */
   async createWithExcelData(data: any) {
     const serial_number = data.get('contents').get('0-스토리')[0].serialNum;
 
@@ -333,6 +402,19 @@ export class EducontentsService {
     await new this.educontentsModel(educontent).save();
   }
 
+  /*
+  * 학습 컨텐츠 목록 조회
+  * @params:
+  *   query:              GetListEduContentsDto
+  * @return: {
+  *   total: number,
+  *   data: [
+  *     {
+  *       educontent      EduContentsDto
+  *     },
+  *   ]
+  * }
+  */
   async getPagingEduContents(
     query: GetListEduContentsDto,
   ): Promise<PagingResDto<EduContentsDto> | Buffer> {
@@ -395,6 +477,13 @@ export class EducontentsService {
     };
   }
 
+  /*
+  * Schema to dto 변환
+  * @params:
+  *   doc:                EduContentsDocument
+  * @return:
+  *   content:            EduContentsDto
+  */
   _docToEduContentsDto(doc: EduContentsDocument): EduContentsDto {
     const dto = new EduContentsDto();
     dto.id = doc._id.toString();
@@ -414,11 +503,24 @@ export class EducontentsService {
   }
 
   // Educontents Quiz Services
+  /*
+  * 퀴즈 삭제
+  * @params:
+  *   id:              string
+  * @return:
+  */
   async deleteQuizs(id: string) {
     await this.quizsModel.findByIdAndDelete(id);
     return id;
   }
 
+  /*
+  * 퀴즈 업데이트
+  * @params:
+  *   id:              string
+  *   body:            UpdateQuizsDto
+  * @return:
+  */
   async updateQuizsById(id: string, body: UpdateQuizsDto) {
     await this.quizsModel.findByIdAndUpdate(id, {
       $set: {
@@ -433,6 +535,13 @@ export class EducontentsService {
     });
   }
 
+  /*
+  * 퀴즈 존재 유무 by Id
+  * @query:
+  *   id:              string
+  * @return:
+  *   true || false    boolean
+  */
   async existQuizsById(id: string): Promise<boolean> {
     const quiz = await this.quizsModel.findById(id);
     if (!quiz) {
@@ -441,6 +550,13 @@ export class EducontentsService {
     return true;
   }
 
+  /*
+  * 퀴즈 생성
+  * @params:
+  *   body:                     ContentsQuizDto
+  * @return:
+  *   id                        string
+  */
   async createQuiz(body: ContentsQuizDto): Promise<string> {
     var quiz: Quizs = new Quizs();
     quiz = {
@@ -454,12 +570,26 @@ export class EducontentsService {
     const result = await new this.quizsModel(quiz).save();
     return result._id.toString();
   }
-
+  
+  /*
+  * 퀴즈 목록 조회
+  * @query:
+  *   contentsSerialNum:              string
+  *   query:                          GetListQuizDto
+  * @return: {
+  *   total: number,
+  *   data: [
+  *     {
+  *       Quiz                        ContentsQuizDto
+  *     },
+  *   ]
+  * }
+  */
   async getPagingQuizs(
     contentsSerialNum: string,
     query: GetListQuizDto,
   ): Promise<PagingResDto<ContentsQuizDto> | Buffer> {
-    const filter: FilterQuery<VocabDocument> = {
+    const filter: FilterQuery<QuizsDocument> = {
       contentsSerialNum: { $eq: contentsSerialNum },
     };
 
@@ -490,6 +620,15 @@ export class EducontentsService {
   }
 
   // EduContents Bookmark Services
+
+  /*
+  * 사용자 북마크 등록을 위한 생성 함수
+  * @params:
+  *   user_id:              string
+  *   educontents_id:       string
+  * @return:
+  *   educontents_id:       string
+  */
   async createBookmark(user_id, educontents_id: string): Promise<string> {
     const bookmarked = await this.bookmarkModel.findOne({
       userId: { $eq: new Types.ObjectId(user_id) },
@@ -509,6 +648,14 @@ export class EducontentsService {
     return result._id.toString();
   }
 
+  /*
+  * 사용자 북마크 삭제 위한 생성 함수
+  * @params:
+  *   user_id:           string
+  *   bookmark_id:       string
+  * @return:
+  *   bookmark_id:       string
+  */
   async deleteBookmark(user_id, bookmark_id: string): Promise<string> {
     const result = await this.bookmarkModel.findByIdAndDelete({
       _id: new Types.ObjectId(bookmark_id),
@@ -522,6 +669,20 @@ export class EducontentsService {
     return bookmark_id;
   }
 
+  /*
+  * 사용자 북마크 리스트 조회
+  * @query:
+  *   email:              string
+  *   query:              GetListBookmarkDto
+  * @return: {
+  *   total: number,
+  *   data: [
+  *     {
+  *       bookmark        BookmarkDto
+  *     },
+  *   ]
+  * }
+  */
   async getPagingBookmark(
     user_id,
     query: GetListBookmarkDto,
