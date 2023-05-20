@@ -684,11 +684,11 @@ export class EducontentsService {
   * }
   */
   async getPagingBookmark(
-    user_id,
+    user_id: string,
     query: GetListBookmarkDto,
   ): Promise<PagingResDto<BookmarkDto> | Buffer> {
     const filter: FilterQuery<BookmarkDocument> = {
-      userId: { $eq: user_id },
+      userId: { $eq: new Types.ObjectId(user_id) },
     };
 
     const projection: ProjectionFields<BookmarkDto> = {
@@ -703,6 +703,8 @@ export class EducontentsService {
       { $sort: { createdAt: -1 } },
       this.utilsService.getCommonMongooseFacet(query),
     ]);
+
+    console.log(cursor)
 
     const metdata = cursor[0].metadata;
     const data = cursor[0].data;
