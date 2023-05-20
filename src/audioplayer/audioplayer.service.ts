@@ -70,22 +70,10 @@ export class AudioplayerService {
     }
     
     /*
-    * GET 오디오플레이어 By Serialnumber
+    * 오디오플레이어 유무 검증 By Serialnumber
     * @params:
     *   contents_serial_num: string    컨텐츠 시리얼 넘버
-    *   body: {
-    *     step: string                스텝
-    *     lastStepCorrect: number     가장 스텝에서 맞춘 정답 갯수
-    *   }
-    * @return: {
-    *   id: string,
-    *   contentsSerialNum: string,
-    *   level: string,
-    *   title: string,
-    *   content: string,
-    *   imagePath: string,            오디오플레이어 썸네일 이미지 경로
-    *   audioFilePath: string,        오디오파일 경로 
-    * }
+    * @return:               boolean
     */
     async existBycontentsSerialNum(contents_serial_num: string): Promise<boolean> {
         const educontents = await this.educontentsModel.find({
@@ -97,6 +85,20 @@ export class AudioplayerService {
         return true;
     }
 
+    /*
+    * 오디오플레이어 리스트 조회
+    * @query:
+    *   query:              getPagingAudioPlayers
+    *   user_id:            string
+    * @return: {
+    *   total: number,
+    *   data: [
+    *     {
+    *       AudioPlayerDto
+    *     },
+    *   ]
+    * }
+    */
     async getPagingAudioPlayers(
     query: GetListAudioPlayerDto,
     user_id: string,

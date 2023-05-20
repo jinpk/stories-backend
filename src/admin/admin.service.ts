@@ -1,3 +1,8 @@
+/*
+  어드민 유저 조회 서비스 함수
+  -관리자 유저 조회
+*/
+
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -19,11 +24,17 @@ export class AdminService {
     return null;
   }
 
+  /*
+  * adminUser 조회
+  * @params:
+  *   id:             string
+  * @return:          AdminDocument
+  */
   async findById(id: string): Promise<AdminDocument | false> {
-    const user = await this.adminModel.findById(id);
-    if (!user) {
+    const adminUser = await this.adminModel.findById(id);
+    if (!adminUser) {
       return false;
     }
-    return user;
+    return adminUser;
   }
 }

@@ -29,7 +29,12 @@ export class AwsService {
     return this.parentJwtSecretKey;
   }
 
-  // 로컬에 있는 파일을 S3로 업로드하는 서비스 함수
+  /*
+  * 로컬에 있는 파일을 S3로 업로드하는 서비스 함수
+  * @params:
+  *   {paths, bucket}         FilesToBucketDto
+  * @return:
+  */
   async filesToBucket({ paths, bucket }: FilesToBucketDto): Promise<void> {
     for await (const path of paths) {
       await this.s3
@@ -42,7 +47,13 @@ export class AwsService {
     }
   }
 
-  // 벌크업로드 요청시 S3의 전체 컨텐츠 정보를 읽어오는 함수
+  /*
+  * 벌크업로드 요청시 S3의 전체 컨텐츠 정보를 읽어오는 함수
+  * @params:
+  *   content:          string
+  *   bucket:           string
+  * @return:            Map<string, any>
+  */
   async fileFromBucket(
     content: string,
     bucket: string,
@@ -78,7 +89,13 @@ export class AwsService {
       });
   }
 
-  // S3 버켓의 파일 및 폴더 리스트 조회
+  /*
+  * S3 버켓의 파일 및 폴더 리스트 조회
+  * @params:
+  *   path:             string
+  *   bucket:           string
+  * @return:            string[]
+  */
   async filesListFromBucket(path: string, bucket: string): Promise<string[]> {
     var options = {
       Bucket: bucket,
@@ -99,7 +116,12 @@ export class AwsService {
       });
   }
 
-  // AWS SES 이메일 발송 공통 함수
+  /*
+  * AWS SES 이메일 발송 공통 함수
+  * @params:
+  *   params:           SendEmailDto
+  * @return:            string
+  */
   async sendEmail(params: SendEmailDto): Promise<string> {
     const payload: SendEmailRequest = {
       Source: 'TTMIK Stories <no-reply@mail.ttmikstories.app>',
