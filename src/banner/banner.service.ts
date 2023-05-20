@@ -1,12 +1,16 @@
+/*
+  배너 조회,등록,관리 서비스 함수
+  -관리자 배너 관리
+  -유저 배너 조회
+*/
+
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   now,
   FilterQuery,
   Model,
-  PipelineStage,
   ProjectionFields,
-  Types,
 } from 'mongoose';
 import { PagingResDto } from 'src/common/dto/response.dto';
 import { Banner, BannerDocument } from './schemas/banner.schema';
@@ -22,6 +26,12 @@ export class BannerService {
     @InjectModel(Banner.name) private bannerModel: Model<BannerDocument>,
   ) {}
 
+  /*
+  * 배너 생성
+  * @params:
+  *   banner_id:              string
+  * @return:                  BannerDocument
+  */
   async getBannerById(banner_id: string): Promise<BannerDocument | false> {
     const banner = await this.bannerModel.findById(banner_id);
     if (!banner) {
@@ -31,6 +41,12 @@ export class BannerService {
     return banner;
   }
 
+  /*
+  * 배너 생성
+  * @params:
+  *   body:                   BannerDto
+  * @return:                  string
+  */
   async createBanner(body: BannerDto): Promise<string> {
     var banner: Banner = new Banner();
     banner = {
@@ -45,6 +61,12 @@ export class BannerService {
     return result._id.toString(); 
   }
 
+  /*
+  * 배너 유무 검증
+  * @params:
+  *   banner_id:              string
+  * @return:                  boolean
+  */
   async existBanner(banner_id: string): Promise<boolean> {
     const banner = await this.bannerModel.findOne({banner_id});
     if (!banner) {
@@ -53,6 +75,14 @@ export class BannerService {
       return true
   }
 
+  /*
+  * 배너 수정
+  * @params:
+  *   banner_id:              string
+  *   body:                   UpdateBannerDto
+  * @return:
+  *   id:                     string
+  */
   async updateBanner(banner_id: string, body: UpdateBannerDto): Promise<string> {
     const result = await this.bannerModel.findByIdAndUpdate(banner_id, { 
       $set: {
@@ -73,6 +103,19 @@ export class BannerService {
     return banner_id
   }
 
+  /*
+  * 배너 리스트 조회
+  * @query:
+  *   query:              GetListBannerDto
+  * @return: {
+  *   total: number,
+  *   data: [
+  *     {
+  *       BannerDto
+  *     },
+  *   ]
+  * }
+  */
   async getPagingBanners(
     query: GetListBannerDto,
   ): Promise<PagingResDto<BannerDto> | Buffer> {
