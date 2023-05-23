@@ -15,7 +15,7 @@ export class TTMIKService {
   // TTMIK로 이메일 인증 상태 변경 요청
   async verifyEmail(adminToken: string, email: string): Promise<void> {
     const res = await this.httpService.axiosRef.post(
-      `${TTMIK_API_URL}/${TTMIK_API_PATH_VERIFY}`,
+      `${TTMIK_API_URL}${TTMIK_API_PATH_VERIFY}`,
       {
         email,
       },
@@ -36,7 +36,7 @@ export class TTMIKService {
     newPassword: string,
   ): Promise<void> {
     const res = await this.httpService.axiosRef.post(
-      `${TTMIK_API_URL}/${TTMIK_API_PATH_RESET_PASSWORD}`,
+      `${TTMIK_API_URL}${TTMIK_API_PATH_RESET_PASSWORD}`,
       {
         email,
         new_password: newPassword,
@@ -54,7 +54,7 @@ export class TTMIKService {
   // TTMIK로 이전 비밀번호 검증 확인 요청
   async validatePassword(adminToken: string, email: string, password: string) {
     const res = await this.httpService.axiosRef.post(
-      `${TTMIK_API_URL}/${TTMIK_API_PATH_VALIDATE_PASSWORD}`,
+      `${TTMIK_API_URL}${TTMIK_API_PATH_VALIDATE_PASSWORD}`,
       {
         email,
         password,
