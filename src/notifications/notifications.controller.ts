@@ -33,6 +33,7 @@ export class NotificationsController {
     @Param('id') id: string,
     @Body() body: UpdateNotificationSettingDto,
   ) {
+    console.log(body)
     return await this.notificationsService.updateNotificationSetting(id, body);
   }
 

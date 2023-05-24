@@ -142,20 +142,28 @@ export class VocabsService {
     const exist = await this.reviewvocabModel.findOne({
       userId: new Types.ObjectId(user_id),
       vocabId: objVocabId,
-      complete: { $ne: true}
     });
 
     if (exist) {
-      throw new ForbiddenException("Already Registered.");
+      if (exist.complete) {
+        await this.reviewvocabModel.findByIdAndUpdate(exist._id, {
+          correctCount: 0,
+          complete: false,
+        })        
+
+        return exist._id.toString()
+      } else {
+        throw new ForbiddenException("Already Registered.");
+      }
+    } else {
+      reviewVocab.userId = new Types.ObjectId(user_id);
+      reviewVocab.level = level;
+      reviewVocab.vocabId = objVocabId;
+      
+      const result = await new this.reviewvocabModel(reviewVocab).save()
+  
+      return result._id.toString()
     }
-
-    reviewVocab.userId = new Types.ObjectId(user_id);
-    reviewVocab.level = level;
-    reviewVocab.vocabId = objVocabId;
-    
-    const result = await new this.reviewvocabModel(reviewVocab).save()
-
-    return result._id.toString()
   }
 
   /*
