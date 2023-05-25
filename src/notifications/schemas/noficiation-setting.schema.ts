@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum } from 'class-validator';
+import { IsEnum, IsString } from 'class-validator';
 import { HydratedDocument, Types, SchemaTypes } from 'mongoose';
 import { NotificationSettingTypes } from '../enums';
 
@@ -11,13 +11,13 @@ export type NotificationSettingDocument = HydratedDocument<NotificationSetting>;
 export class NotificationSetting {
   @Prop({ type: SchemaTypes.ObjectId })
   @ApiProperty({ description: '사용자 Id', type: String })
+  @IsString()
   userId: Types.ObjectId;
 
   @Prop({ enum: NotificationSettingTypes })
   @ApiProperty({ description: '유형', enum: NotificationSettingTypes })
   @IsEnum(NotificationSettingTypes)
   type: string;
-
   @Prop({
     default: true,
   })
@@ -30,6 +30,7 @@ export class NotificationSetting {
     required: false,
     default: '',
   })
+  @IsString()
   remindTime: string;
 
   @Prop({ default: '' })
@@ -38,6 +39,7 @@ export class NotificationSetting {
     required: false,
     default: '',
   })
+  @IsString()
   remindDays: string;
 }
 
