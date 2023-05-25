@@ -62,9 +62,9 @@ export class NotificationsService {
     id: string,
     body: UpdateNotificationSettingDto,
   ) {
-    console.log(body)
     body.remindDays = body.remindDays || '';
     body.remindTime = body.remindTime || '';
+    
     await this.notificationSettingModel.findByIdAndUpdate(id,
       {
         on: body.on,
