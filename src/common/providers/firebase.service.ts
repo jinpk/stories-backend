@@ -4,6 +4,7 @@ import * as admin from 'firebase-admin';
 import { AppConfigService } from 'src/config';
 import { HttpService } from '@nestjs/axios';
 import {
+  IOS_APP_STORE_ID,
   ANDROID_PACKAGE_NAME,
   DYNAMICLINK_POST_URL,
   DYNAMICLINK_URL_PREFIX,
@@ -73,6 +74,7 @@ export class FirebaseService {
           },
           iosInfo: {
             iosBundleId: IOS_BUNDLE_ID,
+            iosAppStoreId: IOS_APP_STORE_ID,
           },
         },
       },

@@ -10,3 +10,4 @@ export const DYNAMICLINK_PAID = DYNAMICLINK_URL_PREFIX + '/paid';
 
 export const ANDROID_PACKAGE_NAME = 'app.ttmikstories.android';
 export const IOS_BUNDLE_ID = 'app.ttmikstories.ios';
+export const IOS_APP_STORE_ID = '1659613381';
