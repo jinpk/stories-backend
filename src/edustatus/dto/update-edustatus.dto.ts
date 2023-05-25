@@ -13,6 +13,9 @@ export class UpdateEduCompleted {
 
     @ApiProperty({})
     contentsSerialNum: string;
+
+    @ApiProperty({default: false})
+    completed: boolean;
 }
 
 export class ChangeSelectedLevelDto {

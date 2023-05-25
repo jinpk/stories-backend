@@ -311,10 +311,10 @@ export class EdustatusService {
   }
 
   /*
-  * 읽은 컨텐츠 저장
+  * 읽은 컨텐츠 수정/저장
   * @params:
   *   user_id:              string
-  *   body:                 ReadStoryDto
+  *   body:                 UpdateEduCompleted
   * @return: 
   *   readstory:           ReadStoryDto
   */
@@ -329,10 +329,58 @@ export class EdustatusService {
       throw new NotFoundException('Not found educontents')
     }
 
-    let readStory = await this.createReadStory(user_id, body);
+    if (body.completed) {
+      const exist = await this.readstoryModel.findOne({
+        userId: new Types.ObjectId(user_id),
+        completed: true,
+        eduContentsId: new Types.ObjectId(body.contentId),
+        contentsSerialNum: body.contentsSerialNum,
+      })
 
-    let dto = this._readstoryToDto(readStory)
-    return dto;
+      if (exist) {
+        throw new NotAcceptableException('Already completed.')
+      }
+
+      const readStory = await this.readstoryModel.findOneAndUpdate(
+        {
+          userId: new Types.ObjectId(user_id),
+          eduContentsId: new Types.ObjectId(body.contentId),
+          contentsSerialNum: body.contentsSerialNum,
+        },
+        {
+          completed: true,
+        }
+      );
+
+      let dto = this._readstoryToDto(readStory)
+      return dto;
+
+    } else {
+      const exist = await this.readstoryModel.findOne({
+        userId: new Types.ObjectId(user_id),
+        eduContentsId: new Types.ObjectId(body.contentId),
+        contentsSerialNum: body.contentsSerialNum,
+      })
+
+      if (exist) {
+        throw new NotAcceptableException('Already registered.')
+      }
+
+      var story_result: ReadStory = new ReadStory()
+      story_result = {
+        userId: new Types.ObjectId(user_id),
+        level: body.level,
+        completed: false,
+        eduContentsId: new Types.ObjectId(body.contentId),
+        contentsSerialNum: body.contentsSerialNum,
+        lastReadAt: now(),
+      }
+
+      const readStory = await new this.readstoryModel(story_result).save();
+
+      let dto = this._readstoryToDto(readStory)
+      return dto;
+    }
   }
 
   /*
@@ -486,7 +534,7 @@ export class EdustatusService {
   }
 
   /*
-  * 읽은 스토리 카운트
+  * 완료한 스토리/아티클 저장
   * @params:
   *   user_id:              string
   *   serial_num            string
@@ -498,6 +546,7 @@ export class EdustatusService {
     story_result = {
       userId: new Types.ObjectId(user_id),
       level: body.level,
+      completed: false,
       eduContentsId: new Types.ObjectId(body.contentId),
       contentsSerialNum: body.contentsSerialNum,
       lastReadAt: now(),

@@ -64,7 +64,7 @@ export class EdustatusController {
     @Post('readcontents')
     @ApiOperation({
         summary: 'User complete read content',
-        description: 'When user read one content, put one contentId and serialnum'
+        description: 'When user start read one content, send completed = false'
     })
     @ApiBody({
         type:UpdateEduCompleted,

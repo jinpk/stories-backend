@@ -41,7 +41,7 @@ export class AudioplayerService {
     *     lastStepCorrect: number     가장 스텝에서 맞춘 정답 갯수
     *   }
     * @return: {
-    *   id: string,
+    *   contentsId: string,
     *   contentsSerialNum: string,
     *   level: string,
     *   title: string,
@@ -58,13 +58,13 @@ export class AudioplayerService {
         var audioplayer: AudioPlayerDto = new AudioPlayerDto();
 
         audioplayer = {
-            id: educontents._id.toString(),
-            contentsSerialNum: educontents.contentsSerialNum,
-            level: educontents.level,
-            title: educontents.title,
-            content: educontents.content,
-            imagePath: educontents.imagePath,
-            audioFilePath: educontents.audioFilePath
+          contentsId: educontents._id.toString(),
+          contentsSerialNum: educontents.contentsSerialNum,
+          level: educontents.level,
+          title: educontents.title,
+          content: educontents.content,
+          imagePath: educontents.imagePath,
+          audioFilePath: educontents.audioFilePath
         }
         return audioplayer;
     }
@@ -103,72 +103,69 @@ export class AudioplayerService {
     query: GetListAudioPlayerDto,
     user_id: string,
     ): Promise<PagingResDto<AudioPlayerDto> | Buffer> {
-        var bookmarked: any[] = [];
-        var stories: any[] = [];
+      var bookmarked: any[] = [];
+      var stories: any[] = [];
 
-        var filter: FilterQuery<EduContentsDocument> = {}
-        if (query.level == "0")  {
-        } else {
-          filter.level = query.level;
+      var filter: FilterQuery<EduContentsDocument> = {}
+
+      if (query.level == "0")  {
+      } else {
+        filter.level = query.level;
+      }
+      if (query.filterType == "ARTICLE") {
+          filter.contentsSerialNum = { $regex: 'A', $options: 'i' };
+      } else if (query.filterType == "SERIES") {
+          filter.contentsSerialNum = { $regex: 'S', $options: 'i' };
+      } else {}
+      
+      const projection: ProjectionFields<AudioPlayerDto> = {
+          _id: 0,
+          contentsId: '$_id',
+          level: 1,
+          title: 1,
+          contentsSerialNum: 1,
+          audioFilePath: 1,
+          imagePath: 1,
+      };
+
+      let cursor = await this.educontentsModel.aggregate([
+          { $match: filter },
+          { $project: projection },
+      ]);
+
+      // 북마크 or Not
+      if (query.bookmarked.toString() == "true") {
+        var bookmarks = await this.bookmarkModel.find({
+            userId: { $eq: new Types.ObjectId(user_id) }
+        });
+        if (bookmarks.length != 0) {
+          bookmarks.forEach((content, _) => {
+            bookmarked.push(content.eduContentsId.toString())
+          })
         }
+        cursor = cursor
+          .filter((content) => bookmarked.includes(content.contentsId.toString()))
+      } else {}
 
-        // 북마크 or Not
-        if (query.bookmarked) {
-            var bookmarks = await this.bookmarkModel.find({
-                userId: { $eq: new Types.ObjectId(user_id) }
-            });
-            if (bookmarks.length != 0) {
-                bookmarks.forEach((content, _) => {
-                  bookmarked.push(content.eduContentsId)
-                })
-            }
-        } else {}
-
-        if (query.filterType == "ARTICLE") {
-            filter.contentsSerialNum = { $regex: 'A', $options: 'i' };
-        } else if (query.filterType == "SERIES") {
-            filter.contentsSerialNum = { $regex: 'S', $options: 'i' };
-        } else {}
-        
-        const projection: ProjectionFields<AudioPlayerDto> = {
-            _id: 1,
-            level: 1,
-            title: 1,
-            contentsSerialNum: 1,
-            audioFilePath: 1,
-            imagePath: 1,
-            createdAt: 1,
-        };
-
-        const cursor = await this.educontentsModel.aggregate([
-            { $match: filter },
-            { $project: projection },
-        ]);
-
-        if (query.filterType == "COMPLETE") {
-            const readstory = await this.readstoryModel.find({
-                userId: { $eq: user_id }
-            });
-    
-          if (readstory.length != 0) {
-            readstory.forEach((content, _) => {
-              stories.push(content.contentsSerialNum)
-            })
-          }
-
-          cursor.forEach((content, _) => {
-            if (stories.includes(content.contentsSerialNum)) {
-            } else {
-              cursor.splice(content, 1)
-            }
-          });
+      if (query.filterType == "COMPLETE") {
+        const readstory = await this.readstoryModel.find({
+            userId: { $eq: user_id }
+        });
+  
+        if (readstory.length != 0) {
+          readstory.forEach((content, _) => {
+            stories.push(content.contentsSerialNum)
+          })
         }
-        const metdata = cursor.length;
-        const data = cursor;
+        cursor = cursor
+          .filter((content) => stories.includes(content.contentsSerialNum))
+      }
+      const metdata = cursor.length;
+      const data = cursor;
 
-        return {
-        total: metdata || 0,
-        data: data,
-        }
+      return {
+      total: metdata || 0,
+      data: data,
+      }
     }
 }
