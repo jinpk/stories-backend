@@ -1,6 +1,7 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 import { Public } from './auth/decorator/auth.decorator';
+import { DynamicLinkActions } from './common/enums';
 
 @Controller()
 export class AppController {
@@ -20,8 +21,11 @@ export class AppController {
 
   @Get('link')
   @Public()
-  @ApiOperation({ summary: 'Firebase Dynamic Link Proxy' })
-  link(@Query('action') action, @Query('payload') payload) {
+  @ApiOperation({
+    summary: 'Firebase Dynamic Link Proxy',
+    description: `[payload]\n\n${DynamicLinkActions.PasswordReset}:{비밀번호 재설정 토큰}`,
+  })
+  link(@Query('action') action: DynamicLinkActions, @Query('payload') payload) {
     return 'Success';
   }
 }

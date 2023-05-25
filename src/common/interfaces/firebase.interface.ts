@@ -1,5 +1,7 @@
+import { DynamicLinkActions } from "../enums";
+
 export interface DynamicLinkQuery {
-  action: string;
+  action: DynamicLinkActions;
   payload: string;
 }
 
