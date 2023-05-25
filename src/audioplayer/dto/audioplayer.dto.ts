@@ -2,6 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class AudioPlayerDto{
     id?: string;
+
+    @ApiProperty({})
+    contentsId: string;
   
     @ApiProperty({})
     contentsSerialNum: string;
