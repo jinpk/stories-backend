@@ -5,3 +5,6 @@ export class GetCertificateDetailDto {
     @ApiProperty({})
     level: string
 }
+
+export class GetStudiedDateDto extends DateReqDto {
+}

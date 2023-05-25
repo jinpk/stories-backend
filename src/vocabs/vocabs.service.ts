@@ -1,3 +1,4 @@
+import { EdustatusService } from './../edustatus/edustatus.service';
 /*
   단어 및 리뷰단어 조회,제출,관리 서비스 함수
   -관리자 단어 등록/수정/삭제
@@ -34,6 +35,7 @@ export class VocabsService {
     private utilsService: UtilsService,
     private commonExcelService: CommonExcelService,
     private staticService: StaticService,
+    private edustatusService: EdustatusService,
     @InjectModel(Vocab.name) private vocabModel: Model<VocabDocument>,
     @InjectModel(ReviewVocab.name) private reviewvocabModel: Model<ReviewVocabDocument>,
   ) {}
@@ -143,6 +145,9 @@ export class VocabsService {
       userId: new Types.ObjectId(user_id),
       vocabId: objVocabId,
     });
+
+    // 출석
+    await this.edustatusService.createStudiedDates(user_id);
 
     if (exist) {
       if (exist.complete) {

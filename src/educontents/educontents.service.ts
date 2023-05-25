@@ -704,8 +704,6 @@ export class EducontentsService {
       this.utilsService.getCommonMongooseFacet(query),
     ]);
 
-    console.log(cursor)
-
     const metdata = cursor[0].metadata;
     const data = cursor[0].data;
 

@@ -8,10 +8,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
-  now,
   FilterQuery,
   Model,
-  PipelineStage,
   ProjectionFields,
   Types,
 } from 'mongoose';
@@ -21,12 +19,12 @@ import { GetListAudioPlayerDto } from './dto/get-audioplayer.dto';
 import { ReadStory, ReadStoryDocument } from '../edustatus/schemas/readstory.schema';
 import { Bookmark, BookmarkDocument } from '../educontents/schemas/bookmark.schema';
 import { EduContents, EduContentsDocument } from '../educontents/schemas/educontents.schema';
-import { UtilsService } from 'src/common/providers';
+import { EdustatusService } from '../edustatus/edustatus.service'
 
 @Injectable()
 export class AudioplayerService {
     constructor(
-        private utilsService: UtilsService,
+        private edustatusService: EdustatusService,
         @InjectModel(EduContents.name) private educontentsModel: Model<EduContentsDocument>,
         @InjectModel(Bookmark.name) private bookmarkModel: Model<BookmarkDocument>,
         @InjectModel(ReadStory.name) private readstoryModel: Model<ReadStoryDocument>,
@@ -103,6 +101,9 @@ export class AudioplayerService {
     query: GetListAudioPlayerDto,
     user_id: string,
     ): Promise<PagingResDto<AudioPlayerDto> | Buffer> {
+      // 출석 저장
+      await this.edustatusService.createStudiedDates(user_id)
+
       var bookmarked: any[] = [];
       var stories: any[] = [];
 

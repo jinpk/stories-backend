@@ -24,6 +24,7 @@ import { EduContents, EduContentsDocument } from '../educontents/schemas/educont
 import { EduStatus, EduStatusDocument } from './schemas/edustatus.schema';
 import { QuizResult, QuizResultDocument } from './schemas/quizresult.schema';
 import { ReadStory, ReadStoryDocument } from './schemas/readstory.schema';
+import { StudiedDate, StudiedDateDocument } from './schemas/studieddate.schema';
 import { 
   EduStatusDto,
   LevelProgressDetail,
@@ -31,12 +32,13 @@ import {
   HomeInfoDto,
   CertificateDetailDto,
 } from './dto/edustatus.dto';
-import { GetReadStoryDto } from './dto/get-readstory.dto';
+import { GetStudiedDateDto } from './dto/get-edustatus.dto';
 import { UpdateEduCompleted } from './dto/update-edustatus.dto';
 import { LevelTestResultDto } from 'src/leveltest/dto/leveltest.dto';
 import { ReadStoryDto } from './dto/readstory.dto';
 import { StaticService } from 'src/static/static.service';
 import { QuizResultDto } from './dto/quizresult.dto';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class EdustatusService {
@@ -45,6 +47,8 @@ export class EdustatusService {
     @InjectModel(QuizResult.name) private quizresultModel: Model<QuizResultDocument>,
     @InjectModel(ReadStory.name) private readstoryModel: Model<ReadStoryDocument>,
     @InjectModel(EduContents.name) private educontentsModel: Model<EduContentsDocument>,
+    @InjectModel(StudiedDate.name) private studieddateModel: Model<StudiedDateDocument>,
+    
     private staticService: StaticService,
   ) {}
 
@@ -379,6 +383,10 @@ export class EdustatusService {
       const readStory = await new this.readstoryModel(story_result).save();
 
       let dto = this._readstoryToDto(readStory)
+
+      // 출석
+      await this.createStudiedDates(user_id);
+      
       return dto;
     }
   }
@@ -553,6 +561,10 @@ export class EdustatusService {
     }
 
     const result = await new this.readstoryModel(story_result).save();
+
+    // 출석
+    await this.createStudiedDates(user_id);
+
     return result;
   }
 
@@ -757,27 +769,24 @@ export class EdustatusService {
   *   }
   * ]
   */
-  async getStudiedDates(user_id: string, query: GetReadStoryDto) {
+  async getStudiedDates(user_id: string, query: GetStudiedDateDto) {
     const start_date = new Date(query.start).toString()
     const end_date = new Date(query.end).toString()
 
-    const filter: FilterQuery<ReadStoryDto> = {
+    const filter: FilterQuery<StudiedDate> = {
       userId: new Types.ObjectId(user_id),
-      lastReadAt: {
+      createdAt: {
         $gte: new Date(start_date),
         $lte: new Date(end_date)
       }
     };
 
-    const projection: ProjectionFields<ReadStoryDto> = {
+    const projection: ProjectionFields<StudiedDate> = {
       _id: 0,
-      userId: 0,
-      level: 0,
-      createdAt: 0,
-      updatedAt: 0,
+      createdAt: 1,
     };
 
-    var cursor =  await this.readstoryModel.aggregate([
+    var cursor =  await this.studieddateModel.aggregate([
       { $match: filter},
       { $project: projection}
     ]);
@@ -785,6 +794,23 @@ export class EdustatusService {
     return cursor
   }
 
+  async createStudiedDates(user_id: string) {
+    const datestr = dayjs().format('YYYY-MM-DD')
+
+    var exist =  await this.studieddateModel.findOne({
+      userId: new Types.ObjectId(user_id),
+      dayStr: datestr,
+    })
+
+    if (exist) {
+    } else {
+      var studied_date = new StudiedDate()
+      studied_date.userId = new Types.ObjectId(user_id)
+      studied_date.dayStr = datestr
+
+      await new this.studieddateModel(studied_date).save();
+    }
+  }
   /*
   * Schema to dto 변환
   * @params:

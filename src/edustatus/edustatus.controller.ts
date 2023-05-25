@@ -18,7 +18,6 @@ import {
     ApiOperation,
     ApiTags,
 } from '@nestjs/swagger'
-import { ApiOkResponsePaginated } from 'src/common/decorators/response.decorator';
 import { 
     EduStatusDto,
     CertificateDto,
@@ -26,15 +25,13 @@ import {
     CertificateDetailDto,
 } from './dto/edustatus.dto';
 import { ReadStoryDto } from './dto/readstory.dto';
-import { GetReadStoryDto } from './dto/get-readstory.dto';
 import {
-    UpdateEduStatusDto,
     UpdateEduCompleted,
     ChangeSelectedLevelDto
 } from './dto/update-edustatus.dto';
 import { EdustatusService } from './edustatus.service';
 import { QuizResultDto } from './dto/quizresult.dto';
-import { GetCertificateDetailDto } from './dto/get-edustatus.dto';
+import { GetStudiedDateDto } from './dto/get-edustatus.dto';
   
 @Controller('edustatus')
 @ApiTags('edustatus')
@@ -151,7 +148,7 @@ export class EdustatusController {
         status: 200,
         type: [ReadStoryDto],
     })
-    async getUserStudied(@Request() req, @Query() query: GetReadStoryDto) {
+    async getUserStudied(@Request() req, @Query() query: GetStudiedDateDto) {
         return await this.edustatusService.getStudiedDates(req.user.id, query);
     }
 
