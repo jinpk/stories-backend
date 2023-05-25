@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ReadStory, ReadStorySchema } from '../edustatus/schemas/readstory.schema';
 import { EduContents, EduContentsSchema } from '../educontents/schemas/educontents.schema';
 import { Bookmark, BookmarkSchema } from '../educontents/schemas/bookmark.schema';
+import { EdustatusModule } from '../edustatus/edustatus.module';
 import { AudioplayerService } from './audioplayer.service';
 import { AudioplayerController } from './audioplayer.controller';
 
@@ -11,6 +12,7 @@ import { AudioplayerController } from './audioplayer.controller';
     MongooseModule.forFeature([{ name: EduContents.name, schema: EduContentsSchema }]),
     MongooseModule.forFeature([{ name: Bookmark.name, schema: BookmarkSchema }]),
     MongooseModule.forFeature([{ name: ReadStory.name, schema: ReadStorySchema }]),
+    EdustatusModule,
   ],
   controllers: [AudioplayerController],
   providers: [AudioplayerService],
