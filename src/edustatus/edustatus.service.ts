@@ -333,18 +333,10 @@ export class EdustatusService {
       throw new NotFoundException('Not found educontents')
     }
 
+    // 출석
+    await this.createStudiedDates(user_id);
+
     if (body.completed) {
-      const exist = await this.readstoryModel.findOne({
-        userId: new Types.ObjectId(user_id),
-        completed: true,
-        eduContentsId: new Types.ObjectId(body.contentId),
-        contentsSerialNum: body.contentsSerialNum,
-      })
-
-      if (exist) {
-        throw new NotAcceptableException('Already completed.')
-      }
-
       const readStory = await this.readstoryModel.findOneAndUpdate(
         {
           userId: new Types.ObjectId(user_id),
@@ -367,27 +359,29 @@ export class EdustatusService {
       })
 
       if (exist) {
-        throw new NotAcceptableException('Already registered.')
+        exist.completed = body.completed;
+        await exist.save();
+
+        let dto = this._readstoryToDto(exist)
+        return dto;
+        
+      } else {
+        var story_result: ReadStory = new ReadStory()
+        story_result = {
+          userId: new Types.ObjectId(user_id),
+          level: body.level,
+          completed: false,
+          eduContentsId: new Types.ObjectId(body.contentId),
+          contentsSerialNum: body.contentsSerialNum,
+          lastReadAt: now(),
+        }
+  
+        const readStory = await new this.readstoryModel(story_result).save();
+  
+        let dto = this._readstoryToDto(readStory);
+
+        return dto;
       }
-
-      var story_result: ReadStory = new ReadStory()
-      story_result = {
-        userId: new Types.ObjectId(user_id),
-        level: body.level,
-        completed: false,
-        eduContentsId: new Types.ObjectId(body.contentId),
-        contentsSerialNum: body.contentsSerialNum,
-        lastReadAt: now(),
-      }
-
-      const readStory = await new this.readstoryModel(story_result).save();
-
-      let dto = this._readstoryToDto(readStory)
-
-      // 출석
-      await this.createStudiedDates(user_id);
-      
-      return dto;
     }
   }
 
