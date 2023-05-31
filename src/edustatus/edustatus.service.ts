@@ -349,6 +349,7 @@ export class EdustatusService {
       );
 
       let dto = this._readstoryToDto(readStory)
+      dto.completed = true;
       return dto;
 
     } else {
@@ -364,7 +365,7 @@ export class EdustatusService {
 
         let dto = this._readstoryToDto(exist)
         return dto;
-        
+
       } else {
         var story_result: ReadStory = new ReadStory()
         story_result = {
@@ -376,7 +377,7 @@ export class EdustatusService {
           lastReadAt: now(),
         }
   
-        const readStory = await new this.readstoryModel(story_result).save();
+        let readStory = await new this.readstoryModel(story_result).save();
   
         let dto = this._readstoryToDto(readStory);
 
