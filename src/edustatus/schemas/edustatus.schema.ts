@@ -16,8 +16,11 @@ export class EduStatus {
     @Prop()
     selectedLevel: string;
 
-    @Prop({type: Object})
-    levelProgress: any;
+    @Prop()
+    recentArticleId: Types.ObjectId;
+
+    @Prop()
+    recentSeriesId: Types.ObjectId;
 
     @Prop()
     userId: Types.ObjectId;

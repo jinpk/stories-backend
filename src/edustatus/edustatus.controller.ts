@@ -23,6 +23,7 @@ import {
     CertificateDto,
     HomeInfoDto, 
     CertificateDetailDto,
+    EduInfoDto,
 } from './dto/edustatus.dto';
 import { ReadStoryDto } from './dto/readstory.dto';
 import {
@@ -44,18 +45,18 @@ export class EdustatusController {
     })
     @ApiOkResponse({
         status: 200,
-        type: EduStatusDto,
+        type: EduInfoDto,
     })
     async getUserEduInfo(
         @Param('userId') userId: string,
         @Request() req) {
-        if (!req.user.isAdmin) {
-            throw new UnauthorizedException('Not an Admin')
-        }
+        // if (!req.user.isAdmin) {
+        //     throw new UnauthorizedException('Not an Admin')
+        // }
         if (!(await this.edustatusService.existEdustatus(userId))) {
             throw new NotFoundException('NotFound Edustatus');
         }
-        return await this.edustatusService.getEduStatusById(userId); 
+        return await this.edustatusService.getUserEduInfoById(userId); 
     }
 
     @Post('readcontents')

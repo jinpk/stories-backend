@@ -22,9 +22,6 @@ export class ReadStory {
     @Prop({default: false})
     completed?: boolean;
 
-    @Prop({default: null})
-    completedAt?: Date;
-
     @Prop({})
     lastReadAt: Date;
 

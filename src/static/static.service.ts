@@ -3,7 +3,7 @@
   -통계 데이터 조회/업데이트
 */
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   Model,
@@ -318,7 +318,7 @@ export class StaticService {
   */
   async updateUserWords(user_id: string) {
     let word_count = await this.reviewvocabModel.find({
-      userId: user_id,
+      userId: new Types.ObjectId(user_id),
       completed: true,
     }).count();
 
@@ -328,5 +328,17 @@ export class StaticService {
     {
       words: word_count,
     });
+  }
+
+  async getUserStaticById(user_id: string) {
+    let userStatic = await this.userstaticModel.findOne({
+      userId: new Types.ObjectId(user_id)
+    });
+
+    if (!userStatic) {
+      throw new NotFoundException("유저 학습정보가 없습니다.");
+    }
+
+    return userStatic
   }
 }
