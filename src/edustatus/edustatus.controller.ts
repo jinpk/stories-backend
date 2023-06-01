@@ -50,9 +50,9 @@ export class EdustatusController {
     async getUserEduInfo(
         @Param('userId') userId: string,
         @Request() req) {
-        // if (!req.user.isAdmin) {
-        //     throw new UnauthorizedException('Not an Admin')
-        // }
+        if (!req.user.isAdmin) {
+            throw new UnauthorizedException('Not an Admin')
+        }
         if (!(await this.edustatusService.existEdustatus(userId))) {
             throw new NotFoundException('NotFound Edustatus');
         }
