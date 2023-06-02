@@ -6,10 +6,7 @@ import { EdustatusService } from './../edustatus/edustatus.service';
   -사용자 리뷰단어 조회/제출
 */
 
-import {
-  Injectable,
-  ForbiddenException
-} from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   now,
@@ -19,12 +16,26 @@ import {
   ProjectionFields,
   Types,
 } from 'mongoose';
-import { PagingResDto, ReviewVocabPagingResDto } from 'src/common/dto/response.dto';
+import {
+  PagingResDto,
+  ReviewVocabPagingResDto,
+} from 'src/common/dto/response.dto';
 import { Vocab, VocabDocument } from './schemas/vocab.schema';
-import { ReviewVocab, ReviewVocabDocument } from './schemas/review-vocab.schema';
-import { VocabDto, ReviewVocabDto, ReviewVocabResultDto } from './dto/vocab.dto';
+import {
+  ReviewVocab,
+  ReviewVocabDocument,
+} from './schemas/review-vocab.schema';
+import {
+  VocabDto,
+  ReviewVocabDto,
+  ReviewVocabResultDto,
+} from './dto/vocab.dto';
 import { UpdateVocabDto } from './dto/update-vocab.dto';
-import { GetVocabsDto, GetReviewVocabDto, GetCoreVocabDto } from './dto/get-vocab.dto';
+import {
+  GetVocabsDto,
+  GetReviewVocabDto,
+  GetCoreVocabDto,
+} from './dto/get-vocab.dto';
 import { EXCEL_COLUMN_LIST } from './vocabs.constant';
 import { CommonExcelService, UtilsService } from 'src/common/providers';
 import { StaticService } from 'src/static/static.service';
@@ -37,45 +48,46 @@ export class VocabsService {
     private staticService: StaticService,
     private edustatusService: EdustatusService,
     @InjectModel(Vocab.name) private vocabModel: Model<VocabDocument>,
-    @InjectModel(ReviewVocab.name) private reviewvocabModel: Model<ReviewVocabDocument>,
+    @InjectModel(ReviewVocab.name)
+    private reviewvocabModel: Model<ReviewVocabDocument>,
   ) {}
 
   /*
-  * 단어 삭제
-  * @params:
-  *   vocabId: string    vocab id
-  * @return: {
-  *   string,
-  * }
-  */
+   * 단어 삭제
+   * @params:
+   *   vocabId: string    vocab id
+   * @return: {
+   *   string,
+   * }
+   */
   async deleteVocab(vacabId: string) {
     const result = await this.vocabModel.findByIdAndDelete(vacabId);
-    return result._id.toString()
+    return result._id.toString();
   }
 
   /*
-  * 단어 수정
-  * @params:
-  *   vocabId: string    user id
-  *   body: {
-  *     contentsSerialNum: string
-  *     vocab:             string
-  *     audioFilePath:     string
-  *     connSentence:      string
-  *     value:             string
-  *     meaningEn:         string
-  *     previewVocabulary: string     "Y" || "N"
-  *   }
-  * @return: {
-  *   id: string,
-  *   userId: string,
-  *   firstLevel: string,           사용자 최초 테스트 레벨
-  *   latestLevel: string,          사용자 최고 테스트 레벨
-  *   selectedLevel: string,        사용자 마지막 선택 레벨
-  * }
-  */
+   * 단어 수정
+   * @params:
+   *   vocabId: string    user id
+   *   body: {
+   *     contentsSerialNum: string
+   *     vocab:             string
+   *     audioFilePath:     string
+   *     connSentence:      string
+   *     value:             string
+   *     meaningEn:         string
+   *     previewVocabulary: string     "Y" || "N"
+   *   }
+   * @return: {
+   *   id: string,
+   *   userId: string,
+   *   firstLevel: string,           사용자 최초 테스트 레벨
+   *   latestLevel: string,          사용자 최고 테스트 레벨
+   *   selectedLevel: string,        사용자 마지막 선택 레벨
+   * }
+   */
   async updateVocabById(vocabId: string, body: UpdateVocabDto) {
-    const result = await this.vocabModel.findByIdAndUpdate(vocabId, { 
+    const result = await this.vocabModel.findByIdAndUpdate(vocabId, {
       $set: {
         contentsSerialNum: body.contentsSerialNum,
         vocab: body.vocab,
@@ -84,21 +96,21 @@ export class VocabsService {
         value: body.value,
         meaningEn: body.meaningEn,
         previewVocabulary: body.previewVocabulary,
-        updatedAt: now()
-      }
+        updatedAt: now(),
+      },
     });
 
     return result._id.toString();
   }
 
   /*
-  * 단어 DB 데이터 유효성 검증
-  * @params:
-  *   vocabId: string    vocab id
-  * @return: {
-  *   boolean,
-  * }
-  */
+   * 단어 DB 데이터 유효성 검증
+   * @params:
+   *   vocabId: string    vocab id
+   * @return: {
+   *   boolean,
+   * }
+   */
   async existVocabById(vocabId: string): Promise<boolean> {
     const vocab = await this.vocabModel.findById(vocabId);
     if (!vocab) {
@@ -108,14 +120,14 @@ export class VocabsService {
   }
 
   /*
-  * 리뷰단어 DB 데이터 유효성 검증
-  * @params:
-  *   userId: string    user id
-  *   reviewVocabId: string    reviewvocab id 
-  * @return: {
-  *   boolean,
-  * }
-  */
+   * 리뷰단어 DB 데이터 유효성 검증
+   * @params:
+   *   userId: string    user id
+   *   reviewVocabId: string    reviewvocab id
+   * @return: {
+   *   boolean,
+   * }
+   */
   async existReviewVocabById(userId, reviewVocabId: string): Promise<boolean> {
     const reviewvocab = await this.reviewvocabModel.findById(reviewVocabId);
     if (!reviewvocab) {
@@ -128,18 +140,18 @@ export class VocabsService {
   }
 
   /*
-  * 사용자 리뷰단어 등록 함수
-  * @params:
-  *   user_id: string     user id
-  *   vocab_id: string    vocab id
-  *   level: string       level 
-  * @return: {
-  *   string,
-  * }
-  */
+   * 사용자 리뷰단어 등록 함수
+   * @params:
+   *   user_id: string     user id
+   *   vocab_id: string    vocab id
+   *   level: string       level
+   * @return: {
+   *   string,
+   * }
+   */
   async createReviewVocab(user_id, vocab_id, level: string) {
-    var reviewVocab: ReviewVocab = new ReviewVocab()
-    var objVocabId = new Types.ObjectId(vocab_id)
+    var reviewVocab: ReviewVocab = new ReviewVocab();
+    var objVocabId = new Types.ObjectId(vocab_id);
 
     const exist = await this.reviewvocabModel.findOne({
       userId: new Types.ObjectId(user_id),
@@ -154,53 +166,56 @@ export class VocabsService {
         await this.reviewvocabModel.findByIdAndUpdate(exist._id, {
           correctCount: 0,
           complete: false,
-        })        
+        });
 
-        return exist._id.toString()
+        return exist._id.toString();
       } else {
-        throw new ForbiddenException("Already Registered.");
+        throw new ForbiddenException('Already Registered.');
       }
     } else {
       reviewVocab.userId = new Types.ObjectId(user_id);
       reviewVocab.level = level;
       reviewVocab.vocabId = objVocabId;
-      
-      const result = await new this.reviewvocabModel(reviewVocab).save()
-  
-      return result._id.toString()
+
+      const result = await new this.reviewvocabModel(reviewVocab).save();
+
+      return result._id.toString();
     }
   }
 
   /*
-  * 사용자 리뷰단어 완료 업데이트 함수
-  * @params:
-  *   user_id: string     user id
-  *   reviewvocab_id: string    reviewvocab id
-  * @return: {
-  *   complete: boolean      완료 여부
-  *   correctCount: number   완료 횟수
-  * }
-  */
-  async updateReviewVocabById(user_id, reviewvocab_id: string): Promise<ReviewVocabResultDto> {
+   * 사용자 리뷰단어 완료 업데이트 함수
+   * @params:
+   *   user_id: string     user id
+   *   reviewvocab_id: string    reviewvocab id
+   * @return: {
+   *   complete: boolean      완료 여부
+   *   correctCount: number   완료 횟수
+   * }
+   */
+  async updateReviewVocabById(
+    user_id,
+    reviewvocab_id: string,
+  ): Promise<ReviewVocabResultDto> {
     let res = new ReviewVocabResultDto();
-    let result = await this.reviewvocabModel.findByIdAndUpdate(reviewvocab_id, { 
-      $inc: {correctCount: 1}
+    let result = await this.reviewvocabModel.findByIdAndUpdate(reviewvocab_id, {
+      $inc: { correctCount: 1 },
     });
 
     if (result.correctCount + 1 >= 3) {
-      result.complete = true
+      result.complete = true;
       await result.save();
       await this.staticService.updateUserWords(user_id);
     }
 
     if (result.complete) {
-      res.complete = result.complete
+      res.complete = result.complete;
     } else {
       res.complete = false;
     }
     res.correctCount = result.correctCount + 1;
 
-    return res
+    return res;
   }
 
   /*
@@ -264,6 +279,79 @@ export class VocabsService {
     return cursor[0];
   }
 
+    /*
+  * 레벨별 랜덤 단어 조회
+  * @query:
+  *   level:          string     요청 레벨
+  *   max:            string     요청 최대 수
+  * @return: {
+  *   total:              number
+  *   data: [
+  *     {
+  *       contentsSerialNum: string
+          vocab:             string
+          audioFilePath:     string
+          meaningEn:         string
+          value:             string
+          connSentence:      string
+          previewVocabulary: string     "Y" | "N"
+          level:             string
+          connStory:         string     연결된 스토리 제목
+        }
+  *   ]
+  * 
+  */
+
+  async getRandomVocabsByLevel(
+    level: string,
+    max: string,
+  ): Promise<VocabDto[]> {
+    const projection: ProjectionFields<VocabDto> = {
+      contentsSerialNum: 1,
+      vocab: 1,
+      audioFilePath: 1,
+      meaningEn: 1,
+      value: 1,
+      connSentence: 1,
+      previewVocabulary: 1,
+      level: '$educontents.level',
+      connStory: '$educontents.title',
+      createdAt: 1,
+    };
+
+    const rand = Math.random();
+
+    const cursor = await this.vocabModel.aggregate<VocabDto>([
+      {
+        $lookup: {
+          from: 'educontents',
+          localField: 'contentsSerialNum',
+          foreignField: 'contentsSerialNum',
+          as: 'educontents',
+        },
+      },
+      {
+        $unwind: {
+          path: '$educontents',
+          preserveNullAndEmptyArrays: false,
+        },
+      },
+      {
+        $match: {
+          'educontents.level': level,
+          $expr: {
+            $gte: [{ $rand: {} }, rand],
+          },
+        },
+      },
+      { $limit: parseInt(max) },
+      { $project: projection },
+      { $sort: { createdAt: -1 } },
+    ]);
+
+    return cursor;
+  }
+
   /*
   * 단어 목록 검색
   * @query:
@@ -307,17 +395,23 @@ export class VocabsService {
       },
     ];
 
-    var filter: FilterQuery<VocabDocument> = {vocab: ''}
+    var filter: FilterQuery<VocabDocument> = { vocab: '' };
     if (!query.level) {
       filter = {
         vocab: { $regex: query.vocab || '', $options: 'i' },
-        'educontents.content': { $regex: query.contents_vocab || '', $options: 'i' },
+        'educontents.content': {
+          $regex: query.contents_vocab || '',
+          $options: 'i',
+        },
       };
     } else {
       filter = {
         vocab: { $regex: query.vocab || '', $options: 'i' },
         'educontents.level': { $eq: query.level },
-        'educontents.content': { $regex: query.contents_vocab || '', $options: 'i' },
+        'educontents.content': {
+          $regex: query.contents_vocab || '',
+          $options: 'i',
+        },
       };
     }
 
@@ -357,7 +451,7 @@ export class VocabsService {
       data: data,
     };
   }
-  
+
   /*
   * 컨텐츠 시리얼 넘버별 핵심 단어 목록 검색
   * @query:
@@ -381,7 +475,7 @@ export class VocabsService {
   async getPagingCoreVocabsBySerialNum(
     query: GetCoreVocabDto,
   ): Promise<PagingResDto<VocabDto> | Buffer> {
-    var filter: FilterQuery<VocabDocument> = {contentsSerialNum: ''}
+    var filter: FilterQuery<VocabDocument> = { contentsSerialNum: '' };
     if (query.previewVocabulary == 'N') {
       filter = {
         contentsSerialNum: { $eq: query.contentsSerialNum },
@@ -442,7 +536,7 @@ export class VocabsService {
   async getListReviewVocabs(
     user_id: string,
   ): Promise<ReviewVocabPagingResDto<ReviewVocabDto> | Buffer> {
-    var query = new GetReviewVocabDto()
+    var query = new GetReviewVocabDto();
     query.userId = user_id;
 
     const lookups: PipelineStage[] = [
@@ -462,18 +556,18 @@ export class VocabsService {
       },
     ];
 
-    var filter: FilterQuery<ReviewVocabDocument> = {}
+    var filter: FilterQuery<ReviewVocabDocument> = {};
     filter = {
       userId: { $eq: new Types.ObjectId(user_id) },
     };
 
     const projection: ProjectionFields<VocabDto> = {
       _id: 1,
-      vocab: "$vocabs.vocab",
-      audioFilePath: "$vocabs.audioFilePath",
-      meaningEn: "$vocabs.meaningEn",
-      value: "$vocabs.value",
-      connSentence: "$vocabs.connSentence",
+      vocab: '$vocabs.vocab',
+      audioFilePath: '$vocabs.audioFilePath',
+      meaningEn: '$vocabs.meaningEn',
+      value: '$vocabs.value',
+      connSentence: '$vocabs.connSentence',
       complete: 1,
     };
 
@@ -481,13 +575,15 @@ export class VocabsService {
       ...lookups,
       { $match: filter },
       { $project: projection },
-      { $sort: { createdAt: -1 } }
+      { $sort: { createdAt: -1 } },
     ]);
 
-    const completed_count = await this.reviewvocabModel.find({
-      userId: { $eq: new Types.ObjectId(query.userId) },
-      complete: { $eq: true },
-    }).count();
+    const completed_count = await this.reviewvocabModel
+      .find({
+        userId: { $eq: new Types.ObjectId(query.userId) },
+        complete: { $eq: true },
+      })
+      .count();
 
     return {
       total: cursor.length || 0,
