@@ -651,6 +651,13 @@ export class EdustatusService {
       }
     }
 
+    if (!nextArticle) {
+      nextArticle = articles[0]
+    }
+    if (!nextStory) {
+      nextStory = stories[0]
+    }
+    
     let res = {level: nextLevel.toString(), article: nextArticle, story: nextStory}
 
     return res
