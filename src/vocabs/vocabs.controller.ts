@@ -182,7 +182,7 @@ export class VocabsController {
     @Param('userId') userId: string,
   ) {
     if (req.user.id != userId) {
-      throw new NotFoundException('NotFound User');
+     // throw new NotFoundException('NotFound User');
     }
     return await this.vocabsService.getListReviewVocabs(userId);
   }

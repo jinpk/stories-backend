@@ -124,6 +124,10 @@ export class ReviewVocabDto{
 
   @ApiProperty({})
   @IsString()
+  level: string;
+
+  @ApiProperty({})
+  @IsString()
   meaningEn: string;
 
   @ApiProperty({})

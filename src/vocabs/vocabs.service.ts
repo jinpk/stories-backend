@@ -279,7 +279,7 @@ export class VocabsService {
     return cursor[0];
   }
 
-    /*
+  /*
   * 레벨별 랜덤 단어 조회
   * @query:
   *   level:          string     요청 레벨
@@ -554,6 +554,20 @@ export class VocabsService {
           preserveNullAndEmptyArrays: false,
         },
       },
+      {
+        $lookup: {
+          from: 'educontents',
+          localField: 'vocabs.contentsSerialNum',
+          foreignField: 'contentsSerialNum',
+          as: 'educontents',
+        },
+      },
+      {
+        $unwind: {
+          path: '$educontents',
+          preserveNullAndEmptyArrays: false,
+        },
+      },
     ];
 
     var filter: FilterQuery<ReviewVocabDocument> = {};
@@ -567,13 +581,15 @@ export class VocabsService {
       audioFilePath: '$vocabs.audioFilePath',
       meaningEn: '$vocabs.meaningEn',
       value: '$vocabs.value',
+      level: '$educontents.level',
       connSentence: '$vocabs.connSentence',
+      createdAt: 1,
       complete: 1,
     };
 
     const cursor = await this.reviewvocabModel.aggregate([
-      ...lookups,
       { $match: filter },
+      ...lookups,
       { $project: projection },
       { $sort: { createdAt: -1 } },
     ]);
