@@ -581,6 +581,7 @@ export class VocabsService {
       audioFilePath: '$vocabs.audioFilePath',
       meaningEn: '$vocabs.meaningEn',
       value: '$vocabs.value',
+      vocabId: '$vocabs._id',
       level: '$educontents.level',
       connSentence: '$vocabs.connSentence',
       createdAt: 1,
