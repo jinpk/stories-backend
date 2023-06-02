@@ -27,10 +27,10 @@ import { ReadStory, ReadStoryDocument } from './schemas/readstory.schema';
 import { StudiedDate, StudiedDateDocument } from './schemas/studieddate.schema';
 import { 
   EduStatusDto,
-  LevelProgressDetail,
   CertificateDto,
   HomeInfoDto,
   CertificateDetailDto,
+  EduInfoDto,
 } from './dto/edustatus.dto';
 import { GetStudiedDateDto } from './dto/get-edustatus.dto';
 import { UpdateEduCompleted } from './dto/update-edustatus.dto';
@@ -59,54 +59,83 @@ export class EdustatusService {
   * @return: 
   *   edustatus             EduStatusDto
   */
-  async getEduStatusById(user_id: string) {
-    const filter: FilterQuery<EduStatusDto> = {
-      userId: new Types.ObjectId(user_id),
-    };
+  async getUserEduInfoById(user_id: string) {
+    let eduinfo: EduInfoDto = new EduInfoDto();
+    // 총 학습시간, 읽은 콘텐츠 수, 퀴즈 정답률, 외운 단어 수
+    let userStatic = await this.staticService.getUserStaticById(user_id);
+    eduinfo.correctRate = userStatic.correctRate;
+    eduinfo.studiedTime = userStatic.totalStudyTime;
+    eduinfo.read = userStatic.read;
+    eduinfo.words = userStatic.words;
 
-    const lookups: PipelineStage[] = [
+    // 레벨별 진행현황
+    let cursor = await this.educontentsModel.aggregate([
       {
         $lookup: {
           from: 'readstories',
-          localField: 'userId',
-          foreignField: 'userId',
+          let: { id: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {$eq: ['$eduContentsId', '$$id']},
+                    {$eq: ['$userId', new Types.ObjectId(user_id)]},
+                  ]
+                },
+              },
+            },
+          ],
           as: 'readstories',
         },
       },
       {
         $unwind: {
           path: '$readstories',
-          preserveNullAndEmptyArrays: false,
+          preserveNullAndEmptyArrays: true,
         },
       },
-    ];
-
-    const projection: ProjectionFields<EduStatusDto> = {
-      _id: 0,
-      id: '$coupons._id',
-      userCouponId: '$_id',
-      nickname: '$users.nickname',
-      name: '$coupons.name',
-      description: '$coupons.description',
-      type: '$coupons.type',
-      start: '$coupons.start',
-      end: '$coupons.end',
-      storeId: '$coupons.storeId',
-      value: '$coupons.value',
-      userId: 1,
-      createdAt: 1,
-      used: {
-        $cond: [{ $gte: [{ $size: '$subscriptions' }, 1] }, true, false],
-      },
-    };
-
-    var edustatus =  await this.edustatusModel.aggregate([
-      { $match: filter},
-      ...lookups,
-      { $project: projection}
     ]);
 
-    return edustatus
+    let lvl_progress = {}
+    let lvlArr = []
+    for (let i=1; i<=10; i++) {
+      let progress_key = "level" + i.toString();
+      lvl_progress[progress_key] = {
+        articleTotal: 0,
+        articleComplete:0,
+        seriesTotal: 0,
+        seriesComplete:0,
+      }
+      lvlArr.push(i.toString());
+    }
+
+    cursor.forEach((element) => {
+      if (lvlArr.includes(element.level)) {
+        if (element.contentsSerialNum.includes('s')) {
+          lvl_progress["level" + element.level].seriesTotal += 1;
+        }
+        if (element.contentsSerialNum.includes('a')) {
+          lvl_progress["level" + element.level].articleTotal += 1;
+        }
+
+        // 완료 카운트
+        if (element.readstories) {
+          if (element.readstories.completed) {
+            if (element.contentsSerialNum.includes('s')) {
+              lvl_progress["level" + element.level].seriesComplete += 1;
+            }
+            if (element.contentsSerialNum.includes('a')){
+              lvl_progress["level" + element.level].articleComplete += 1;
+            }
+          }
+        }
+      }
+    })
+
+    eduinfo.levelProgress = lvl_progress;
+
+    return eduinfo
   }
 
   /*
@@ -124,43 +153,29 @@ export class EdustatusService {
     const lookups: PipelineStage[] = [
       {
         $lookup: {
-          from: 'readstories',
-          let: { user_id: '$userId', sel_level: '$selectedLevel' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    {$eq: ['$userId', '$$user_id']},
-                    {$eq: ['$level', '$$sel_level']},
-                  ]
-                },
-              },
-            },
-          ],
-          as: 'readstories',
-        },
-      },
-      {
-        $unwind: {
-          path: '$readstories',
-          preserveNullAndEmptyArrays: true,
-        },
-      },
-      {
-        $sort: {'readstories.lastReadAt': -1}
-      },
-      {
-        $lookup: {
           from: 'educontents',
-          localField: 'readstories.eduContentsId',
+          localField: 'recentArticleId',
           foreignField: '_id',
-          as: 'contents'
+          as: 'recentArticle'
         }
       },
       {
         $unwind: {
-          path: '$contents',
+          path: '$recentArticle',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: 'educontents',
+          localField: 'recentSeriesId',
+          foreignField: '_id',
+          as: 'recentSeries'
+        }
+      },
+      {
+        $unwind: {
+          path: '$recentSeries',
           preserveNullAndEmptyArrays: true,
         },
       },
@@ -178,15 +193,26 @@ export class EdustatusService {
        },
       {
        $project: {
-        'contents.__v': 0,
-        'contents.level': 0,
-        'contents.vocabCount': 0,
-        'contents.questionCount': 0,
-        'contents.timeLine': 0,
-        'contents.createdAt': 0,
-        'contents.updatedAt': 0,
+        'recentArticle.__v': 0,
+        'recentArticle.level': 0,
+        'recentArticle.vocabCount': 0,
+        'recentArticle.questionCount': 0,
+        'recentArticle.timeLine': 0,
+        'recentArticle.createdAt': 0,
+        'recentArticle.updatedAt': 0,
        }
       },
+      {
+        $project: {
+         'recentSeries.__v': 0,
+         'recentSeries.level': 0,
+         'recentSeries.vocabCount': 0,
+         'recentSeries.questionCount': 0,
+         'recentSeries.timeLine': 0,
+         'recentSeries.createdAt': 0,
+         'recentSeries.updatedAt': 0,
+        }
+       },
     ];
 
     const projection: ProjectionFields<HomeInfoDto> = {
@@ -194,7 +220,8 @@ export class EdustatusService {
       userId: 1,
       selectedLevel: 1,
       contents: 1,
-      readstories: 1,
+      recentArticle: 1,
+      recentSeries: 1,
     };
 
     var cursor =  await this.edustatusModel.aggregate([
@@ -210,10 +237,29 @@ export class EdustatusService {
     let dto: HomeInfoDto = new HomeInfoDto();
 
     dto.selectedLevel = cursor[0].selectedLevel
-    dto.seriesTotal = 0
-    dto.articleTotal = 0
-    dto.seriesCompleted = 0
-    dto.articleCompleted = 0
+    dto.seriesTotal = 0;
+    dto.articleTotal = 0;
+    dto.curSeriesNumTotal = 0;
+    dto.seriesCompleted = 0;
+    dto.articleCompleted = 0;
+    dto.recentArticle = {
+      _id: cursor[0].recentArticle._id.toString(),
+      contentsSerialNum: cursor[0].recentArticle.contentsSerialNum,
+      title: cursor[0].recentArticle.title,
+      content: cursor[0].recentArticle.content,
+      seriesNum: cursor[0].recentArticle.seriesNum,
+      storyIndex: cursor[0].recentArticle.storyIndex,
+      imagePath: cursor[0].recentArticle.imagePath,
+    }
+    dto.recentSeries = {
+      _id: cursor[0].recentSeries._id.toString(),
+      contentsSerialNum: cursor[0].recentSeries.contentsSerialNum,
+      title: cursor[0].recentSeries.title,
+      content: cursor[0].recentSeries.content,
+      seriesNum: cursor[0].recentSeries.seriesNum,
+      storyIndex: cursor[0].recentSeries.storyIndex,
+      imagePath: cursor[0].recentSeries.imagePath,
+    }
 
     let levelContents = await this.educontentsModel.aggregate([
       {
@@ -235,42 +281,34 @@ export class EdustatusService {
       }
     ])
 
-    levelContents.forEach(element => {
-      if (element.contentsSerialNum.includes('a' || 'A')) {
-        dto.articleTotal += 1;
-        if (!dto.recentArticle) {
-          dto.recentArticle = element;
-        }
+    let readstories = await this.readstoryModel.find({
+      userId: new Types.ObjectId(user_id),
+      level: cursor[0].selectedLevel,
+      completed: true,
+    })
+
+    readstories.forEach((element) => {
+      // 완료 카운트
+      if (element.contentsSerialNum.includes('s')) {
+        dto.seriesCompleted += 1;
       }
-      if (element.contentsSerialNum.includes('s' || 'S')) {
-        dto.seriesTotal += 1;
-        if (!dto.recentSeries) {
-          dto.recentSeries = element;
-        }
+      if (element.contentsSerialNum.includes('a')){
+        dto.articleCompleted += 1;
       }
     })
 
-    cursor.forEach(element => {
-      if (element.contents) {
-        if (element.contents.contentsSerialNum.includes('a' || 'A')) {
-          if (element.readstories.completed) {
-            dto.articleCompleted += 1
-          }
-          if (dto.recentArticle == null) {
-            dto.recentArticle = element.contents
-          }
-        }
-        if (element.contents.contentsSerialNum.includes('s' || 'S')) {
-          if (element.readstories.completed) {
-            dto.seriesCompleted += 1
-          }
-          if (dto.recentSeries == null) {
-            dto.recentSeries = element.contents
-          }
-        }
-      } else {
+
+    levelContents.forEach(element => {
+      if (element.contentsSerialNum.includes('a' || 'A')) {
+        dto.articleTotal += 1;
       }
-    });
+      if (element.contentsSerialNum.includes('s' || 'S')) {
+        dto.seriesTotal += 1;
+        if (element.seriesNum == cursor[0].recentSeries.seriesNum) {
+          dto.curSeriesNumTotal += 1;
+        }
+      }
+    })
 
     return dto
   }
@@ -333,18 +371,10 @@ export class EdustatusService {
       throw new NotFoundException('Not found educontents')
     }
 
+    // 출석
+    await this.createStudiedDates(user_id);
+
     if (body.completed) {
-      const exist = await this.readstoryModel.findOne({
-        userId: new Types.ObjectId(user_id),
-        completed: true,
-        eduContentsId: new Types.ObjectId(body.contentId),
-        contentsSerialNum: body.contentsSerialNum,
-      })
-
-      if (exist) {
-        throw new NotAcceptableException('Already completed.')
-      }
-
       const readStory = await this.readstoryModel.findOneAndUpdate(
         {
           userId: new Types.ObjectId(user_id),
@@ -353,6 +383,27 @@ export class EdustatusService {
         },
         {
           completed: true,
+        },
+        {
+          new: true,
+        }
+      );
+
+      // 다음 컨텐츠 계산
+      const calNextContent = await this.calculateNextContent(user_id, body);
+
+      // 읽은 컨텐츠 수 업데이트
+      await this.staticService.updateUserReadStory(user_id);
+
+      // userstatus update
+      await this.edustatusModel.findOneAndUpdate(
+        {
+          userId: new Types.ObjectId(user_id),
+        },
+        {
+          selectedLevel: calNextContent.level,
+          recentArticleId: calNextContent.article['_id'],
+          recentSeriesId: calNextContent.story['_id'],
         }
       );
 
@@ -366,29 +417,243 @@ export class EdustatusService {
         contentsSerialNum: body.contentsSerialNum,
       })
 
+      // 다음 컨텐츠 계산
+      const calNextContent = await this.calculateNextContent(user_id, body);
+      // userstatus update
+      await this.edustatusModel.findOneAndUpdate(
+        {
+          userId: new Types.ObjectId(user_id),
+        },
+        {
+          selectedLevel: calNextContent.level,
+          recentArticleId: calNextContent.article['_id'],
+          recentSeriesId: calNextContent.story['_id'],
+        }
+      );
+
       if (exist) {
-        throw new NotAcceptableException('Already registered.')
+      } else {
+        var story_result: ReadStory = new ReadStory()
+        story_result = {
+          userId: new Types.ObjectId(user_id),
+          level: body.level,
+          completed: false,
+          eduContentsId: new Types.ObjectId(body.contentId),
+          contentsSerialNum: body.contentsSerialNum,
+          lastReadAt: now(),
+        }
+  
+        let readStory = await new this.readstoryModel(story_result).save();
+  
+        let dto = this._readstoryToDto(readStory);
+
+        return dto;
       }
-
-      var story_result: ReadStory = new ReadStory()
-      story_result = {
-        userId: new Types.ObjectId(user_id),
-        level: body.level,
-        completed: false,
-        eduContentsId: new Types.ObjectId(body.contentId),
-        contentsSerialNum: body.contentsSerialNum,
-        lastReadAt: now(),
-      }
-
-      const readStory = await new this.readstoryModel(story_result).save();
-
-      let dto = this._readstoryToDto(readStory)
-
-      // 출석
-      await this.createStudiedDates(user_id);
-      
-      return dto;
     }
+  }
+
+  async calculateNextContent(user_id: string, body: UpdateEduCompleted) {
+    // 해당 레벨 읽음 목록 조회
+    let lastArticle = await this.readstoryModel.aggregate([
+      { 
+        $match: {
+          userId: new Types.ObjectId(user_id),
+          level: body.level,
+          contentsSerialNum: {$regex: "a"}
+        }
+      },
+      {
+        $sort: { completedAt: -1}
+      },
+      {
+        $limit: 1
+      },
+      {
+        $lookup: {
+          from: 'educontents',
+          localField: 'eduContentsId',
+          foreignField: '_id',
+          as: 'contents'
+        }
+      },
+      {
+        $unwind: {
+          path: '$contents',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+       $project: {
+        'contents.__v': 0,
+        'contents.vocabCount': 0,
+        'contents.questionCount': 0,
+        'contents.timeLine': 0,
+        'contents.title': 0,
+        'contents.content': 0,
+        'contents.imagePath': 0,
+        'contents.audioFilePath': 0,
+        'contents.createdAt': 0,
+        'contents.updatedAt': 0,
+       }
+      },
+    ]);
+
+    let lastStory = await this.readstoryModel.aggregate([
+      { 
+        $match: {
+          userId: new Types.ObjectId(user_id),
+          level: body.level,
+          contentsSerialNum: {$regex: "s"}
+        }
+      },
+      {
+        $sort: { completedAt: -1}
+      },
+      {
+        $limit: 1
+      },
+      {
+        $lookup: {
+          from: 'educontents',
+          localField: 'eduContentsId',
+          foreignField: '_id',
+          as: 'contents'
+        }
+      },
+      {
+        $unwind: {
+          path: '$contents',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+       $project: {
+        'contents.__v': 0,
+        'contents.vocabCount': 0,
+        'contents.questionCount': 0,
+        'contents.timeLine': 0,
+        'contents.title': 0,
+        'contents.content': 0,
+        'contents.imagePath': 0,
+        'contents.audioFilePath': 0,
+        'contents.createdAt': 0,
+        'contents.updatedAt': 0,
+       }
+      },
+    ]);
+
+    // 레벨 컨텐츠 조회
+    let contents = await this.educontentsModel.aggregate([
+      { 
+        $match: {
+          level: body.level,
+        }
+      },
+      {
+        $sort: {seriesNum: 1, storyIndex: 1}
+      },
+      {
+       $project: {
+         __v: 0,
+         vocabCount: 0,
+         questionCount: 0,
+         timeLine: 0,
+         title: 0,
+         content: 0,
+         imagePath: 0,
+         audioFilePath: 0,
+         createdAt: 0,
+         updatedAt: 0,
+       }
+      },
+    ]);
+
+    let articles = []
+    let stories = []
+    for (let i=0; i < contents.length; i++) {
+      if (contents[i].contentsSerialNum.includes('A') || contents[i].contentsSerialNum.includes('a')){
+        articles.push(contents[i]);
+      } else if (contents[i].contentsSerialNum.includes('S') || contents[i].contentsSerialNum.includes('s')){
+        stories.push(contents[i]);
+      }
+    }
+
+    let nextArticle: object;
+    let nextStory: object;
+    let articleCompleted = false;
+    let storyCompleted = false;
+
+    if (lastArticle.length != 0) {
+      let lastArticleIndex = lastArticle[0].contents.storyIndex
+      nextArticle = lastArticle[0].contents
+
+      for (let i=0; i < articles.length; i++) {
+        if (articles[i].contentsSerialNum.includes('A') || articles[i].contentsSerialNum.includes('a')){
+          if (articles[i].storyIndex == lastArticleIndex) {
+            if ((i+1 < articles.length) && (lastArticle[0].completed)) {
+              nextArticle = articles[i+1];
+            } else if ((i+1 >= articles.length) && (lastArticle[0].completed)) {
+              articleCompleted = true;
+            }  else if (!lastArticle[0].completed) {
+              nextArticle = articles[i];
+            }
+            break
+          }
+        }
+      }
+    }
+    if (lastStory.length != 0) {
+      let lastStorySeriesNum = lastStory[0].contents.seriesNum
+      let lastStoryIndex = lastStory[0].contents.storyIndex
+      nextStory = lastStory[0].contents
+
+      for (let i=0; i < stories.length; i++) {
+        if (stories[i].contentsSerialNum.includes('S') || stories[i].contentsSerialNum.includes('s')){
+          if ((stories[i].seriesNum == lastStorySeriesNum)
+          && (stories[i].storyIndex == lastStoryIndex)) {
+            if ((i+1 < stories.length) && (lastStory[0].completed)) {
+              nextStory = stories[i+1];
+            } else if ((i+1 >= stories.length) && (lastStory[0].completed)) {
+              storyCompleted = true;
+            } else if (!lastStory[0].completed) {
+              nextStory = stories[i];
+            }
+            break
+          }
+        }
+      }
+    }
+
+    let nextLevel = parseInt(body.level,0);
+    if (articleCompleted && storyCompleted) {
+      nextLevel += 1;
+
+      let nextLevelArticle = await this.educontentsModel.find(
+        {
+          level: nextLevel.toString(),
+          contentsSerialNum: {$regex: 'a'}
+        }
+      ).sort({seriesNum: 1, storyIndex: 1}).limit(1);
+
+      if (nextLevelArticle.length > 0) {
+        nextArticle = nextLevelArticle[0];
+      }
+
+      let nextLevelStory = await this.educontentsModel.find(
+        {
+          level: nextLevel.toString(),
+          contentsSerialNum: {$regex: 's'}
+        }
+      ).sort({seriesNum: 1, storyIndex: 1}).limit(1);
+
+      if (nextLevelStory.length > 0) {
+        nextStory = nextLevelStory[0];
+      }
+    }
+
+    let res = {level: nextLevel.toString(), article: nextArticle, story: nextStory}
+
+    return res
   }
 
   /*
@@ -464,30 +729,15 @@ export class EdustatusService {
 
     calculatedLevel = await this.calculateLevel(body.step, body.lastStepCorrect)
 
-    const article_count = await this.educontentsModel.find({
+    const articles = await this.educontentsModel.find({
       level: { $eq: calculatedLevel },
       contentsSerialNum: { $regex: 'A', $options: 'i' },
-    }).count();
+    }).sort({ storyIndex: 1, seriesNum : 1 });
 
-    const series_count = await this.educontentsModel.find({
+    const series = await this.educontentsModel.find({
       level: { $eq: calculatedLevel },
       contentsSerialNum: { $regex: 'S', $options: 'i' },
-    }).count();
-
-    var cur_progress: LevelProgressDetail = new LevelProgressDetail();
-    cur_progress = {
-      articleTotal: article_count,
-      seriesCompleted: [],
-      seriesTotal: series_count,
-      articleCompleted: [],
-      quizResult: {correct: 0, total: 0},
-      updatedAt: now(),
-    }
-
-    let progress_key = "level" + calculatedLevel
-
-    let lvl_progress = {}
-    lvl_progress[progress_key] = cur_progress
+    }).sort({ storyIndex: 1, seriesNum : 1 });
     
     var edustatus: EduStatus = new EduStatus();
     edustatus = {
@@ -495,7 +745,8 @@ export class EdustatusService {
       firstLevel: calculatedLevel,
       latestLevel: calculatedLevel,
       selectedLevel: calculatedLevel,
-      levelProgress: lvl_progress,
+      recentArticleId: articles[0]._id, 
+      recentSeriesId: series[0]._id,
     }
 
     const result = await new this.edustatusModel(edustatus).save();
@@ -746,7 +997,7 @@ export class EdustatusService {
       if ((readContents.length == educontentsCount) && (readContents.length != 0)) {
         let dto = new CertificateDetailDto()
         dto.level = level;
-        dto.completedAt = readContents[0].completedAt;
+        dto.completedAt = readContents[0].lastReadAt;
         dto.completion = true;
         return dto
       } else {
@@ -840,7 +1091,6 @@ export class EdustatusService {
     const dto = new ReadStoryDto();
     dto.id = doc._id.toHexString();
     dto.completed = doc.completed;
-    dto.completedAt = doc.completedAt;
     dto.contentsSerialNum = doc.contentsSerialNum;
     dto.eduContentsId = doc.eduContentsId.toHexString();
     dto.lastReadAt = doc.lastReadAt;

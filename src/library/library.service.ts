@@ -84,12 +84,14 @@ export class LibraryService {
       } else {}
 
       // isCompleted: true or false
-      const readstory = await this.readstoryModel.find({
-        userId: { $eq: user_id }
+      const readstories = await this.readstoryModel.find({
+        userId: { $eq: new Types.ObjectId(user_id) },
+        completed: true,
+        level: query.level,
       });
 
-      if (readstory.length != 0) {
-        readstory.forEach((content, _) => {
+      if (readstories.length != 0) {
+        readstories.forEach((content, _) => {
           stories.push(content.contentsSerialNum)
         })
       }

@@ -1,37 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { now } from 'mongoose';
 
-export class QuizResult {
-    @ApiProperty({})
-    correct: number;
-
-    @ApiProperty({})
-    total: number;
-}
-
-export class LevelProgressDetail {
-    @ApiProperty({})
-    seriesTotal: number;
-
-    @ApiProperty({})
-    seriesCompleted: string[];
-
-    @ApiProperty({})
-    articleTotal: number;
-
-    @ApiProperty({})
-    articleCompleted: string[];
-
-    @ApiProperty({})
-    quizResult: QuizResult;
-
-    @ApiProperty({})
-    updatedAt: Date;
-}
-
-export class LevelProgress { 
-}
-
 export class RecentContent {
     @ApiProperty({})
     _id: string;
@@ -70,20 +39,11 @@ export class EduStatusDto {
     @ApiProperty({})
     selectedLevel: string;
 
-    // @ApiProperty({})
-    // levelProgress: LevelProgress;
+    @ApiProperty({})
+    recentArticleId: string;
 
-    // @ApiProperty({})
-    // recentSeries: RecentSeries;
-
-    // @ApiProperty({})
-    // recentArticle: RecentArticle;
-
-    // @ApiProperty({
-    // description: '개인 학습정보 통계 지표',
-    // default: {},
-    // })
-    // statics: Object;
+    @ApiProperty({})
+    recentSeriesId: string;
 
     @ApiProperty({})
     updateAt?: Date;
@@ -104,6 +64,9 @@ export class HomeInfoDto {
 
     @ApiProperty({})
     articleTotal: number;
+
+    @ApiProperty({})
+    curSeriesNumTotal: number;
 
     @ApiProperty({})
     seriesCompleted: number;
@@ -138,4 +101,27 @@ export class CertificateDetailDto {
     
     @ApiProperty({})
     completedAt: Date;
+}
+
+export class EduInfoDto {
+    @ApiProperty({})
+    firstLevel: string;
+
+    @ApiProperty({})
+    currentLevel: string;
+    
+    @ApiProperty({})
+    studiedTime: number;
+
+    @ApiProperty({})
+    read: number;
+
+    @ApiProperty({})
+    correctRate: number;
+    
+    @ApiProperty({})
+    words: number;
+
+    @ApiProperty({})
+    levelProgress: Object;
 }

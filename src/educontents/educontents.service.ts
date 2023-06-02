@@ -385,7 +385,7 @@ export class EducontentsService {
         previewVocabulary: 'N',
       };
       Object.entries(vocab).forEach(([key, value]) => {
-        if (key.includes('vocabulary')) {
+        if (key.includes('preview')) {
           if (value != null) {
             if (value == 'Y') {
               vocabs.previewVocabulary = 'Y';
