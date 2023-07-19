@@ -1,1 +1,1 @@
-Stories backend server
+# 스토리 한국어 학습 애플리케이션 백엔드
